@@ -12,7 +12,7 @@ generic-service:
   ingress:
     enabled: true
     host: app-hostname.local    # override per environment
-    tlsSecretName: restricted-patients-api-cert
+    tlsSecretName: hmpps-restricted-patients-api-cert
     path: /
 
   # Environment variables to load into the deployment
