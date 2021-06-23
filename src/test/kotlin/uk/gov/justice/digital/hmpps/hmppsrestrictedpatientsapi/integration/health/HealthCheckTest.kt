@@ -1,13 +1,21 @@
 package uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.integration.health
 
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.integration.IntegrationTestBase
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.function.Consumer
 
+
 class HealthCheckTest : IntegrationTestBase() {
+
+  @BeforeEach
+  fun beforeEach() {
+    prisonApiMockServer.resetMappings()
+    prisonApiMockServer.stubHealth()
+  }
 
   @Test
   fun `Health page reports ok`() {
@@ -30,6 +38,25 @@ class HealthCheckTest : IntegrationTestBase() {
           assertThat(it).startsWith(LocalDateTime.now().format(DateTimeFormatter.ISO_DATE))
         }
       )
+  }
+
+  @Test
+  fun `Prison API health reports UP and OK`() {
+    webTestClient.get().uri("/health")
+      .exchange()
+      .expectStatus().isOk
+      .expectBody()
+      .jsonPath("components.prisonApiHealthCheck.status").value(
+        Consumer<String> {
+          assertThat(it).isEqualTo("UP")
+        }
+      )
+      .jsonPath("components.prisonApiHealthCheck.details.HttpStatus").value(
+        Consumer<String> {
+          assertThat(it).isEqualTo("OK")
+        }
+      )
+
   }
 
   @Test
