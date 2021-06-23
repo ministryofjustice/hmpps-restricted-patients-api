@@ -8,7 +8,6 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.function.Consumer
 
-
 class HealthCheckTest : IntegrationTestBase() {
 
   @BeforeEach
@@ -56,7 +55,6 @@ class HealthCheckTest : IntegrationTestBase() {
           assertThat(it).isEqualTo("OK")
         }
       )
-
   }
 
   @Test

@@ -16,7 +16,7 @@ class PrisonApiMockServer : WireMockServer(8999) {
                {
                  "status": "UP"
                }
-             """.trimIndent()
+              """.trimIndent()
             )
         )
     )

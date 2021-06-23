@@ -1,4 +1,4 @@
-package uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.health;
+package uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.health
 
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
