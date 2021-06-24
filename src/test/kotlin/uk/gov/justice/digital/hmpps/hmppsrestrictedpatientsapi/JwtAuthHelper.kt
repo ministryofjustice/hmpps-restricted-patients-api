@@ -1,4 +1,4 @@
-package uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.config
+package uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi
 
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
