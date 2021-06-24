@@ -13,7 +13,6 @@ import java.time.Duration
 import java.util.Date
 import java.util.UUID
 
-
 @Configuration
 class JwtAuthHelper {
   private val keyPair: KeyPair
@@ -26,7 +25,6 @@ class JwtAuthHelper {
 
   @Bean
   fun jwtDecoder(): JwtDecoder = NimbusJwtDecoder.withPublicKey(keyPair.public as RSAPublicKey).build()
-
 
   fun createJwt(
     subject: String? = null,
