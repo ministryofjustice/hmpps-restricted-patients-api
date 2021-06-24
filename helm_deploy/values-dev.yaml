@@ -10,7 +10,6 @@ generic-service:
   env:
     APPLICATIONINSIGHTS_CONFIGURATION_FILE: applicationinsights.dev.json
     PRISON_API_ENDPOINT_URL: https://api-dev.prison.service.justice.gov.uk
-    JAVA_OPTS: "-Xmx512m"
     SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: https://sign-in-dev.hmpps.service.justice.gov.uk/auth/.well-known/jwks.json
 
 generic-prometheus-alerts:

@@ -7,3 +7,5 @@ management.endpoint:
 
 
 prison.api.endpoint.url: http://localhost:8999
+api:
+  health-timeout-ms: 20000

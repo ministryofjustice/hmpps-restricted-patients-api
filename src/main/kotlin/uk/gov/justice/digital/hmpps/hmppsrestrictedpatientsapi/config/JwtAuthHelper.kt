@@ -1,14 +1,14 @@
 package uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.config
 
 import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Configuration
 import org.springframework.security.oauth2.jwt.JwtDecoder
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder
-import org.springframework.stereotype.Component
 import java.security.KeyPair
 import java.security.KeyPairGenerator
 import java.security.interfaces.RSAPublicKey
 
-@Component
+@Configuration
 class JwtAuthHelper {
   private val keyPair: KeyPair
 
