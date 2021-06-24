@@ -52,4 +52,4 @@ management:
 
 
 api:
-  health-timeout-ms: 20000
+  health-timeout-ms: 1000
