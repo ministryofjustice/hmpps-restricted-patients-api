@@ -14,7 +14,6 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
   implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
 
-
   implementation("org.apache.commons:commons-text:1.9")
 
   testImplementation("io.jsonwebtoken:jjwt:0.9.1")

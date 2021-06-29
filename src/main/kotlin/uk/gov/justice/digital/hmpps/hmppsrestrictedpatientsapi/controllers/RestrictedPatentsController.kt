@@ -16,5 +16,4 @@ class RestrictedPatentsController(private val restrictedPatientsService: Restric
   @ResponseStatus(code = HttpStatus.CREATED)
   fun dischargeToHospital(@RequestBody dischargeToHospital: DischargeToHospitalRequest): DischargeToHospitalResponse =
     restrictedPatientsService.dischargeToHospital(dischargeToHospital)
-
 }

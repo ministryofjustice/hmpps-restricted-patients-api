@@ -67,7 +67,7 @@ class PrisonApiMockServer : WireMockServer(8999) {
                       "dischargeDetails": "Psychiatric Hospital Discharge to Hazelwood House"
                   }
               }
-            """.trimIndent()
+              """.trimIndent()
             )
         )
     )

@@ -5,7 +5,6 @@ import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.*
 import java.time.LocalDate
 import java.time.LocalDateTime
 
-
 fun makeDischargeRequest(
   offenderNo: String = "A12345",
   commentText: String = "test",

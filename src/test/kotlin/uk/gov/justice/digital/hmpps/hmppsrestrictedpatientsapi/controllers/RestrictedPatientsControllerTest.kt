@@ -52,7 +52,6 @@ class RestrictedPatientsControllerTest : ControllerTestBase() {
           )
       )
       .andExpect(MockMvcResultMatchers.status().isInternalServerError)
-
   }
 
   @Test
