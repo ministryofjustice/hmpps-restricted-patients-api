@@ -14,7 +14,7 @@ import org.springframework.web.reactive.function.client.WebClient
 class WebClientConfig(
   @Value("\${prison.api.endpoint.url}") private val prisonApiUrl: String,
   @Value("\${prisoner.search.api.endpoint.url}") private val prisonerSearchApiUrl: String
-  ) {
+) {
 
   @Bean
   fun prisonAPiWebClientAuditable(builder: WebClient.Builder): WebClient = builder

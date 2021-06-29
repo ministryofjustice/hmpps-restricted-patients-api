@@ -1,4 +1,5 @@
 prison.api.endpoint.url: https://api-dev.prison.service.justice.gov.uk
+prisoner.search.api.endpoint.url: https://prisoner-offender-search-dev.prison.service.justice.gov.uk
 
 spring:
   security:
