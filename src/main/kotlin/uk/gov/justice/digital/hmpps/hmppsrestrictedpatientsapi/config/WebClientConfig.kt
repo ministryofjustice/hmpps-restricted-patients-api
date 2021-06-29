@@ -11,7 +11,10 @@ import org.springframework.web.reactive.function.client.ExchangeFunction
 import org.springframework.web.reactive.function.client.WebClient
 
 @Configuration
-class WebClientConfig(@Value("\${prison.api.endpoint.url}") private val prisonApiUrl: String) {
+class WebClientConfig(
+  @Value("\${prison.api.endpoint.url}") private val prisonApiUrl: String,
+  @Value("\${prisoner.search.api.endpoint.url}") private val prisonerSearchApiUrl: String
+  ) {
 
   @Bean
   fun prisonAPiWebClientAuditable(builder: WebClient.Builder): WebClient = builder
@@ -20,8 +23,13 @@ class WebClientConfig(@Value("\${prison.api.endpoint.url}") private val prisonAp
     .build()
 
   @Bean
-  fun prisonApiNoiAuthToken(builder: WebClient.Builder): WebClient = builder
-    .baseUrl("$prisonApiUrl")
+  fun prisonApiNoAuthToken(builder: WebClient.Builder): WebClient = builder
+    .baseUrl(prisonApiUrl)
+    .build()
+
+  @Bean
+  fun prisonerSearchApiUrlNoAuthToken(builder: WebClient.Builder): WebClient = builder
+    .baseUrl(prisonerSearchApiUrl)
     .build()
 
   private fun addAuthHeaderFilterFunction(): ExchangeFilterFunction =

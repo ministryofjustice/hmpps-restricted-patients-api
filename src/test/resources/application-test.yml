@@ -7,3 +7,4 @@ management.endpoint:
 
 
 prison.api.endpoint.url: http://localhost:8999
+prisoner.search.api.endpoint.url: http://localhost:8100
