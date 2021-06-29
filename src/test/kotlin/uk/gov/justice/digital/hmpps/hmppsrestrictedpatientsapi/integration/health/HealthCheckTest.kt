@@ -14,6 +14,7 @@ class HealthCheckTest : IntegrationTestBase() {
   fun beforeEach() {
     prisonApiMockServer.resetMappings()
     prisonApiMockServer.stubHealth()
+    prisonerOffenderSearchApiMockServer.stubHealth()
   }
 
   @Test
@@ -51,6 +52,24 @@ class HealthCheckTest : IntegrationTestBase() {
         }
       )
       .jsonPath("components.prisonApiHealthCheck.details.HttpStatus").value(
+        Consumer<String> {
+          assertThat(it).isEqualTo("OK")
+        }
+      )
+  }
+
+  @Test
+  fun `Prisoner search API health reports UP and OK`() {
+    webTestClient.get().uri("/health")
+      .exchange()
+      .expectStatus().isOk
+      .expectBody()
+      .jsonPath("components.prisonerSearchApiHealthCheck.status").value(
+        Consumer<String> {
+          assertThat(it).isEqualTo("UP")
+        }
+      )
+      .jsonPath("components.prisonerSearchApiHealthCheck.details.HttpStatus").value(
         Consumer<String> {
           assertThat(it).isEqualTo("OK")
         }
