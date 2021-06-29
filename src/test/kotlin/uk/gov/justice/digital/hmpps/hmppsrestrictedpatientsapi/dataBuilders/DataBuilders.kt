@@ -1,7 +1,11 @@
 package uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.dataBuilders
 
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.request.DischargeToHospitalRequest
-import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.*
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.AssignedLivingUnit
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.DischargeToHospitalResponse
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.DischargedHospital
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.RestrictivePatient
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.SupportingPrison
 import java.time.LocalDate
 import java.time.LocalDateTime
 
