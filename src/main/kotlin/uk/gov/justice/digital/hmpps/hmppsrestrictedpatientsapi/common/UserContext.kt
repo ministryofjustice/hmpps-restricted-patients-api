@@ -15,7 +15,7 @@ class UserContext {
       authentication.set(auth)
     }
 
-    fun getAuthToken(): String = authToken.get()
+    fun getAuthToken(): String? = authToken.get()
     fun getAuthentication(): Authentication = authentication.get()
   }
 }
