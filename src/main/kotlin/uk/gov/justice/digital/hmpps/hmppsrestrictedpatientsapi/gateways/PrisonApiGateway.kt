@@ -6,9 +6,9 @@ import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.request.Dis
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.DischargeToHospitalResponse
 
 @Component
-class PrisonApiGateway(private val prisonAPiWebClientAuditable: WebClient) {
+class PrisonApiGateway(private val prisonApiWithAuthWebClient: WebClient) {
   fun dischargeToHospital(dischargeToHospitalDetails: DischargeToHospitalRequest): DischargeToHospitalResponse =
-    prisonAPiWebClientAuditable
+    prisonApiWithAuthWebClient
       .put()
       .uri("/offenders/${dischargeToHospitalDetails.offenderNo}/discharge-to-hospital")
       .bodyValue(

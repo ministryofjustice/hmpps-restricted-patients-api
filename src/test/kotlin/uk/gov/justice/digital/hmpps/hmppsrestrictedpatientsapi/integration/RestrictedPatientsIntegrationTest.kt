@@ -1,12 +1,16 @@
 package uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.integration
 
-import com.github.tomakehurst.wiremock.client.WireMock
+import com.github.tomakehurst.wiremock.client.WireMock.equalToJson
+import com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor
+import com.github.tomakehurst.wiremock.client.WireMock.putRequestedFor
+import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 import org.junit.jupiter.api.Test
 
 class RestrictedPatientsIntegrationTest : IntegrationTestBase() {
   @Test
-  fun `calls discharge to hospital prison api endpoint`() {
+  fun `discharge a prisoner to hospital`() {
     prisonApiMockServer.stubDischargeToPrison("A12345")
+    prisonerSearchApiMockServer.stubSearchByPrisonNumber()
 
     webTestClient
       .post()
@@ -28,9 +32,9 @@ class RestrictedPatientsIntegrationTest : IntegrationTestBase() {
       .json(loadResourceFile("discharge-to-hospital-response.json"))
 
     prisonApiMockServer.verify(
-      WireMock.putRequestedFor(WireMock.urlEqualTo("/api/offenders/A12345/discharge-to-hospital"))
+      putRequestedFor(urlEqualTo("/api/offenders/A12345/discharge-to-hospital"))
         .withRequestBody(
-          WireMock.equalToJson(
+          equalToJson(
             """
           {
             "commentText": "Prisoner was released on bail",
@@ -40,6 +44,15 @@ class RestrictedPatientsIntegrationTest : IntegrationTestBase() {
             "supportingPrisonId": "MDI"
           }
             """.trimIndent()
+          )
+        )
+    )
+
+    prisonerSearchApiMockServer.verify(
+      postRequestedFor(urlEqualTo("/prisoner-search/prisoner-numbers"))
+        .withRequestBody(
+          equalToJson(
+            """   {  "prisonerNumbers": ["A12345"] }  """.trimIndent()
           )
         )
     )

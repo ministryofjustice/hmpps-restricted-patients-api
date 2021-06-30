@@ -14,7 +14,7 @@ class HealthCheckTest : IntegrationTestBase() {
   fun beforeEach() {
     prisonApiMockServer.resetMappings()
     prisonApiMockServer.stubHealth()
-    prisonerOffenderSearchApiMockServer.stubHealth()
+    prisonerSearchApiMockServer.stubHealth()
   }
 
   @Test
