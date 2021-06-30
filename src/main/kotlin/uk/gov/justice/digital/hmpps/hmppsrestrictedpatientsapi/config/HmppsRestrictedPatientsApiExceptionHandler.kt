@@ -15,6 +15,7 @@ import org.springframework.web.client.RestClientException
 import org.springframework.web.client.RestClientResponseException
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException
 import org.springframework.web.reactive.function.client.WebClientResponseException
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.exceptions.NoResultsReturnedException
 import javax.validation.ValidationException
 
 @RestControllerAdvice
@@ -138,6 +139,19 @@ class HmppsRestrictedPatientsApiExceptionHandler {
       .body(
         ErrorResponse(
           status = BAD_REQUEST.value(),
+          developerMessage = e.message
+        )
+      )
+  }
+
+  @ExceptionHandler(NoResultsReturnedException::class)
+  fun handleNotFoundException(e: Exception): ResponseEntity<ErrorResponse> {
+    log.debug("Not found (404) returned with message {}", e.message)
+    return ResponseEntity
+      .status(HttpStatus.NOT_FOUND)
+      .body(
+        ErrorResponse(
+          status = HttpStatus.NOT_FOUND.value(),
           developerMessage = e.message
         )
       )

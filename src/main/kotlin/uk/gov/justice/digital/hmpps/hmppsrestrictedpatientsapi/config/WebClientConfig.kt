@@ -17,19 +17,25 @@ class WebClientConfig(
 ) {
 
   @Bean
-  fun prisonAPiWebClientAuditable(builder: WebClient.Builder): WebClient = builder
+  fun prisonApiWithAuthWebClient(builder: WebClient.Builder): WebClient = builder
     .baseUrl("$prisonApiUrl/api")
     .filter(addAuthHeaderFilterFunction())
     .build()
 
   @Bean
-  fun prisonApiNoAuthToken(builder: WebClient.Builder): WebClient = builder
+  fun prisonApiNoAuthWebClient(builder: WebClient.Builder): WebClient = builder
     .baseUrl(prisonApiUrl)
     .build()
 
   @Bean
-  fun prisonerSearchApiUrlNoAuthToken(builder: WebClient.Builder): WebClient = builder
+  fun prisonerSearchNoAuthWebClient(builder: WebClient.Builder): WebClient = builder
     .baseUrl(prisonerSearchApiUrl)
+    .build()
+
+  @Bean
+  fun prisonerSearchWithAuthWebClient(builder: WebClient.Builder): WebClient = builder
+    .baseUrl(prisonerSearchApiUrl)
+    .filter(addAuthHeaderFilterFunction())
     .build()
 
   private fun addAuthHeaderFilterFunction(): ExchangeFilterFunction =
