@@ -46,5 +46,5 @@ class RestrictedPatientsService(
   }
 
   private fun isCorrectLegalStatus(legalStatus: LegalStatus?): Boolean =
-    LegalStatus.acceptableLegalStatuesForDischargeToHospital().contains(legalStatus)
+    LegalStatus.acceptableLegalStatuesToDischargeToHospital().contains(legalStatus)
 }

@@ -17,7 +17,7 @@ enum class LegalStatus(private val desc: String) {
   );
 
   companion object {
-    fun acceptableLegalStatuesForDischargeToHospital(): List<LegalStatus> = listOf(
+    fun acceptableLegalStatuesToDischargeToHospital(): List<LegalStatus> = listOf(
       INDETERMINATE_SENTENCE,
       RECALL,
       SENTENCED,
