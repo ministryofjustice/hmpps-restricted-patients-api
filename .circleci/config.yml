@@ -8,10 +8,10 @@ executors:
   validator:
     docker:
         - image: circleci/postgres:13.2
-        environment:
-          - POSTGRES_PASSWORD=test
-          - POSTGRES_USER=test
-          - POSTGRES_DB=restricted-patients-api-db
+          environment:
+            - POSTGRES_PASSWORD=test
+            - POSTGRES_USER=test
+            - POSTGRES_DB=restricted-patients-api-db
     working_directory: ~/
 
 jobs:
