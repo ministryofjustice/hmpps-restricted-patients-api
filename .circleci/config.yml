@@ -26,8 +26,9 @@ jobs:
             - gradle-{{ checksum "build.gradle.kts" }}
             - gradle-
       - run:
-          environment:
-            DATASOURCE_URL: "postgres://test@localhost:5432/restricted-patients-api-db"
+          name: Wait for Postgres to be ready
+          command: ./postgres-check.sh
+      - run:
           command: ./gradlew -Dorg.gradle.jvmargs="--illegal-access=permit" -Dkotlin.daemon.jvm.options="--illegal-access=permit" check
       - save_cache:
           paths:
