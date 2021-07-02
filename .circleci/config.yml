@@ -12,6 +12,7 @@ executors:
             - POSTGRES_PASSWORD=test
             - POSTGRES_USER=test
             - POSTGRES_DB=restricted-patients-api-db
+            - DOCKER_HOST=unix:///var/run/docker.sock
     working_directory: ~/app
 
 jobs:
