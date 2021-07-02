@@ -3,11 +3,28 @@ version: 2.1
 orbs:
   hmpps: ministryofjustice/hmpps@3.2
 
+
+executors:
+  validator:
+    docker:
+        - image: circleci/postgres:13.2
+        environment:
+          - POSTGRES_PASSWORD=test
+          - POSTGRES_USER=test
+          - POSTGRES_DB=restricted-patients-api-db
+    working_directory: ~/
+
 jobs:
   validate:
     executor:
       name: hmpps/java
       tag: "16.0"
+    docker:
+      - image: postgres
+          auth:
+            username: test
+            password: test
+            POSTGRES_DB: restricted-patients-api-db
     steps:
       - checkout
       - restore_cache:
@@ -15,6 +32,8 @@ jobs:
             - gradle-{{ checksum "build.gradle.kts" }}
             - gradle-
       - run:
+          environment:
+            DATASOURCE_URL: "postgres://test@localhost:5432/restricted-patients-api-db"
           command: ./gradlew -Dorg.gradle.jvmargs="--illegal-access=permit" -Dkotlin.daemon.jvm.options="--illegal-access=permit" check
       - save_cache:
           paths:

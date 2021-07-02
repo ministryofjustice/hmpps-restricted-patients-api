@@ -15,4 +15,14 @@ enum class LegalStatus(private val desc: String) {
   OTHER(
     "Other"
   );
+
+  companion object {
+    fun acceptableLegalStatuesForDischargeToHospital(): List<LegalStatus> = listOf(
+      INDETERMINATE_SENTENCE,
+      RECALL,
+      SENTENCED,
+      CONVICTED_UNSENTENCED,
+      IMMIGRATION_DETAINEE
+    )
+  }
 }
