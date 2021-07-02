@@ -19,12 +19,6 @@ jobs:
     executor:
       name: hmpps/java
       tag: "16.0"
-    docker:
-      - image: postgres
-          auth:
-            username: test
-            password: test
-            POSTGRES_DB: restricted-patients-api-db
     steps:
       - checkout
       - restore_cache:
