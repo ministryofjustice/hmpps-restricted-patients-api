@@ -5,21 +5,22 @@ orbs:
 
 
 executors:
-  validator:
+  integration-tests:
     docker:
+      - image: cimg/openjdk:16.0
       - image: circleci/postgres:13.2
         environment:
           - POSTGRES_PASSWORD=test
           - POSTGRES_USER=test
           - POSTGRES_DB=restricted-patients-api-db
+    environment:
+      _JAVA_OPTIONS: -Xmx256m -XX:ParallelGCThreads=2 -XX:ConcGCThreads=2 -Djava.util.concurrent.ForkJoinPool.common.parallelism=2 -Dorg.gradle.daemon=false -Dkotlin.compiler.execution.strategy=in-process -Dorg.gradle.workers.max=1
     working_directory: ~/app
 
 
 jobs:
   validate:
-    executor:
-      name: hmpps/java
-      tag: "16.0"
+    executor: integration-tests
     steps:
       - checkout
       - restore_cache:
@@ -68,31 +69,31 @@ workflows:
             - validate
             - build_docker
             - helm_lint
-#      - request-preprod-approval:
-#          type: approval
-#          requires:
-#            - deploy_dev
-#      - hmpps/deploy_env:
-#          name: deploy_preprod
-#          env: "preprod"
-#          context:
-#            - hmpps-common-vars
-#            - hmpps-restricted-patients-api-preprod
-#          requires:
-#            - request-preprod-approval
-#      - request-prod-approval:
-#          type: approval
-#          requires:
-#            - deploy_preprod
-#      - hmpps/deploy_env:
-#          name: deploy_prod
-#          env: "prod"
-#          slack_notification: true
-#          context:
-#            - hmpps-common-vars
-#            - hmpps-restricted-patients-api-prod
-#          requires:
-#            - request-prod-approval
+  #      - request-preprod-approval:
+  #          type: approval
+  #          requires:
+  #            - deploy_dev
+  #      - hmpps/deploy_env:
+  #          name: deploy_preprod
+  #          env: "preprod"
+  #          context:
+  #            - hmpps-common-vars
+  #            - hmpps-restricted-patients-api-preprod
+  #          requires:
+  #            - request-preprod-approval
+  #      - request-prod-approval:
+  #          type: approval
+  #          requires:
+  #            - deploy_preprod
+  #      - hmpps/deploy_env:
+  #          name: deploy_prod
+  #          env: "prod"
+  #          slack_notification: true
+  #          context:
+  #            - hmpps-common-vars
+  #            - hmpps-restricted-patients-api-prod
+  #          requires:
+  #            - request-prod-approval
 
   security:
     triggers:
