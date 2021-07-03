@@ -3,17 +3,15 @@ version: 2.1
 orbs:
   hmpps: ministryofjustice/hmpps@3.2
 
-
-  executors:
-    validator:
-      docker:
-          - image: circleci/postgres:13.2
-            environment:
-              - POSTGRES_PASSWORD=test
-              - POSTGRES_USER=test
-              - POSTGRES_DB=restricted-patients-api-db
-              - DOCKER_HOST=unix:///var/run/docker.sock
-      working_directory: ~/app
+executors:
+  validator:
+    docker:
+      - image: circleci/postgres:13.2
+      environment:
+        - POSTGRES_PASSWORD=tes
+        - POSTGRES_USER=test
+        - POSTGRES_DB=restricted-patients-api-db
+    working_directory: ~/app
 
 jobs:
   validate:
