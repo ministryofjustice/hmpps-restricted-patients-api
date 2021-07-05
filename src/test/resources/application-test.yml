@@ -8,3 +8,11 @@ management.endpoint:
 
 prison.api.endpoint.url: http://localhost:8999
 prisoner.search.api.endpoint.url: http://localhost:8100
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/restricted-patients-api-db
+    username: test
+    password: test
+    continueOnError: true
+
