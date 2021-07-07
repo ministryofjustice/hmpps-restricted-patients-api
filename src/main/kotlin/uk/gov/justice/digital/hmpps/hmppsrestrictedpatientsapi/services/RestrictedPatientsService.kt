@@ -3,12 +3,13 @@ package uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.PrisonApiGateway
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.PrisonerSearchApiGateway
-import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.entities.RestrictivePatient
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.entities.RestrictedPatients
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.enums.LegalStatus
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.exceptions.NoResultsReturnedException
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.request.DischargeToHospitalRequest
-import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.DischargeToHospitalResponse
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.RestrictedPatientDto
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.repositories.RestrictedPatientsRepository
+import javax.persistence.EntityNotFoundException
 import javax.transaction.Transactional
 import javax.validation.ValidationException
 
@@ -20,7 +21,7 @@ class RestrictedPatientsService(
 ) {
 
   @Transactional
-  fun dischargeToHospital(dischargeToHospital: DischargeToHospitalRequest): DischargeToHospitalResponse {
+  fun dischargeToHospital(dischargeToHospital: DischargeToHospitalRequest): RestrictedPatientDto {
 
     val prisonerSearchResponse = prisonerSearchApiGateway.searchByPrisonNumber(dischargeToHospital.offenderNo)
 
@@ -30,20 +31,39 @@ class RestrictedPatientsService(
     if (!isCorrectLegalStatus(prisonerResult.legalStatus))
       throw ValidationException("Can not discharge prisoner with a legal status of ${prisonerResult.legalStatus}")
 
-    val response = prisonApiGateway.dischargeToHospital(dischargeToHospital)
+    prisonApiGateway.dischargeToHospital(dischargeToHospital)
 
-    restrictedPatientsRepository.save(
-      RestrictivePatient(
-        fromLocationId = dischargeToHospital.fromLocationId,
-        hospitalLocationCode = response.restrictivePatient.dischargedHospital.agencyId,
-        supportingPrisonId = response.restrictivePatient.supportingPrison.agencyId,
-        dischargeTime = dischargeToHospital.dischargeTime,
-        commentText = dischargeToHospital.commentText
-      )
+    val restrictivePatient = RestrictedPatients(
+      prisonerNumber = dischargeToHospital.offenderNo,
+      fromLocationId = dischargeToHospital.fromLocationId,
+      hospitalLocationCode = dischargeToHospital.hospitalLocationCode,
+      supportingPrisonId = dischargeToHospital.supportingPrisonId,
+      dischargeTime = dischargeToHospital.dischargeTime,
+      commentText = dischargeToHospital.commentText
     )
 
-    return response
+    return transform(restrictedPatientsRepository.save(restrictivePatient))
   }
+
+  fun getRestrictedPatient(prisonerNumber: String): RestrictedPatientDto {
+    val restrictedPatient = restrictedPatientsRepository.findByPrisonerNumber(prisonerNumber)
+      ?: throw EntityNotFoundException("No restricted patient record found for prison number $prisonerNumber")
+
+    return transform(restrictedPatient)
+  }
+
+  fun transform(restrictedPatient: RestrictedPatients): RestrictedPatientDto = RestrictedPatientDto(
+    id = restrictedPatient.id!!,
+    prisonerNumber = restrictedPatient.prisonerNumber,
+    fromLocationId = restrictedPatient.fromLocationId,
+    supportingPrisonId = restrictedPatient.supportingPrisonId,
+    dischargeTime = restrictedPatient.dischargeTime,
+    commentText = restrictedPatient.commentText,
+    hospitalLocationCode = restrictedPatient.hospitalLocationCode,
+    active = restrictedPatient.active,
+    createUserId = restrictedPatient.createUserId,
+    createDateTime = restrictedPatient.createDateTime
+  )
 
   private fun isCorrectLegalStatus(legalStatus: LegalStatus?): Boolean =
     LegalStatus.permissibleLegalStatusesForDischargingPrisonersToHospital().contains(legalStatus)

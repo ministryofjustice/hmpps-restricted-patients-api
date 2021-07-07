@@ -1,10 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.service
 
-import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.never
-import com.nhaarman.mockitokotlin2.verify
-import com.nhaarman.mockitokotlin2.whenever
+import com.nhaarman.mockitokotlin2.*
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
@@ -13,11 +9,12 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 import org.mockito.ArgumentCaptor
+import org.mockito.ArgumentMatchers.anyString
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.dataBuilders.makeDischargeRequest
-import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.dataBuilders.makeDischargeToHospitalResponse
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.dataBuilders.makeRestrictedPatient
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.PrisonApiGateway
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.PrisonerSearchApiGateway
-import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.entities.RestrictivePatient
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.entities.RestrictedPatients
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.enums.LegalStatus
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.exceptions.NoResultsReturnedException
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.request.DischargeToHospitalRequest
@@ -25,6 +22,7 @@ import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.Pr
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.repositories.RestrictedPatientsRepository
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services.RestrictedPatientsService
 import java.time.LocalDateTime
+import javax.persistence.EntityNotFoundException
 import javax.validation.ValidationException
 
 class RestrictedPatientsServiceTest {
@@ -77,8 +75,7 @@ class RestrictedPatientsServiceTest {
         names = ["INDETERMINATE_SENTENCE", "RECALL", "SENTENCED", "CONVICTED_UNSENTENCED", "IMMIGRATION_DETAINEE"]
       )
       fun `discharge an prisoner to hospital when they have the correct legal status`(status: LegalStatus) {
-        whenever(prisonApiGateway.dischargeToHospital(any())).thenReturn(makeDischargeToHospitalResponse())
-
+        whenever(restrictedPatientsRepository.save(any())).thenReturn(makeRestrictedPatient())
         whenever(prisonerSearchApiGateway.searchByPrisonNumber(any())).thenReturn(
           listOf(PrisonerResult(prisonerNumber = "A12345", legalStatus = status))
         )
@@ -91,20 +88,17 @@ class RestrictedPatientsServiceTest {
 
     @Nested
     inner class SuccessfulDischargeToHospital {
-
       @BeforeEach
       fun beforeEach() {
         whenever(prisonerSearchApiGateway.searchByPrisonNumber(any())).thenReturn(
           listOf(PrisonerResult(prisonerNumber = "A12345", legalStatus = LegalStatus.SENTENCED))
         )
-        whenever(prisonApiGateway.dischargeToHospital(any())).thenReturn(makeDischargeToHospitalResponse())
+        whenever(restrictedPatientsRepository.save(any())).thenReturn(makeRestrictedPatient())
       }
 
       @Test
       fun `make a call to prison api to discharge a prisoner to hospital`() {
-        val response = service.dischargeToHospital(makeDischargeRequest())
-
-        assertThat(response).isEqualTo(makeDischargeToHospitalResponse())
+        service.dischargeToHospital(makeDischargeRequest())
 
         verify(prisonApiGateway).dischargeToHospital(
           DischargeToHospitalRequest(
@@ -120,7 +114,7 @@ class RestrictedPatientsServiceTest {
 
       @Test
       fun `calls save with the correct parameters`() {
-        val argumentCaptor = ArgumentCaptor.forClass(RestrictivePatient::class.java)
+        val argumentCaptor = ArgumentCaptor.forClass(RestrictedPatients::class.java)
 
         service.dischargeToHospital(makeDischargeRequest())
 
@@ -133,6 +127,49 @@ class RestrictedPatientsServiceTest {
           "commentText",
           "dischargeTime"
         ).contains("MDI", "MDI", "HAZLWD", "test", LocalDateTime.parse("2020-10-10T20:00:01"))
+      }
+    }
+
+    @Nested
+    inner class GetRestrictedPatient {
+      @Test
+      fun `throws entity not found`() {
+        whenever(restrictedPatientsRepository.findByPrisonerNumber(any())).thenReturn(null)
+
+        Assertions.assertThrows(EntityNotFoundException::class.java) {
+          service.getRestrictedPatient("A12345")
+        }
+      }
+
+      @Test
+      fun `by prison number`() {
+        whenever(restrictedPatientsRepository.findByPrisonerNumber(anyString())).thenReturn(makeRestrictedPatient())
+
+        val restrictedPatient = service.getRestrictedPatient("A12345")
+
+        assertThat(restrictedPatient).extracting(
+          "id",
+          "prisonerNumber",
+          "fromLocationId",
+          "hospitalLocationCode",
+          "supportingPrisonId",
+          "dischargeTime",
+          "commentText",
+          "active",
+          "createDateTime",
+          "createUserId"
+        ).contains(
+          1L,
+          "A12345",
+          "MDI",
+          "HAZLWD",
+          "MDI",
+          LocalDateTime.parse("2020-10-10T20:00:01"),
+          "test",
+          true,
+          LocalDateTime.parse("2020-10-10T20:00:01"),
+          "ITAG_USER"
+        )
       }
     }
   }

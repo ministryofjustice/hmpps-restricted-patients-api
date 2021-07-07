@@ -12,8 +12,9 @@ import javax.persistence.Table
 @Entity
 @Table(name = "RESTRICTED_PATIENTS")
 @EntityListeners(AuditingEntityListener::class)
-class RestrictivePatient(
+class RestrictedPatients(
   id: Long? = null,
+  val prisonerNumber: String,
   val fromLocationId: String,
   val hospitalLocationCode: String,
   val supportingPrisonId: String? = null,

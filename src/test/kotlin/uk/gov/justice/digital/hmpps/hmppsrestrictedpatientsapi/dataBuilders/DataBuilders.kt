@@ -1,12 +1,8 @@
 package uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.dataBuilders
 
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.entities.RestrictedPatients
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.request.DischargeToHospitalRequest
-import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.AssignedLivingUnit
-import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.DischargeToHospitalResponse
-import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.DischargedHospital
-import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.RestrictivePatient
-import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.SupportingPrison
-import java.time.LocalDate
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.RestrictedPatientDto
 import java.time.LocalDateTime
 
 fun makeDischargeRequest(
@@ -25,33 +21,54 @@ fun makeDischargeRequest(
   supportingPrisonId
 )
 
-fun makeDischargeToHospitalResponse(
-  offenderNo: String = "A12345",
-  bookingId: Long = 1,
-  offenderId: Long = 2,
-  rootOffenderId: Long = 3,
-  assignedLivingUnit: AssignedLivingUnit = AssignedLivingUnit(agencyId = "OUT", agencyName = "Outside"),
-  inOutStatus: String = "OUT",
-  status: String = "INACTIVE OUT",
-  statusReason: String = "REL-HP",
-  lastMovementTypeCode: String = "REL",
-  lastMovementReasonCode: String = "HP",
-  restrictivePatient: RestrictivePatient = RestrictivePatient(
-    SupportingPrison("MDI", "Moorland (HMP & YOI)", "HMP & YOI Moorland Prison near Doncaster", "INST", true),
-    DischargedHospital("HAZLWD", "Hazelwood House", "Hazelwood House", "HSHOSP", true),
-    dischargeDate = LocalDate.now().atStartOfDay().toLocalDate(),
-    dischargeDetails = "Psychiatric Hospital Discharge to Hazelwood House"
-  ),
-) = DischargeToHospitalResponse(
-  offenderNo,
-  bookingId,
-  offenderId,
-  rootOffenderId,
-  assignedLivingUnit,
-  inOutStatus,
-  status,
-  statusReason,
-  lastMovementTypeCode,
-  lastMovementReasonCode,
-  restrictivePatient,
+fun makeRestrictedPatientDto(
+  id: Long = 1,
+  fromLocationId: String = "MDI",
+  supportingPrisonId: String = "MDI",
+  prisonerNumber: String = "A12345",
+  hospitalLocationCode: String = "HAZLWD",
+  active: Boolean = true,
+  commentText: String = "test",
+  dischargeTime: LocalDateTime = LocalDateTime.parse("2020-10-10T20:00:01"),
+  createDateTime: LocalDateTime = LocalDateTime.parse("2020-10-10T20:00:01"),
+  createUserId: String = "user"
+): RestrictedPatientDto = RestrictedPatientDto(
+  id,
+  prisonerNumber,
+  fromLocationId,
+  hospitalLocationCode,
+  supportingPrisonId,
+  dischargeTime,
+  commentText,
+  active,
+  createDateTime,
+  createUserId
 )
+
+fun makeRestrictedPatient(
+  id: Long = 1,
+  fromLocationId: String = "MDI",
+  supportingPrisonId: String = "MDI",
+  prisonerNumber: String = "A12345",
+  hospitalLocationCode: String = "HAZLWD",
+  active: Boolean = true,
+  commentText: String = "test",
+  dischargeTime: LocalDateTime = LocalDateTime.parse("2020-10-10T20:00:01"),
+  createDateTime: LocalDateTime = LocalDateTime.parse("2020-10-10T20:00:01"),
+  createUserId: String = "ITAG_USER"
+): RestrictedPatients {
+  val patient = RestrictedPatients(
+    id,
+    prisonerNumber,
+    fromLocationId,
+    hospitalLocationCode,
+    supportingPrisonId,
+    dischargeTime,
+    commentText,
+    active
+  )
+  patient.createDateTime = createDateTime
+  patient.createUserId = createUserId
+  return patient
+}
+

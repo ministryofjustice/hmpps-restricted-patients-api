@@ -12,8 +12,10 @@ import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.dataBuilders.makeDischargeRequest
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.dataBuilders.makeRestrictedPatientDto
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.exceptions.NoResultsReturnedException
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services.RestrictedPatientsService
+import javax.persistence.EntityNotFoundException
 
 @WebMvcTest(value = [RestrictedPatentsController::class])
 class RestrictedPatientsControllerTest : ControllerTestBase() {
@@ -91,6 +93,40 @@ class RestrictedPatientsControllerTest : ControllerTestBase() {
             )
         )
         .andExpect(MockMvcResultMatchers.status().isNotFound)
+    }
+  }
+
+  @Nested
+  @WithMockUser(username = "ITAG_USER")
+  inner class RetrieveRestrictedPatient {
+    @Test
+    fun `restricted patient not found by prison number`() {
+      whenever(restrictedPatientsService.getRestrictedPatient("A12345")).thenThrow(EntityNotFoundException())
+
+      mockMvc
+        .perform(
+          MockMvcRequestBuilders.get("/restricted-patient/prison-number/A12345")
+            .header("Content-Type", "application/json")
+            .content(
+              objectMapper.writeValueAsString(makeRestrictedPatientDto())
+            )
+        )
+        .andExpect(MockMvcResultMatchers.status().isNotFound)
+    }
+
+    @Test
+    fun `returns a restricted patient for a prisoner number`() {
+      whenever(restrictedPatientsService.getRestrictedPatient("A12345")).thenReturn(makeRestrictedPatientDto())
+
+      mockMvc
+        .perform(
+          MockMvcRequestBuilders.get("/restricted-patient/prison-number/A12345")
+            .header("Content-Type", "application/json")
+            .content(
+              objectMapper.writeValueAsString(makeRestrictedPatientDto())
+            )
+        )
+        .andExpect(MockMvcResultMatchers.status().is2xxSuccessful)
     }
   }
 

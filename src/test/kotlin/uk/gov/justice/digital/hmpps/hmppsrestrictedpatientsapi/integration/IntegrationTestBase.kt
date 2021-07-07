@@ -1,6 +1,8 @@
 package uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.integration
 
+import org.flywaydb.core.Flyway
 import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -20,6 +22,9 @@ abstract class IntegrationTestBase {
   @Suppress("SpringJavaInjectionPointsAutowiringInspection")
   @Autowired
   lateinit var webTestClient: WebTestClient
+
+  @Autowired
+  lateinit var flyway: Flyway
 
   @Autowired
   lateinit var jwtAuthHelper: JwtAuthHelper
@@ -44,6 +49,12 @@ abstract class IntegrationTestBase {
       prisonApiMockServer.stop()
       prisonerSearchApiMockServer.stop()
     }
+  }
+
+  @AfterEach
+  fun resetDb() {
+    flyway.clean()
+    flyway.migrate()
   }
 
   fun setHeaders(contentType: MediaType = MediaType.APPLICATION_JSON): (HttpHeaders) -> Unit = {
