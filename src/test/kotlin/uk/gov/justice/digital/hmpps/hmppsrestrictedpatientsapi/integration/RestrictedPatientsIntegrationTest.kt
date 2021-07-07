@@ -1,6 +1,9 @@
 package uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.integration
 
-import com.github.tomakehurst.wiremock.client.WireMock.*
+import com.github.tomakehurst.wiremock.client.WireMock.equalToJson
+import com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor
+import com.github.tomakehurst.wiremock.client.WireMock.putRequestedFor
+import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 import org.junit.jupiter.api.Test
 import org.springframework.test.web.reactive.server.WebTestClient
 
@@ -53,7 +56,6 @@ class RestrictedPatientsIntegrationTest : IntegrationTestBase() {
       .expectStatus().is2xxSuccessful
       .expectBody()
       .json(loadResourceFile("restricted-patient-by-prison-number-response.json"))
-
   }
 
   fun dischargePrisonerWebClient(

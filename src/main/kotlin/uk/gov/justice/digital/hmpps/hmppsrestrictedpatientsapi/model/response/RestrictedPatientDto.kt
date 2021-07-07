@@ -14,6 +14,3 @@ data class RestrictedPatientDto(
   var createDateTime: LocalDateTime? = null,
   var createUserId: String? = null
 )
-
-
-

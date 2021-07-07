@@ -71,4 +71,3 @@ fun makeRestrictedPatient(
   patient.createUserId = createUserId
   return patient
 }
-

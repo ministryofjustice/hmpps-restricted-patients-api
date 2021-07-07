@@ -88,7 +88,7 @@ class RestrictedPatientsRepositoryTest {
         "commentText",
         "createUserId"
       )
-      .contains("A12345", "MDI", "LEI",  "HAZLWD", "test", "user")
+      .contains("A12345", "MDI", "LEI", "HAZLWD", "test", "user")
 
     entityManager.remove(entity)
   }
