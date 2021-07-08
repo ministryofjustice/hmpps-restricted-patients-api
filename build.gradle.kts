@@ -16,10 +16,13 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-data-jpa")
   implementation("org.apache.commons:commons-text:1.9")
 
+  implementation("io.springfox:springfox-boot-starter:3.0.0")
+
   runtimeOnly("com.h2database:h2")
   runtimeOnly("org.flywaydb:flyway-core")
   runtimeOnly("org.postgresql:postgresql")
 
+  testImplementation("org.flywaydb:flyway-core:7.7.2")
   testImplementation("io.jsonwebtoken:jjwt:0.9.1")
   testImplementation("com.github.tomakehurst:wiremock-standalone:2.27.2")
   testImplementation("org.springframework.security:spring-security-test")

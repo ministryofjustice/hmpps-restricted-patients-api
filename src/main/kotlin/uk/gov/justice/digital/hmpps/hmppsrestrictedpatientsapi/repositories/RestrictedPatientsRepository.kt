@@ -1,6 +1,8 @@
 package uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.repositories
 
 import org.springframework.data.repository.CrudRepository
-import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.entities.RestrictivePatient
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.entities.RestrictedPatient
 
-interface RestrictedPatientsRepository : CrudRepository<RestrictivePatient, Long>
+interface RestrictedPatientsRepository : CrudRepository<RestrictedPatient, Long> {
+  fun findByPrisonerNumberAndActiveTrue(prisonerNumber: String): RestrictedPatient?
+}

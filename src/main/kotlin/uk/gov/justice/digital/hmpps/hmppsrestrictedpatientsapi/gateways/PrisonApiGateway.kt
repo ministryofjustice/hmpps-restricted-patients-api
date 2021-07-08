@@ -2,12 +2,12 @@ package uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways
 
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient
+import org.springframework.web.reactive.function.client.bodyToMono
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.request.DischargeToHospitalRequest
-import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.DischargeToHospitalResponse
 
 @Component
 class PrisonApiGateway(private val prisonApiWithAuthWebClient: WebClient) {
-  fun dischargeToHospital(dischargeToHospitalDetails: DischargeToHospitalRequest): DischargeToHospitalResponse =
+  fun dischargeToHospital(dischargeToHospitalDetails: DischargeToHospitalRequest) {
     prisonApiWithAuthWebClient
       .put()
       .uri("/offenders/${dischargeToHospitalDetails.offenderNo}/discharge-to-hospital")
@@ -21,6 +21,7 @@ class PrisonApiGateway(private val prisonApiWithAuthWebClient: WebClient) {
         )
       )
       .retrieve()
-      .bodyToMono(DischargeToHospitalResponse::class.java)
-      .block()!!
+      .bodyToMono<Any>()
+      .block()
+  }
 }

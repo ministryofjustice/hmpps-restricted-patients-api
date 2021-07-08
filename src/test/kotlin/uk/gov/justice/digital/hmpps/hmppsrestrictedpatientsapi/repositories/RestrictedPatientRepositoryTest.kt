@@ -11,14 +11,14 @@ import org.springframework.security.authentication.TestingAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.test.context.ActiveProfiles
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.config.AuditConfiguration
-import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.entities.RestrictivePatient
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.entities.RestrictedPatient
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.security.UserSecurityUtils
 import java.time.LocalDateTime
 
 @ActiveProfiles("test")
 @Import(AuditConfiguration::class, UserSecurityUtils::class)
 @DataJpaTest
-class RestrictedPatientsRepositoryTest {
+class RestrictedPatientRepositoryTest {
 
   @Autowired
   lateinit var entityManager: TestEntityManager
@@ -36,7 +36,8 @@ class RestrictedPatientsRepositoryTest {
     val now = LocalDateTime.now()
 
     val id = entityManager.persistAndFlush(
-      RestrictivePatient(
+      RestrictedPatient(
+        prisonerNumber = "A12345",
         fromLocationId = "MDI",
         supportingPrisonId = "LEI",
         dischargeTime = now,
@@ -45,9 +46,12 @@ class RestrictedPatientsRepositoryTest {
       )
     ).id
 
-    assertThat(repository.findById(id).orElseThrow())
+    val entity = repository.findById(id!!).orElseThrow()
+
+    assertThat(entity)
       .extracting(
         "id",
+        "prisonerNumber",
         "fromLocationId",
         "supportingPrisonId",
         "dischargeTime",
@@ -55,6 +59,37 @@ class RestrictedPatientsRepositoryTest {
         "commentText",
         "createUserId"
       )
-      .contains(id, "MDI", "LEI", now, "HAZLWD", "test", "user")
+      .contains(id, "A12345", "MDI", "LEI", now, "HAZLWD", "test", "user")
+
+    entityManager.remove(entity)
+  }
+
+  @Test
+  fun `find by prison number`() {
+    entityManager.persistAndFlush(
+      RestrictedPatient(
+        prisonerNumber = "A12345",
+        fromLocationId = "MDI",
+        supportingPrisonId = "LEI",
+        dischargeTime = LocalDateTime.now(),
+        hospitalLocationCode = "HAZLWD",
+        commentText = "test"
+      )
+    )
+
+    val entity = repository.findByPrisonerNumberAndActiveTrue("A12345")
+
+    assertThat(entity)
+      .extracting(
+        "prisonerNumber",
+        "fromLocationId",
+        "supportingPrisonId",
+        "hospitalLocationCode",
+        "commentText",
+        "createUserId"
+      )
+      .contains("A12345", "MDI", "LEI", "HAZLWD", "test", "user")
+
+    entityManager.remove(entity)
   }
 }
