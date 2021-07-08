@@ -46,7 +46,7 @@ class RestrictedPatientsRepositoryTest {
       )
     ).id
 
-    val entity = repository.findById(id).orElseThrow()
+    val entity = repository.findById(id!!).orElseThrow()
 
     assertThat(entity)
       .extracting(
