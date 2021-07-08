@@ -14,9 +14,9 @@ data class RestrictedPatientDto(
   val fromLocationId: String,
   @ApiModelProperty(value = "Hospital location code, this indicates the current location of a prisoner", example = "HAZLWD")
   val hospitalLocationCode: String,
-  @ApiModelProperty(value = "Hospital location code, this indicates the current location of a prisoner", example = "HAZLWD")
+  @ApiModelProperty(value = "Prison where the offender is support by POM", example = "LEI")
   val supportingPrisonId: String? = null,
-  @ApiModelProperty(value = "Prison where the offender is support by POM", example = "MDI")
+  @ApiModelProperty(value = "Date and time the prisoner was discharged to hospital")
   val dischargeTime: LocalDateTime,
   @ApiModelProperty(value = "Useful comments")
   val commentText: String? = null,
