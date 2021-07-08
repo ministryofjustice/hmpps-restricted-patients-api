@@ -18,7 +18,7 @@ import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.dataBuilders.make
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.dataBuilders.makeRestrictedPatient
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.PrisonApiGateway
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.PrisonerSearchApiGateway
-import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.entities.RestrictedPatients
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.entities.RestrictedPatient
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.enums.LegalStatus
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.exceptions.NoResultsReturnedException
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.request.DischargeToHospitalRequest
@@ -29,7 +29,7 @@ import java.time.LocalDateTime
 import javax.persistence.EntityNotFoundException
 import javax.validation.ValidationException
 
-class RestrictedPatientsServiceTest {
+class RestrictedPatientServiceTest {
 
   private val prisonApiGateway: PrisonApiGateway = mock()
   private val prisonerSearchApiGateway: PrisonerSearchApiGateway = mock()
@@ -118,7 +118,7 @@ class RestrictedPatientsServiceTest {
 
       @Test
       fun `calls save with the correct parameters`() {
-        val argumentCaptor = ArgumentCaptor.forClass(RestrictedPatients::class.java)
+        val argumentCaptor = ArgumentCaptor.forClass(RestrictedPatient::class.java)
 
         service.dischargeToHospital(makeDischargeRequest())
 

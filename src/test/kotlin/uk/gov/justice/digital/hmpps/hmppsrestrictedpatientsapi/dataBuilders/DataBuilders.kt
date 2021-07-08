@@ -1,6 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.dataBuilders
 
-import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.entities.RestrictedPatients
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.entities.RestrictedPatient
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.request.DischargeToHospitalRequest
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.RestrictedPatientDto
 import java.time.LocalDateTime
@@ -56,8 +56,8 @@ fun makeRestrictedPatient(
   dischargeTime: LocalDateTime = LocalDateTime.parse("2020-10-10T20:00:01"),
   createDateTime: LocalDateTime = LocalDateTime.parse("2020-10-10T20:00:01"),
   createUserId: String = "ITAG_USER"
-): RestrictedPatients {
-  val patient = RestrictedPatients(
+): RestrictedPatient {
+  val patient = RestrictedPatient(
     id,
     prisonerNumber,
     fromLocationId,

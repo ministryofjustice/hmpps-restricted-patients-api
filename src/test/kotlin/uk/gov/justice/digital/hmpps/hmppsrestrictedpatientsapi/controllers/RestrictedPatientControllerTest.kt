@@ -18,7 +18,7 @@ import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services.Restrict
 import javax.persistence.EntityNotFoundException
 
 @WebMvcTest(value = [RestrictedPatentsController::class])
-class RestrictedPatientsControllerTest : ControllerTestBase() {
+class RestrictedPatientControllerTest : ControllerTestBase() {
 
   @MockBean
   lateinit var restrictedPatientsService: RestrictedPatientsService

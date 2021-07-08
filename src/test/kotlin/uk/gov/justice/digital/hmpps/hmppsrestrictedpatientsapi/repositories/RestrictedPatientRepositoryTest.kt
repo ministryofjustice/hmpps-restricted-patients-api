@@ -11,14 +11,14 @@ import org.springframework.security.authentication.TestingAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.test.context.ActiveProfiles
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.config.AuditConfiguration
-import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.entities.RestrictedPatients
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.entities.RestrictedPatient
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.security.UserSecurityUtils
 import java.time.LocalDateTime
 
 @ActiveProfiles("test")
 @Import(AuditConfiguration::class, UserSecurityUtils::class)
 @DataJpaTest
-class RestrictedPatientsRepositoryTest {
+class RestrictedPatientRepositoryTest {
 
   @Autowired
   lateinit var entityManager: TestEntityManager
@@ -36,7 +36,7 @@ class RestrictedPatientsRepositoryTest {
     val now = LocalDateTime.now()
 
     val id = entityManager.persistAndFlush(
-      RestrictedPatients(
+      RestrictedPatient(
         prisonerNumber = "A12345",
         fromLocationId = "MDI",
         supportingPrisonId = "LEI",
@@ -67,7 +67,7 @@ class RestrictedPatientsRepositoryTest {
   @Test
   fun `find by prison number`() {
     entityManager.persistAndFlush(
-      RestrictedPatients(
+      RestrictedPatient(
         prisonerNumber = "A12345",
         fromLocationId = "MDI",
         supportingPrisonId = "LEI",

@@ -3,7 +3,7 @@ package uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.PrisonApiGateway
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.PrisonerSearchApiGateway
-import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.entities.RestrictedPatients
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.entities.RestrictedPatient
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.enums.LegalStatus
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.exceptions.NoResultsReturnedException
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.request.DischargeToHospitalRequest
@@ -33,7 +33,7 @@ class RestrictedPatientsService(
 
     prisonApiGateway.dischargeToHospital(dischargeToHospital)
 
-    val restrictivePatient = RestrictedPatients(
+    val restrictedPatient = RestrictedPatient(
       prisonerNumber = dischargeToHospital.offenderNo,
       fromLocationId = dischargeToHospital.fromLocationId,
       hospitalLocationCode = dischargeToHospital.hospitalLocationCode,
@@ -42,7 +42,7 @@ class RestrictedPatientsService(
       commentText = dischargeToHospital.commentText
     )
 
-    return transform(restrictedPatientsRepository.save(restrictivePatient))
+    return transform(restrictedPatientsRepository.save(restrictedPatient))
   }
 
   fun getRestrictedPatient(prisonerNumber: String): RestrictedPatientDto {
@@ -52,7 +52,7 @@ class RestrictedPatientsService(
     return transform(restrictedPatient)
   }
 
-  fun transform(restrictedPatient: RestrictedPatients): RestrictedPatientDto = RestrictedPatientDto(
+  fun transform(restrictedPatient: RestrictedPatient): RestrictedPatientDto = RestrictedPatientDto(
     id = restrictedPatient.id!!,
     prisonerNumber = restrictedPatient.prisonerNumber,
     fromLocationId = restrictedPatient.fromLocationId,

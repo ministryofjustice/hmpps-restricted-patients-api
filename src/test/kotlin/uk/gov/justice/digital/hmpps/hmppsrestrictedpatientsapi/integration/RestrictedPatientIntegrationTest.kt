@@ -7,7 +7,7 @@ import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 import org.junit.jupiter.api.Test
 import org.springframework.test.web.reactive.server.WebTestClient
 
-class RestrictedPatientsIntegrationTest : IntegrationTestBase() {
+class RestrictedPatientIntegrationTest : IntegrationTestBase() {
 
   @Test
   fun `discharge a prisoner to hospital`() {
