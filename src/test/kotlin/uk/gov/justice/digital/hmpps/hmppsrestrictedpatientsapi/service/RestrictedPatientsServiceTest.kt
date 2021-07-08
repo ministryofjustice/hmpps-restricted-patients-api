@@ -138,7 +138,7 @@ class RestrictedPatientsServiceTest {
     inner class GetRestrictedPatient {
       @Test
       fun `throws entity not found`() {
-        whenever(restrictedPatientsRepository.findByPrisonerNumber(any())).thenReturn(null)
+        whenever(restrictedPatientsRepository.findByPrisonerNumberAndActiveTrue(any())).thenReturn(null)
 
         Assertions.assertThrows(EntityNotFoundException::class.java) {
           service.getRestrictedPatient("A12345")
@@ -147,7 +147,7 @@ class RestrictedPatientsServiceTest {
 
       @Test
       fun `by prison number`() {
-        whenever(restrictedPatientsRepository.findByPrisonerNumber(anyString())).thenReturn(makeRestrictedPatient())
+        whenever(restrictedPatientsRepository.findByPrisonerNumberAndActiveTrue(anyString())).thenReturn(makeRestrictedPatient())
 
         val restrictedPatient = service.getRestrictedPatient("A12345")
 

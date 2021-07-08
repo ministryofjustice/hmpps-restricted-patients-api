@@ -46,7 +46,7 @@ class RestrictedPatientsService(
   }
 
   fun getRestrictedPatient(prisonerNumber: String): RestrictedPatientDto {
-    val restrictedPatient = restrictedPatientsRepository.findByPrisonerNumber(prisonerNumber)
+    val restrictedPatient = restrictedPatientsRepository.findByPrisonerNumberAndActiveTrue(prisonerNumber)
       ?: throw EntityNotFoundException("No restricted patient record found for prison number $prisonerNumber")
 
     return transform(restrictedPatient)
