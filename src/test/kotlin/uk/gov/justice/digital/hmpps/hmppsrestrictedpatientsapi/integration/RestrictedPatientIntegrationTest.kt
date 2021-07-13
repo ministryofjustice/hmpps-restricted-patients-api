@@ -20,9 +20,21 @@ class RestrictedPatientIntegrationTest : IntegrationTestBase() {
       .expectBody()
       .jsonPath("$.id").isNumber
       .jsonPath("$.prisonerNumber").isEqualTo("A12345")
-      .jsonPath("$.fromLocationId").isEqualTo("MDI")
-      .jsonPath("$.hospitalLocationCode").isEqualTo("HAZLWD")
-      .jsonPath("$.supportingPrisonId").isEqualTo("MDI")
+      .jsonPath("$.fromLocation.agencyId").isEqualTo("MDI")
+      .jsonPath("$.fromLocation.description").isEqualTo("Moorland (HMP & YOI)")
+      .jsonPath("$.fromLocation.longDescription").isEqualTo("HMP & YOI Moorland Prison near Doncaster")
+      .jsonPath("$.fromLocation.agencyType").isEqualTo("INST")
+      .jsonPath("$.fromLocation.active").isEqualTo(true)
+      .jsonPath("$.hospitalLocation.agencyId").isEqualTo("HAZLWD")
+      .jsonPath("$.hospitalLocation.description").isEqualTo("Hazelwood House")
+      .jsonPath("$.hospitalLocation.longDescription").isEqualTo("Hazelwood House")
+      .jsonPath("$.hospitalLocation.agencyType").isEqualTo("HSHOSP")
+      .jsonPath("$.hospitalLocation.active").isEqualTo(true)
+      .jsonPath("$.supportingPrison.agencyId").isEqualTo("MDI")
+      .jsonPath("$.supportingPrison.description").isEqualTo("Moorland (HMP & YOI)")
+      .jsonPath("$.supportingPrison.longDescription").isEqualTo("HMP & YOI Moorland Prison near Doncaster")
+      .jsonPath("$.supportingPrison.agencyType").isEqualTo("INST")
+      .jsonPath("$.supportingPrison.active").isEqualTo(true)
       .jsonPath("$.dischargeTime").isEqualTo("2021-06-07T13:40:32.498")
       .jsonPath("$.commentText").isEqualTo("Prisoner was released on bail")
 
@@ -43,6 +55,8 @@ class RestrictedPatientIntegrationTest : IntegrationTestBase() {
 
   @Test
   fun `returns restricted patient by prisoner number`() {
+    prisonApiMockServer.stubAgencyLocationForPrisons()
+    prisonApiMockServer.stubAgencyLocationForHospitals()
     prisonApiMockServer.stubDischargeToPrison("A16345")
     prisonerSearchApiMockServer.stubSearchByPrisonNumber()
 
