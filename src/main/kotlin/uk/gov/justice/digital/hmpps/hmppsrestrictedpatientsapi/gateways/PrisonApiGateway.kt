@@ -1,13 +1,15 @@
 package uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways
 
+import org.springframework.core.ParameterizedTypeReference
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient
-import org.springframework.web.reactive.function.client.bodyToMono
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.request.DischargeToHospitalRequest
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.Agency
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.DischargeToHospitalResponse
 
 @Component
 class PrisonApiGateway(private val prisonApiWithAuthWebClient: WebClient) {
-  fun dischargeToHospital(dischargeToHospitalDetails: DischargeToHospitalRequest) {
+  fun dischargeToHospital(dischargeToHospitalDetails: DischargeToHospitalRequest): DischargeToHospitalResponse? =
     prisonApiWithAuthWebClient
       .put()
       .uri("/offenders/${dischargeToHospitalDetails.offenderNo}/discharge-to-hospital")
@@ -21,7 +23,13 @@ class PrisonApiGateway(private val prisonApiWithAuthWebClient: WebClient) {
         )
       )
       .retrieve()
-      .bodyToMono<Any>()
+      .bodyToMono(DischargeToHospitalResponse::class.java)
       .block()
-  }
+
+  fun getAgencyLocationsByType(type: String): List<Agency> = prisonApiWithAuthWebClient
+    .get()
+    .uri("/agencies/type/$type")
+    .retrieve()
+    .bodyToMono(object : ParameterizedTypeReference<List<Agency>>() {})
+    .block()!!
 }

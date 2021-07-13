@@ -75,4 +75,89 @@ class PrisonApiMockServer : WireMockServer(8999) {
         )
     )
   }
+
+  fun stubAgencyLocationForPrisons() {
+    stubFor(
+      get(urlEqualTo("/api/agencies/type/INST"))
+        .willReturn(
+          aResponse()
+            .withHeader("Content-Type", "application/json")
+            .withStatus(200)
+            .withBody(
+              """
+              [
+               {
+                  "agencyId": "MRI",
+                  "description": "Manchester (HMP)",
+                  "longDescription": "HMP MANCHESTER",
+                  "agencyType": "INST",
+                  "active": true
+                },
+                {
+                  "agencyId": "MDI",
+                  "description": "Moorland (HMP & YOI)",
+                  "longDescription": "HMP & YOI Moorland Prison near Doncaster",
+                  "agencyType": "INST",
+                  "active": true
+                },
+                {
+                  "agencyId": "HDI",
+                  "description": "Hatfield (HMP & YOI)",
+                  "longDescription": "HMP & YOI HATFIELD",
+                  "agencyType": "INST",
+                  "active": true
+                }
+              ]
+              """.trimIndent()
+            )
+        )
+    )
+  }
+
+  fun stubAgencyLocationForHospitals() {
+    val response = """
+         [
+            {
+              "agencyId": "STANSD",
+              "description": "St Ann's (dorset)",
+              "longDescription": "St Ann's (Dorset)",
+              "agencyType": "HSHOSP",
+              "active": true
+            },
+            {
+              "agencyId": "BRADEN",
+              "description": "Branden Unit",
+              "longDescription": "Branden Unit",
+              "agencyType": "HSHOSP",
+              "active": true
+            },
+            {
+              "agencyId": "HAZLWD",
+              "description": "Hazelwood House",
+              "longDescription": "Hazelwood House",
+              "agencyType": "HSHOSP",
+              "active": true
+            }
+         ]
+    """.trimIndent()
+
+    stubFor(
+      get(urlEqualTo("/api/agencies/type/HSHOSP"))
+        .willReturn(
+          aResponse()
+            .withHeader("Content-Type", "application/json")
+            .withStatus(200)
+            .withBody(response)
+        )
+    )
+    stubFor(
+      get(urlEqualTo("/api/agencies/type/HOSPITAL"))
+        .willReturn(
+          aResponse()
+            .withHeader("Content-Type", "application/json")
+            .withStatus(200)
+            .withBody(response)
+        )
+    )
+  }
 }

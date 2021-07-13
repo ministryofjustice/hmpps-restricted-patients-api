@@ -11,11 +11,11 @@ data class RestrictedPatientDto(
   @ApiModelProperty(value = "Then NOMS Id of the restricted patient", example = "G1072GT")
   val prisonerNumber: String,
   @ApiModelProperty(value = "Previous location id", example = "MDI")
-  val fromLocationId: String,
+  val fromLocation: Agency?,
   @ApiModelProperty(value = "Hospital location code, this indicates the current location of a prisoner", example = "HAZLWD")
-  val hospitalLocationCode: String,
+  val hospitalLocation: Agency?,
   @ApiModelProperty(value = "Prison where the offender is supported by POM", example = "LEI")
-  val supportingPrisonId: String? = null,
+  val supportingPrison: Agency? = null,
   @ApiModelProperty(value = "Date and time the prisoner was discharged to hospital")
   val dischargeTime: LocalDateTime,
   @ApiModelProperty(value = "Useful comments")
@@ -26,4 +26,12 @@ data class RestrictedPatientDto(
   var createDateTime: LocalDateTime? = null,
   @ApiModelProperty(value = "The user id of the person who created the record")
   var createUserId: String? = null
+)
+
+data class Agency(
+  val agencyId: String,
+  val description: String?,
+  val longDescription: String?,
+  val agencyType: String,
+  val active: Boolean
 )

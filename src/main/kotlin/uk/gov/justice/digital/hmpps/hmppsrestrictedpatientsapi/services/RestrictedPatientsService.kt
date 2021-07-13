@@ -7,6 +7,7 @@ import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.entities.Re
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.enums.LegalStatus
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.exceptions.NoResultsReturnedException
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.request.DischargeToHospitalRequest
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.Agency
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.RestrictedPatientDto
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.repositories.RestrictedPatientsRepository
 import javax.persistence.EntityNotFoundException
@@ -31,7 +32,7 @@ class RestrictedPatientsService(
     if (!isCorrectLegalStatus(prisonerResult.legalStatus))
       throw ValidationException("Can not discharge prisoner with a legal status of ${prisonerResult.legalStatus}")
 
-    prisonApiGateway.dischargeToHospital(dischargeToHospital)
+    val response = prisonApiGateway.dischargeToHospital(dischargeToHospital)
 
     val restrictedPatient = RestrictedPatient(
       prisonerNumber = dischargeToHospital.offenderNo,
@@ -42,24 +43,42 @@ class RestrictedPatientsService(
       commentText = dischargeToHospital.commentText
     )
 
-    return transform(restrictedPatientsRepository.save(restrictedPatient))
+    return transform(
+      restrictedPatientsRepository.save(restrictedPatient),
+      response?.restrictivePatient?.supportingPrison,
+      response?.restrictivePatient?.dischargedHospital,
+      response?.restrictivePatient?.supportingPrison
+    )
   }
 
   fun getRestrictedPatient(prisonerNumber: String): RestrictedPatientDto {
     val restrictedPatient = restrictedPatientsRepository.findByPrisonerNumberAndActiveTrue(prisonerNumber)
       ?: throw EntityNotFoundException("No restricted patient record found for prison number $prisonerNumber")
 
-    return transform(restrictedPatient)
+    val agencies = prisonApiGateway.getAgencyLocationsByType("INST")
+    val hospitals =
+      prisonApiGateway.getAgencyLocationsByType("HOSPITAL") + prisonApiGateway.getAgencyLocationsByType("HSHOSP")
+
+    val prisonSentFrom = agencies.find { it.agencyId == restrictedPatient.fromLocationId }
+    val supportingPrison = agencies.find { it.agencyId == restrictedPatient.supportingPrisonId }
+    val hospitalSentTo = hospitals.find { it.agencyId == restrictedPatient.hospitalLocationCode }
+
+    return transform(restrictedPatient, prisonSentFrom, hospitalSentTo, supportingPrison)
   }
 
-  fun transform(restrictedPatient: RestrictedPatient): RestrictedPatientDto = RestrictedPatientDto(
+  fun transform(
+    restrictedPatient: RestrictedPatient,
+    fromAgency: Agency? = null,
+    toAgency: Agency? = null,
+    supportingPrisonAgency: Agency? = null
+  ): RestrictedPatientDto = RestrictedPatientDto(
     id = restrictedPatient.id!!,
     prisonerNumber = restrictedPatient.prisonerNumber,
-    fromLocationId = restrictedPatient.fromLocationId,
-    supportingPrisonId = restrictedPatient.supportingPrisonId,
+    fromLocation = fromAgency,
+    supportingPrison = supportingPrisonAgency,
     dischargeTime = restrictedPatient.dischargeTime,
     commentText = restrictedPatient.commentText,
-    hospitalLocationCode = restrictedPatient.hospitalLocationCode,
+    hospitalLocation = toAgency,
     active = restrictedPatient.active,
     createUserId = restrictedPatient.createUserId,
     createDateTime = restrictedPatient.createDateTime

@@ -1,10 +1,28 @@
 {
   "id": 1,
   "prisonerNumber": "A16345",
-  "fromLocationId": "MDI",
-  "hospitalLocationCode": "HAZLWD",
-  "supportingPrisonId": "MDI",
-  "dischargeTime": "2021-06-07T13:40:32.498",
+  "fromLocation": {
+    "agencyId": "MDI",
+    "description": "Moorland (HMP & YOI)",
+    "longDescription": "HMP & YOI Moorland Prison near Doncaster",
+    "agencyType": "INST",
+    "active": true
+  },
+  "hospitalLocation": {
+    "agencyId": "HAZLWD",
+    "description": "Hazelwood House",
+    "longDescription": "Hazelwood House",
+    "agencyType": "HSHOSP",
+    "active": true
+  },
+  "supportingPrison": {
+    "agencyId": "MDI",
+    "description": "Moorland (HMP & YOI)",
+    "longDescription": "HMP & YOI Moorland Prison near Doncaster",
+    "agencyType": "INST",
+    "active": true
+  },
   "commentText": "Prisoner was released on bail",
+  "active": true,
   "createUserId": "ITAG_USER"
 }

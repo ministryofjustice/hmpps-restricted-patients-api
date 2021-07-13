@@ -14,7 +14,10 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.anyString
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.dataBuilders.HOSPITAL
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.dataBuilders.PRISON
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.dataBuilders.makeDischargeRequest
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.dataBuilders.makeDischargeToHospitalResponse
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.dataBuilders.makeRestrictedPatient
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.PrisonApiGateway
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.PrisonerSearchApiGateway
@@ -102,7 +105,9 @@ class RestrictedPatientServiceTest {
 
       @Test
       fun `make a call to prison api to discharge a prisoner to hospital`() {
-        service.dischargeToHospital(makeDischargeRequest())
+        whenever(prisonApiGateway.dischargeToHospital(any())).thenReturn(makeDischargeToHospitalResponse())
+
+        val response = service.dischargeToHospital(makeDischargeRequest())
 
         verify(prisonApiGateway).dischargeToHospital(
           DischargeToHospitalRequest(
@@ -114,6 +119,20 @@ class RestrictedPatientServiceTest {
             supportingPrisonId = "MDI"
           )
         )
+
+        assertThat(response.fromLocation).isEqualTo(PRISON)
+        assertThat(response.supportingPrison).isEqualTo(PRISON)
+        assertThat(response.hospitalLocation).isEqualTo(HOSPITAL)
+
+        assertThat(response)
+          .extracting(
+            "id",
+            "prisonerNumber",
+            "dischargeTime",
+            "commentText",
+            "active",
+          )
+          .contains(1L, "A12345", LocalDateTime.parse("2020-10-10T20:00:01"), "test", true)
       }
 
       @Test
@@ -147,16 +166,21 @@ class RestrictedPatientServiceTest {
 
       @Test
       fun `by prison number`() {
-        whenever(restrictedPatientsRepository.findByPrisonerNumberAndActiveTrue(anyString())).thenReturn(makeRestrictedPatient())
+        whenever(prisonApiGateway.getAgencyLocationsByType("HSHOSP")).thenReturn(listOf(HOSPITAL))
+        whenever(prisonApiGateway.getAgencyLocationsByType("INST")).thenReturn(listOf(PRISON))
+        whenever(restrictedPatientsRepository.findByPrisonerNumberAndActiveTrue(anyString())).thenReturn(
+          makeRestrictedPatient()
+        )
 
         val restrictedPatient = service.getRestrictedPatient("A12345")
+
+        assertThat(restrictedPatient.fromLocation).isEqualTo(PRISON)
+        assertThat(restrictedPatient.supportingPrison).isEqualTo(PRISON)
+        assertThat(restrictedPatient.hospitalLocation).isEqualTo(HOSPITAL)
 
         assertThat(restrictedPatient).extracting(
           "id",
           "prisonerNumber",
-          "fromLocationId",
-          "hospitalLocationCode",
-          "supportingPrisonId",
           "dischargeTime",
           "commentText",
           "active",
@@ -165,9 +189,6 @@ class RestrictedPatientServiceTest {
         ).contains(
           1L,
           "A12345",
-          "MDI",
-          "HAZLWD",
-          "MDI",
           LocalDateTime.parse("2020-10-10T20:00:01"),
           "test",
           true,
