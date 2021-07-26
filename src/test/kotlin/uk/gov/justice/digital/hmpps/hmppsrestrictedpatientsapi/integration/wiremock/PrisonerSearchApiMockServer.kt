@@ -25,7 +25,7 @@ class PrisonerSearchApiMockServer : WireMockServer(8100) {
     )
   }
 
-  fun stubSearchByPrisonNumber() {
+  fun stubSearchByPrisonNumber(prisonerNumber: String) {
     stubFor(
       post(urlEqualTo("/prisoner-search/prisoner-numbers"))
         .willReturn(
@@ -36,7 +36,7 @@ class PrisonerSearchApiMockServer : WireMockServer(8100) {
               """
              [
                 {
-                  "prisonerNumber": "G1670VU",
+                  "prisonerNumber": "$prisonerNumber",
                   "pncNumber": "96/371915Q",
                   "pncNumberCanonicalShort": "96/371915Q",
                   "pncNumberCanonicalLong": "1996/371915Q",

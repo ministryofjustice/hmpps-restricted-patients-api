@@ -4,5 +4,6 @@ import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.enums.Legal
 
 data class PrisonerResult(
   val prisonerNumber: String,
+  val bookingId: Long,
   val legalStatus: LegalStatus
 )

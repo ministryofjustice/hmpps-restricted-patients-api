@@ -77,7 +77,7 @@ class RestrictedPatientRepositoryTest {
       )
     )
 
-    val entity = repository.findByPrisonerNumberAndActiveTrue("A12345")
+    val entity = repository.findByPrisonerNumber("A12345")
 
     assertThat(entity)
       .extracting(

@@ -4,15 +4,32 @@ import com.github.tomakehurst.wiremock.client.WireMock.equalToJson
 import com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor
 import com.github.tomakehurst.wiremock.client.WireMock.putRequestedFor
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
+import com.nhaarman.mockitokotlin2.whenever
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.test.web.reactive.server.WebTestClient
+import java.time.Clock
+import java.time.LocalDate
+import java.time.ZoneId
 
 class RestrictedPatientIntegrationTest : IntegrationTestBase() {
+
+  @MockBean
+  lateinit var clock: Clock
+
+  @BeforeEach
+  fun beforeEach() {
+    val fixedClock =
+      Clock.fixed(LocalDate.parse("2020-10-10").atStartOfDay(ZoneId.systemDefault()).toInstant(), ZoneId.systemDefault())
+    whenever(clock.instant()).thenReturn(fixedClock.instant())
+    whenever(clock.getZone()).thenReturn(fixedClock.getZone())
+  }
 
   @Test
   fun `discharge a prisoner to hospital`() {
     prisonApiMockServer.stubDischargeToPrison("A12345")
-    prisonerSearchApiMockServer.stubSearchByPrisonNumber()
+    prisonerSearchApiMockServer.stubSearchByPrisonNumber("A12345")
 
     dischargePrisonerWebClient(offenderNo = "A12345")
       .exchange()
@@ -55,10 +72,7 @@ class RestrictedPatientIntegrationTest : IntegrationTestBase() {
 
   @Test
   fun `returns restricted patient by prisoner number`() {
-    prisonApiMockServer.stubAgencyLocationForPrisons()
-    prisonApiMockServer.stubAgencyLocationForHospitals()
-    prisonApiMockServer.stubDischargeToPrison("A16345")
-    prisonerSearchApiMockServer.stubSearchByPrisonNumber()
+    stubDischargeToHospital("A16345")
 
     dischargePrisonerWebClient(offenderNo = "A16345")
       .exchange()
@@ -72,7 +86,36 @@ class RestrictedPatientIntegrationTest : IntegrationTestBase() {
       .json(loadResourceFile("restricted-patient-by-prison-number-response.json"))
   }
 
-  fun dischargePrisonerWebClient(
+  @Test
+  fun `remove restricted patient`() {
+    stubDischargeToHospital("A16345")
+    prisonApiMockServer.stubCreateExternalMovement()
+
+    dischargePrisonerWebClient(offenderNo = "A16345")
+      .exchange()
+      .expectStatus().isCreated
+
+    webTestClient.delete().uri("/restricted-patient/prison-number/A16345")
+      .headers(setHeaders())
+      .exchange()
+      .expectStatus().is2xxSuccessful
+
+    prisonApiMockServer.verify(
+      postRequestedFor(urlEqualTo("/api/movements"))
+        .withRequestBody(
+          equalToJson(loadResourceFile("create-external-movement-request.json"))
+        )
+    )
+  }
+
+  private fun stubDischargeToHospital(prisonerNumber: String) {
+    prisonApiMockServer.stubAgencyLocationForPrisons()
+    prisonApiMockServer.stubAgencyLocationForHospitals()
+    prisonApiMockServer.stubDischargeToPrison(prisonerNumber)
+    prisonerSearchApiMockServer.stubSearchByPrisonNumber(prisonerNumber)
+  }
+
+  private fun dischargePrisonerWebClient(
     offenderNo: String,
     commentText: String = "Prisoner was released on bail",
     dischargeTime: String = "2021-06-07T13:40:32.498Z",
