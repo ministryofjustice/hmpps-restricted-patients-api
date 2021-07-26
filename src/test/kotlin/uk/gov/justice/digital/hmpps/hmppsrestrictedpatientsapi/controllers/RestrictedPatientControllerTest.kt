@@ -130,6 +130,20 @@ class RestrictedPatientControllerTest : ControllerTestBase() {
     }
   }
 
+  @Nested
+  @WithMockUser(username = "ITAG_USER")
+  inner class RemoveRestrictedPatients {
+    @Test
+    fun `remove restricted patient from the service`() {
+      mockMvc
+        .perform(
+          MockMvcRequestBuilders.delete("/restricted-patient/prison-number/A12345")
+        ).andExpect(MockMvcResultMatchers.status().is2xxSuccessful)
+
+      verify(restrictedPatientsService).removeRestrictedPatient("A12345")
+    }
+  }
+
   private fun makeDischargeBody() = mapOf(
     "offenderNo" to "A12345",
     "commentText" to "test",

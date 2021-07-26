@@ -1,6 +1,7 @@
 package uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.controllers
 
 import org.springframework.http.HttpStatus
+import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -13,7 +14,6 @@ import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services.Restrict
 
 @RestController
 class RestrictedPatentsController(private val restrictedPatientsService: RestrictedPatientsService) {
-
   @PostMapping(value = ["/discharge-to-hospital"])
   @ResponseStatus(code = HttpStatus.CREATED)
   fun dischargeToHospital(@RequestBody dischargeToHospital: DischargeToHospitalRequest): RestrictedPatientDto =
@@ -22,4 +22,8 @@ class RestrictedPatentsController(private val restrictedPatientsService: Restric
   @GetMapping(value = ["/restricted-patient/prison-number/{prison-number}"])
   fun getRestrictedPatientByPrisonNumber(@PathVariable(name = "prison-number") prisonNumber: String): RestrictedPatientDto =
     restrictedPatientsService.getRestrictedPatient(prisonNumber)
+
+  @DeleteMapping(value = ["/restricted-patient/prison-number/{prison-number}"])
+  fun removeRestrictedPatient(@PathVariable(name = "prison-number") prisonNumber: String) =
+    restrictedPatientsService.removeRestrictedPatient(prisonNumber)
 }

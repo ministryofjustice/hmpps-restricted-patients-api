@@ -4,5 +4,5 @@ import org.springframework.data.repository.CrudRepository
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.entities.RestrictedPatient
 
 interface RestrictedPatientsRepository : CrudRepository<RestrictedPatient, Long> {
-  fun findByPrisonerNumberAndActiveTrue(prisonerNumber: String): RestrictedPatient?
+  fun findByPrisonerNumber(prisonerNumber: String): RestrictedPatient?
 }

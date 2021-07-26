@@ -19,8 +19,7 @@ class RestrictedPatient(
   val hospitalLocationCode: String,
   val supportingPrisonId: String? = null,
   val dischargeTime: LocalDateTime,
-  val commentText: String? = null,
-  val active: Boolean? = true
+  val commentText: String? = null
 ) : BaseEntity(id) {
   @CreatedDate
   @Column(name = "CREATE_DATETIME", nullable = false)

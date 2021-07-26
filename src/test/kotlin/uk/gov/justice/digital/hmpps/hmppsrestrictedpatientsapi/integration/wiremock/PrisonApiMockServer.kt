@@ -3,6 +3,7 @@ package uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.integration.wire
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock.aResponse
 import com.github.tomakehurst.wiremock.client.WireMock.get
+import com.github.tomakehurst.wiremock.client.WireMock.post
 import com.github.tomakehurst.wiremock.client.WireMock.put
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 
@@ -157,6 +158,17 @@ class PrisonApiMockServer : WireMockServer(8999) {
             .withHeader("Content-Type", "application/json")
             .withStatus(200)
             .withBody(response)
+        )
+    )
+  }
+
+  fun stubCreateExternalMovement() {
+    stubFor(
+      post(urlEqualTo("/api/movements"))
+        .willReturn(
+          aResponse()
+            .withHeader("Content-Type", "application/json")
+            .withStatus(200)
         )
     )
   }
