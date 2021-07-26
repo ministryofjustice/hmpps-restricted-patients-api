@@ -1,7 +1,11 @@
 package uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.service
 
 import com.microsoft.applicationinsights.TelemetryClient
-import com.nhaarman.mockitokotlin2.*
+import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.never
+import com.nhaarman.mockitokotlin2.verify
+import com.nhaarman.mockitokotlin2.whenever
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
@@ -11,7 +15,12 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.anyString
-import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.dataBuilders.*
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.dataBuilders.HOSPITAL
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.dataBuilders.PRISON
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.dataBuilders.makeDischargeRequest
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.dataBuilders.makeDischargeToHospitalResponse
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.dataBuilders.makePrisonerResult
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.dataBuilders.makeRestrictedPatient
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.PrisonApiGateway
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.PrisonerSearchApiGateway
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.entities.RestrictedPatient
@@ -54,7 +63,6 @@ class RestrictedPatientServiceTest {
       clock
     )
   }
-
 
   @Nested
   inner class RemovesRestrictedPatient {
@@ -99,7 +107,6 @@ class RestrictedPatientServiceTest {
         makeRestrictedPatient()
       )
       whenever(prisonerSearchApiGateway.searchByPrisonNumber(anyString())).thenReturn(emptyList())
-
 
       val exception = Assertions.assertThrows(NoResultsReturnedException::class.java) {
         service.removeRestrictedPatient("A12345")
@@ -167,7 +174,8 @@ class RestrictedPatientServiceTest {
           "hospitalLocationCode" to "HAZLWD",
           "supportingPrisonId" to "MDI",
           "dischargeTime" to LocalDateTime.parse("2020-10-10T20:00:01").toString(),
-        ), null
+        ),
+        null
       )
     }
   }

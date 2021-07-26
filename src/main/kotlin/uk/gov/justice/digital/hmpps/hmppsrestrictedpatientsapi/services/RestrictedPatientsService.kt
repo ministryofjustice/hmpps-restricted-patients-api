@@ -103,7 +103,8 @@ class RestrictedPatientsService(
         "hospitalLocationCode" to restrictedPatient.hospitalLocationCode,
         "supportingPrisonId" to restrictedPatient.supportingPrisonId,
         "dischargeTime" to restrictedPatient.dischargeTime.toString(),
-      ), null
+      ),
+      null
     )
   }
 

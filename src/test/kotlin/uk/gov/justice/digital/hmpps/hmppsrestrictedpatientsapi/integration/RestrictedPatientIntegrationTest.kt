@@ -106,6 +106,11 @@ class RestrictedPatientIntegrationTest : IntegrationTestBase() {
           equalToJson(loadResourceFile("create-external-movement-request.json"))
         )
     )
+
+    webTestClient.get().uri("/restricted-patient/prison-number/A16345")
+      .headers(setHeaders())
+      .exchange()
+      .expectStatus().isNotFound
   }
 
   private fun stubDischargeToHospital(prisonerNumber: String) {

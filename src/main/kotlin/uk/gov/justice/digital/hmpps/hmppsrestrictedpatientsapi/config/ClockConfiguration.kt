@@ -9,4 +9,3 @@ class ClockConfiguration {
   @Bean
   fun clock(): Clock? = Clock.systemDefaultZone()
 }
-
