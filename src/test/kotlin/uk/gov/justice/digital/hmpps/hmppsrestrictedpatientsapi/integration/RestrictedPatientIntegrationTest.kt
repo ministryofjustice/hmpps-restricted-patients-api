@@ -95,6 +95,11 @@ class RestrictedPatientIntegrationTest : IntegrationTestBase() {
       .exchange()
       .expectStatus().isCreated
 
+    webTestClient.get().uri("/restricted-patient/prison-number/A16345")
+      .headers(setHeaders())
+      .exchange()
+      .expectStatus().is2xxSuccessful
+
     webTestClient.delete().uri("/restricted-patient/prison-number/A16345")
       .headers(setHeaders())
       .exchange()
