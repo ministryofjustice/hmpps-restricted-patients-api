@@ -14,7 +14,6 @@ import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services.Restrict
 
 @RestController
 class RestrictedPatentsController(private val restrictedPatientsService: RestrictedPatientsService) {
-
   @PostMapping(value = ["/discharge-to-hospital"])
   @ResponseStatus(code = HttpStatus.CREATED)
   fun dischargeToHospital(@RequestBody dischargeToHospital: DischargeToHospitalRequest): RestrictedPatientDto =
@@ -25,7 +24,6 @@ class RestrictedPatentsController(private val restrictedPatientsService: Restric
     restrictedPatientsService.getRestrictedPatient(prisonNumber)
 
   @DeleteMapping(value = ["/restricted-patient/prison-number/{prison-number}"])
-  fun removeRestrictedPatient(@PathVariable(name = "prison-number") prisonNumber: String) {
+  fun removeRestrictedPatient(@PathVariable(name = "prison-number") prisonNumber: String) =
     restrictedPatientsService.removeRestrictedPatient(prisonNumber)
-  }
 }
