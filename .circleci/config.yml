@@ -34,6 +34,7 @@ jobs:
     executor: integration-tests
     steps:
       - checkout
+      - hmpps/install_aws_cli
       - restore_cache:
           keys:
             - gradle-{{ checksum "build.gradle.kts" }}
@@ -42,6 +43,14 @@ jobs:
           name: Wait for Postgres to be ready
           command: ./postgres-check.sh
       - run:
+          name: Wait for SQS to be ready
+          command: curl -4 --connect-timeout 30 --retry-connrefused --retry 20 --retry-delay 5 http://localhost:4566
+      - run:
+          name: Set up es domain
+          command: src/test/resources/localstack/setup-es.sh
+      - run:
+          environment:
+            - AWS_PROVIDER: localstack
           command: ./gradlew -Dorg.gradle.jvmargs="--illegal-access=permit" -Dkotlin.daemon.jvm.options="--illegal-access=permit" check
       - save_cache:
           paths:
