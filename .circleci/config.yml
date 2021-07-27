@@ -54,7 +54,7 @@ jobs:
           command: src/test/resources/localstack/setup-queue.sh
       - run:
           environment:
-            - AWS_PROVIDER: localstack
+            - SPRING_PROFILES_ACTIVE: test
           command: ./gradlew -Dorg.gradle.jvmargs="--illegal-access=permit" -Dkotlin.daemon.jvm.options="--illegal-access=permit" check
       - save_cache:
           paths:
