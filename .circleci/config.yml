@@ -25,7 +25,7 @@ executors:
           - POSTGRES_USER=test
           - POSTGRES_DB=restricted-patients-api-db
     environment:
-      _JAVA_OPTIONS: -Xmx256m -XX:ParallelGCThreads=2 -XX:ConcGCThreads=2 -Djava.util.concurrent.ForkJoinPool.common.parallelism=2 -Dorg.gradle.daemon=false -Dkotlin.compiler.execution.strategy=in-process -Dorg.gradle.workers.max=1
+      _JAVA_OPTIONS: -Xmx256m -XX:ParallelGCThreads=2 -XX:ConcGCThreads=2 -XX:ParallelGCThreads=2 -Djava.util.concurrent.ForkJoinPool.common.parallelism=2 -Dorg.gradle.daemon=false -Dorg.gradle.jvmargs=-XX:+UseContainerSupport -Dkotlin.compiler.execution.strategy=in-process -Dorg.gradle.workers.max=2
     working_directory: ~/app
 
 
