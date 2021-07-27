@@ -10,16 +10,12 @@ executors:
       - image: cimg/openjdk:16.0
       - image: localstack/localstack-full:0.12.10
         environment:
-          - SERVICES=sqs,sns
-          - ES_PORT_EXTERNAL=4571
           - DEBUG=${DEBUG- }
+          - SERVICES=sqs,sns
           - DATA_DIR=/tmp/localstack/data
           - DOCKER_HOST=unix:///var/run/docker.sock
-          - LAMBDA_EXECUTOR=${LAMBDA_EXECUTOR- }
-          - AWS_EXECUTION_ENV=True
           - DEFAULT_REGION=eu-west-2
-          - TMPDIR=/private
-      - image: circleci/postgres:13.2
+       - image: circleci/postgres:13.2
         environment:
           - POSTGRES_PASSWORD=test
           - POSTGRES_USER=test
