@@ -1,16 +1,25 @@
 package uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.dataBuilders
 
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.entities.RestrictedPatient
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.enums.LegalStatus
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.request.DischargeToHospitalRequest
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.Agency
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.DischargeToHospitalResponse
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.PrisonerResult
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.RestrictedPatientDto
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.RestrictivePatient
 import java.time.LocalDate
 import java.time.LocalDateTime
 
-val PRISON = Agency(agencyId = "MDI", agencyType = "INST", active = true, description = "Moorland", longDescription = "Moorland")
-val HOSPITAL = Agency(agencyId = "HAZLWD", agencyType = "HSHOSP", active = true, description = "Hazelwood House", longDescription = "Hazelwood House")
+val PRISON =
+  Agency(agencyId = "MDI", agencyType = "INST", active = true, description = "Moorland", longDescription = "Moorland")
+val HOSPITAL = Agency(
+  agencyId = "HAZLWD",
+  agencyType = "HSHOSP",
+  active = true,
+  description = "Hazelwood House",
+  longDescription = "Hazelwood House"
+)
 
 fun makeDischargeRequest(
   offenderNo: String = "A12345",
@@ -34,7 +43,6 @@ fun makeRestrictedPatientDto(
   supportingPrisonId: Agency = PRISON,
   prisonerNumber: String = "A12345",
   hospitalLocationCode: Agency = HOSPITAL,
-  active: Boolean = true,
   commentText: String = "test",
   dischargeTime: LocalDateTime = LocalDateTime.parse("2020-10-10T20:00:01"),
   createDateTime: LocalDateTime = LocalDateTime.parse("2020-10-10T20:00:01"),
@@ -47,7 +55,6 @@ fun makeRestrictedPatientDto(
   supportingPrisonId,
   dischargeTime,
   commentText,
-  active,
   createDateTime,
   createUserId
 )
@@ -58,7 +65,6 @@ fun makeRestrictedPatient(
   supportingPrisonId: String = "MDI",
   prisonerNumber: String = "A12345",
   hospitalLocationCode: String = "HAZLWD",
-  active: Boolean = true,
   commentText: String = "test",
   dischargeTime: LocalDateTime = LocalDateTime.parse("2020-10-10T20:00:01"),
   createDateTime: LocalDateTime = LocalDateTime.parse("2020-10-10T20:00:01"),
@@ -71,15 +77,17 @@ fun makeRestrictedPatient(
     hospitalLocationCode,
     supportingPrisonId,
     dischargeTime,
-    commentText,
-    active
+    commentText
   )
   patient.createDateTime = createDateTime
   patient.createUserId = createUserId
   return patient
 }
 
-fun makeDischargeToHospitalResponse(dischargeDate: LocalDate = LocalDate.now(), dischargeDetails: String = "test"): DischargeToHospitalResponse = DischargeToHospitalResponse(
+fun makeDischargeToHospitalResponse(
+  dischargeDate: LocalDate = LocalDate.now(),
+  dischargeDetails: String = "test"
+): DischargeToHospitalResponse = DischargeToHospitalResponse(
   restrictivePatient = RestrictivePatient(
     supportingPrison = PRISON,
     dischargedHospital = HOSPITAL,
@@ -87,3 +95,9 @@ fun makeDischargeToHospitalResponse(dischargeDate: LocalDate = LocalDate.now(), 
     dischargeDetails = dischargeDetails
   )
 )
+
+fun makePrisonerResult(
+  prisonerNumber: String = "A12345",
+  legalStatus: LegalStatus = LegalStatus.SENTENCED,
+  bookingId: Long = 1L
+): PrisonerResult = PrisonerResult(prisonerNumber = prisonerNumber, legalStatus = legalStatus, bookingId = bookingId)

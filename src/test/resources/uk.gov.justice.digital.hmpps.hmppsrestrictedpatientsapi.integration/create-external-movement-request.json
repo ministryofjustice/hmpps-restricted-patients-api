@@ -1,0 +1,9 @@
+{
+  "bookingId" : 1138058,
+  "fromAgencyId" : "HAZLWD",
+  "toAgencyId" : "OUT",
+  "movementTime" : "2020-10-10T00:00:00",
+  "movementType" : "REL",
+  "movementReason" : "CR",
+  "directionCode" : "OUT"
+}

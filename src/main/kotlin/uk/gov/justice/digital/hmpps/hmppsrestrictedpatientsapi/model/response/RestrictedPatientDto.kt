@@ -20,8 +20,6 @@ data class RestrictedPatientDto(
   val dischargeTime: LocalDateTime,
   @ApiModelProperty(value = "Useful comments")
   val commentText: String? = null,
-  @ApiModelProperty(value = "Indicates whether the prisoner is still a restricted patient")
-  val active: Boolean? = true,
   @ApiModelProperty(value = "Date time the record was created")
   var createDateTime: LocalDateTime? = null,
   @ApiModelProperty(value = "The user id of the person who created the record")
