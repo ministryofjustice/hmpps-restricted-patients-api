@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 set -e
+export TERM=ansi
+export AWS_DEFAULT_REGION=eu-west-2
+
 aws --endpoint-url=http://localhost:4566 sns create-topic --name offender_events
 aws --endpoint-url=http://localhost:4566 sqs create-queue --queue-name rp_api_dlq
 aws --endpoint-url=http://localhost:4566 sqs create-queue --queue-name rp_api_queue
