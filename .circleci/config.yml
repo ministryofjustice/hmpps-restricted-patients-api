@@ -9,8 +9,10 @@ executors:
     docker:
       - image: cimg/openjdk:16.0
       - image: localstack/localstack-full:0.12.10
+        ports:
+          - "4566-4597:4566-4597"
         environment:
-          - SERVICES=sqs,sns,es
+          - SERVICES=sqs,sns
           - ES_PORT_EXTERNAL=4571
           - DEBUG=${DEBUG- }
           - DATA_DIR=/tmp/localstack/data
