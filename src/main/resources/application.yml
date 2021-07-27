@@ -64,6 +64,9 @@ management:
       cache:
         time-to-live: 2000ms
 
+offender-events-sqs:
+  provider: aws
+  endpoint.region: eu-west-2
 
 api:
   health-timeout-ms: 1000

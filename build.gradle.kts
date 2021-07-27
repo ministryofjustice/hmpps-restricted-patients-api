@@ -18,6 +18,9 @@ dependencies {
 
   implementation("io.springfox:springfox-boot-starter:3.0.0")
 
+  implementation("org.springframework:spring-jms")
+  implementation("com.amazonaws:amazon-sqs-java-messaging-lib:1.0.8")
+
   runtimeOnly("com.h2database:h2")
   runtimeOnly("org.flywaydb:flyway-core")
   runtimeOnly("org.postgresql:postgresql")
