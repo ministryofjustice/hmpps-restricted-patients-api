@@ -52,9 +52,13 @@ jobs:
       - run:
           name: Set up es domain
           command: src/test/resources/localstack/setup-queue.sh
+      - restore_cache:
+          keys:
+            - gradle-{{ checksum "build.gradle.kts" }}
+            - gradle-
       - run:
           environment:
-            - SPRING_PROFILES_ACTIVE: test
+            - AWS_PROVIDER: localstack
           command: ./gradlew -Dorg.gradle.jvmargs="--illegal-access=permit" -Dkotlin.daemon.jvm.options="--illegal-access=permit" check
       - save_cache:
           paths:
