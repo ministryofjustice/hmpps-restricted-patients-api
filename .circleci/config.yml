@@ -8,9 +8,10 @@ executors:
   integration-tests:
     docker:
       - image: cimg/openjdk:16.0
-      - image: localstack/localstack-full:0.12.10
+      - image: localstack/localstack:0.12.9.1
         environment:
           - DEBUG=${DEBUG- }
+          - DATA_DIR=/tmp/localstack/data
           - SERVICES=sqs,sns
           - DATA_DIR=/tmp/localstack/data
           - DOCKER_HOST=unix:///var/run/docker.sock
@@ -39,19 +40,15 @@ jobs:
           background: true
       - checkout
       - hmpps/install_aws_cli
-      - restore_cache:
-          keys:
-            - gradle-{{ checksum "build.gradle.kts" }}
-            - gradle-
-      - run:
-          name: Wait for Postgres to be ready
-          command: ./postgres-check.sh
       - run:
           name: Wait for SQS to be ready
           command: curl -4 --connect-timeout 30 --retry-connrefused --retry 20 --retry-delay 5 http://localhost:4566
       - run:
           name: Set up es domain
           command: src/test/resources/localstack/setup-queue.sh
+      - run:
+          name: Wait for Postgres to be ready
+          command: ./postgres-check.sh
       - restore_cache:
           keys:
             - gradle-{{ checksum "build.gradle.kts" }}
