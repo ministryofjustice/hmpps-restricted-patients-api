@@ -8,8 +8,6 @@ import com.amazonaws.auth.BasicAWSCredentials
 import com.amazonaws.client.builder.AwsClientBuilder
 import com.amazonaws.services.sqs.AmazonSQS
 import com.amazonaws.services.sqs.AmazonSQSClientBuilder
-import com.amazonaws.services.sqs.model.CreateQueueRequest
-import com.amazonaws.services.sqs.model.QueueAttributeName
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
@@ -93,19 +91,6 @@ class OffenderEventsJmsConfig {
   @Suppress("SpringJavaInjectionPointsAutowiringInspection")
   fun queueUrl(
     @Autowired awsSqsClientForOffenderEvents: AmazonSQS,
-    @Value("\${offender-events-sqs.queue.name}") queueName: String,
-    @Value("\${offender-events-sqs.dlq.name}") dlqName: String
-  ): String {
-    val result = awsSqsClientForOffenderEvents.createQueue(CreateQueueRequest(dlqName))
-    val dlqArn = awsSqsClientForOffenderEvents.getQueueAttributes(result.queueUrl, listOf(QueueAttributeName.QueueArn.toString()))
-    awsSqsClientForOffenderEvents.createQueue(
-      CreateQueueRequest(queueName).withAttributes(
-        mapOf(
-          QueueAttributeName.RedrivePolicy.toString() to
-            """{"deadLetterTargetArn":"${dlqArn.attributes["QueueArn"]}","maxReceiveCount":"5"}"""
-        )
-      )
-    )
-    return awsSqsClientForOffenderEvents.getQueueUrl(queueName).queueUrl
-  }
+    @Value("\${offender-events-sqs.queue.name}") queueName: String
+  ): String = awsSqsClientForOffenderEvents.getQueueUrl(queueName).queueUrl
 }
