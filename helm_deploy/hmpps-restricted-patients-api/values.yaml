@@ -34,11 +34,11 @@ generic-service:
     restricted-patients-sub-queue-for-offender-events-instance-output:
       OFFENDER_EVENTS_SQS_AWS_ACCESS_KEY_ID: "access_key_id"
       OFFENDER_EVENTS_SQS_AWS_SECRET_ACCESS_KEY: "secret_access_key"
-      OFFENDER_EVENTS_SQS_AWS_QUEUE_NAME: "sqs_pos_name"
+      OFFENDER_EVENTS_SQS_QUEUE_NAME: "sqs_pos_name"
     restricted-patients-sub-queue-for-offender-events-dl-instance-output:
       OFFENDER_EVENTS_SQS_AWS_DLQ_ACCESS_KEY_ID: "access_key_id"
       OFFENDER_EVENTS_SQS_AWS_DLQ_SECRET_ACCESS_KEY: "secret_access_key"
-      OFFENDER_EVENTS_SQS_AWS_DLQ_NAME: "sqs_pos_name"
+      OFFENDER_EVENTS_SQS_DLQ_NAME: "sqs_pos_name"
 
   allowlist:
     office: "217.33.148.210/32"

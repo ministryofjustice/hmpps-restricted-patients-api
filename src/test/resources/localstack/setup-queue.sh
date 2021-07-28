@@ -12,4 +12,6 @@ aws --endpoint-url=http://localhost:4566 sns subscribe \
     --topic-arn arn:aws:sns:eu-west-2:000000000000:offender_events \
     --protocol sqs \
     --notification-endpoint http://localhost:4566/queue/rp_api_queue \
-    --attributes '{"FilterPolicy":"{\"eventType\":[\"XTERNAL_MOVEMENT_RECORD-INSERTED\"]}"}'
+    --attributes '{"FilterPolicy":"{\"eventType\":[\"EXTERNAL_MOVEMENT_RECORD-INSERTED\"]}"}'
+
+
