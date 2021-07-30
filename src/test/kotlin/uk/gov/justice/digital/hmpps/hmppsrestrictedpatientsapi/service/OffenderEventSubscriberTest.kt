@@ -1,10 +1,11 @@
 package uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.service
 
+import com.google.gson.GsonBuilder
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.config.GsonConfig
+import org.springframework.boot.autoconfigure.gson.GsonAutoConfiguration
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.dataBuilders.makeExternalMovementEventAsJson
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services.ExternalPrisonerMovementMessage
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services.OffenderEventSubscriber
@@ -17,7 +18,7 @@ class OffenderEventSubscriberTest {
 
   @BeforeEach
   fun beforeEach() {
-    offenderEventSubscriber = OffenderEventSubscriber(GsonConfig().gson(), restrictedPatientCleanup)
+    offenderEventSubscriber = OffenderEventSubscriber(GsonAutoConfiguration().gson(GsonBuilder()), restrictedPatientCleanup)
   }
 
   @Test

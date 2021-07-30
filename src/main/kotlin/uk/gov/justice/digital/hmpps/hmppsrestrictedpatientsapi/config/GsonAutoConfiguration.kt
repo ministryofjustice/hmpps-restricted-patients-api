@@ -8,23 +8,30 @@ import com.google.gson.JsonElement
 import com.google.gson.JsonPrimitive
 import com.google.gson.JsonSerializationContext
 import com.google.gson.JsonSerializer
-import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.Configuration
 import java.lang.reflect.Type
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-import java.util.Locale
+import java.util.*
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
+import org.springframework.boot.autoconfigure.gson.GsonProperties
+import org.springframework.boot.context.properties.EnableConfigurationProperties
+import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Configuration
 
-@Configuration
-class GsonConfig() {
+
+@Configuration(proxyBeanMethods = false)
+@ConditionalOnClass(Gson::class)
+@EnableConfigurationProperties(GsonProperties::class)
+class GsonAutoConfiguration {
   @Bean
-  fun gson(): Gson {
-    return GsonBuilder().setPrettyPrinting()
-      .registerTypeAdapter(LocalDate::class.java, LocalDateAdapter())
-      .registerTypeAdapter(LocalDateTime::class.java, LocalDateTimeAdapter())
-      .create()
-  }
+  @ConditionalOnMissingBean
+  fun gson(gsonBuilder: GsonBuilder): Gson = gsonBuilder
+    .setPrettyPrinting()
+    .registerTypeAdapter(LocalDate::class.java, LocalDateAdapter())
+    .registerTypeAdapter(LocalDateTime::class.java, LocalDateTimeAdapter())
+    .create()
 
   internal class LocalDateAdapter : JsonSerializer<LocalDate?>, JsonDeserializer<LocalDate?> {
     override fun serialize(src: LocalDate?, typeOfSrc: Type?, context: JsonSerializationContext?): JsonElement {
