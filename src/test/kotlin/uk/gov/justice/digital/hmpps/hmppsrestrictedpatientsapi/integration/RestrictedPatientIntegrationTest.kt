@@ -6,12 +6,12 @@ import com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor
 import com.github.tomakehurst.wiremock.client.WireMock.putRequestedFor
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 import com.nhaarman.mockitokotlin2.whenever
-import java.time.Clock
-import java.time.LocalDate
-import java.time.ZoneId
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.mock.mockito.MockBean
+import java.time.Clock
+import java.time.LocalDate
+import java.time.ZoneId
 
 class RestrictedPatientIntegrationTest : IntegrationTestBase() {
 
@@ -61,7 +61,6 @@ class RestrictedPatientIntegrationTest : IntegrationTestBase() {
           equalToJson(loadResourceFile("discharge-to-hospital-request.json"))
         ).withHeader("Authorization", WireMock.containing("Bearer"))
     )
-
 
     prisonerSearchApiMockServer.verify(
       postRequestedFor(urlEqualTo("/prisoner-search/prisoner-numbers"))
