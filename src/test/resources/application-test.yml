@@ -5,9 +5,9 @@ management.endpoint:
   health.cache.time-to-live: 0
   info.cache.time-to-live: 0
 
-
 prison.api.endpoint.url: http://localhost:8999
 prisoner.search.api.endpoint.url: http://localhost:8100
+oauth.endpoint.url: http://localhost:8090/auth
 
 spring:
   datasource:

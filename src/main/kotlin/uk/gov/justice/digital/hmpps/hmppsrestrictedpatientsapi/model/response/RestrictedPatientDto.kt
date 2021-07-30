@@ -28,8 +28,8 @@ data class RestrictedPatientDto(
 
 data class Agency(
   val agencyId: String,
-  val description: String?,
-  val longDescription: String?,
+  val description: String? = null,
+  val longDescription: String? = null,
   val agencyType: String,
   val active: Boolean
 )

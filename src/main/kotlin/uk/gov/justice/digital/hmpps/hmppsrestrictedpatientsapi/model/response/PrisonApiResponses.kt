@@ -12,3 +12,5 @@ data class RestrictivePatient(
   val dischargeDate: LocalDate? = null,
   val dischargeDetails: String? = null
 )
+
+data class OffenderBookingResponse(val bookingId: Long, val offenderNo: String)

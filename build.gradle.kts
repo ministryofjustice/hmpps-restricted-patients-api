@@ -15,11 +15,11 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
   implementation("org.springframework.boot:spring-boot-starter-data-jpa")
   implementation("org.apache.commons:commons-text:1.9")
-
   implementation("io.springfox:springfox-boot-starter:3.0.0")
-
   implementation("org.springframework:spring-jms")
   implementation("com.amazonaws:amazon-sqs-java-messaging-lib:1.0.8")
+  implementation("com.google.code.gson:gson:2.8.6")
+  implementation("org.awaitility:awaitility-kotlin:4.1.0")
 
   runtimeOnly("com.h2database:h2")
   runtimeOnly("org.flywaydb:flyway-core")
