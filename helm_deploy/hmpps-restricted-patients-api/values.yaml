@@ -31,8 +31,8 @@ generic-service:
   namespace_secrets:
     hmpps-restricted-patients-api:
       APPINSIGHTS_INSTRUMENTATIONKEY: "APPINSIGHTS_INSTRUMENTATIONKEY"
-      RESTRICTED_PATIENTS_API_CLIENT_ID: "client_id"
-      RESTRICTED_PATIENTS_API_CLIENT_SECRET: "client_secret"
+      RESTRICTED_PATIENTS_API_CLIENT_ID: "RESTRICTED_PATIENTS_API_CLIENT_ID"
+      RESTRICTED_PATIENTS_API_CLIENT_SECRET: "RESTRICTED_PATIENTS_API_CLIENT_SECRET"
     restricted-patients-sub-queue-for-offender-events-instance-output:
       OFFENDER_EVENTS_SQS_AWS_ACCESS_KEY_ID: "access_key_id"
       OFFENDER_EVENTS_SQS_AWS_SECRET_ACCESS_KEY: "secret_access_key"
