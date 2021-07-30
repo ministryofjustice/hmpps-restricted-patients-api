@@ -5,13 +5,12 @@ import com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor
 import com.github.tomakehurst.wiremock.client.WireMock.putRequestedFor
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 import com.nhaarman.mockitokotlin2.whenever
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
-import org.springframework.boot.test.mock.mockito.MockBean
-import org.springframework.test.web.reactive.server.WebTestClient
 import java.time.Clock
 import java.time.LocalDate
 import java.time.ZoneId
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.springframework.boot.test.mock.mockito.MockBean
 
 class RestrictedPatientIntegrationTest : IntegrationTestBase() {
 
@@ -21,17 +20,17 @@ class RestrictedPatientIntegrationTest : IntegrationTestBase() {
   @BeforeEach
   fun beforeEach() {
     val fixedClock =
-      Clock.fixed(LocalDate.parse("2020-10-10").atStartOfDay(ZoneId.systemDefault()).toInstant(), ZoneId.systemDefault())
+      Clock.fixed(
+        LocalDate.parse("2020-10-10").atStartOfDay(ZoneId.systemDefault()).toInstant(),
+        ZoneId.systemDefault()
+      )
     whenever(clock.instant()).thenReturn(fixedClock.instant())
     whenever(clock.getZone()).thenReturn(fixedClock.getZone())
   }
 
   @Test
   fun `discharge a prisoner to hospital`() {
-    prisonApiMockServer.stubDischargeToPrison("A12345")
-    prisonerSearchApiMockServer.stubSearchByPrisonNumber("A12345")
-
-    dischargePrisonerWebClient(offenderNo = "A12345")
+    dischargePrisonerWebClient(prisonerNumber = "A12345")
       .exchange()
       .expectStatus().isCreated
       .expectBody()
@@ -72,9 +71,7 @@ class RestrictedPatientIntegrationTest : IntegrationTestBase() {
 
   @Test
   fun `returns restricted patient by prisoner number`() {
-    stubDischargeToHospital("A16345")
-
-    dischargePrisonerWebClient(offenderNo = "A16345")
+    dischargePrisonerWebClient(prisonerNumber = "A16345")
       .exchange()
       .expectStatus().isCreated
 
@@ -88,19 +85,17 @@ class RestrictedPatientIntegrationTest : IntegrationTestBase() {
 
   @Test
   fun `remove restricted patient`() {
-    stubDischargeToHospital("A16345")
     prisonApiMockServer.stubCreateExternalMovement()
 
-    dischargePrisonerWebClient(offenderNo = "A16345")
+    dischargePrisonerWebClient(prisonerNumber = "A12345")
       .exchange()
       .expectStatus().isCreated
 
-    webTestClient.get().uri("/restricted-patient/prison-number/A16345")
-      .headers(setHeaders())
+    getRestrictedPatient(prisonerNumber = "A12345")
       .exchange()
       .expectStatus().is2xxSuccessful
 
-    webTestClient.delete().uri("/restricted-patient/prison-number/A16345")
+    webTestClient.delete().uri("/restricted-patient/prison-number/A12345")
       .headers(setHeaders())
       .exchange()
       .expectStatus().is2xxSuccessful
@@ -112,39 +107,8 @@ class RestrictedPatientIntegrationTest : IntegrationTestBase() {
         )
     )
 
-    webTestClient.get().uri("/restricted-patient/prison-number/A16345")
-      .headers(setHeaders())
+    getRestrictedPatient(prisonerNumber = "A12345")
       .exchange()
       .expectStatus().isNotFound
   }
-
-  private fun stubDischargeToHospital(prisonerNumber: String) {
-    prisonApiMockServer.stubAgencyLocationForPrisons()
-    prisonApiMockServer.stubAgencyLocationForHospitals()
-    prisonApiMockServer.stubDischargeToPrison(prisonerNumber)
-    prisonerSearchApiMockServer.stubSearchByPrisonNumber(prisonerNumber)
-  }
-
-  private fun dischargePrisonerWebClient(
-    offenderNo: String,
-    commentText: String = "Prisoner was released on bail",
-    dischargeTime: String = "2021-06-07T13:40:32.498Z",
-    fromLocationId: String = "MDI",
-    hospitalLocationCode: String = "HAZLWD",
-    supportingPrisonId: String = "MDI"
-
-  ): WebTestClient.RequestHeadersSpec<*> = webTestClient
-    .post()
-    .uri("/discharge-to-hospital")
-    .headers(setHeaders())
-    .bodyValue(
-      mapOf(
-        "offenderNo" to offenderNo,
-        "commentText" to commentText,
-        "dischargeTime" to dischargeTime,
-        "fromLocationId" to fromLocationId,
-        "hospitalLocationCode" to hospitalLocationCode,
-        "supportingPrisonId" to supportingPrisonId
-      )
-    )
 }

@@ -172,4 +172,44 @@ class PrisonApiMockServer : WireMockServer(8999) {
         )
     )
   }
+
+  fun stubGetOffenderBooking(bookingId: Long, prisonerNumber: String) {
+    stubFor(
+      get(urlEqualTo("/api/bookings/$bookingId"))
+        .willReturn(
+          aResponse()
+            .withHeader("Content-Type", "application/json")
+            .withStatus(200)
+            .withBody(
+              """
+              {
+                "bookingId": $bookingId,
+                "offenderNo": "$prisonerNumber"
+              }              
+            """.trimIndent()
+            )
+        )
+    )
+  }
+
+  fun stubGetAgency(agencyId: String, agencyType: String, description: String) {
+    stubFor(
+      get(urlEqualTo("/api/agencies/$agencyId"))
+        .willReturn(
+          aResponse()
+            .withHeader("Content-Type", "application/json")
+            .withStatus(200)
+            .withBody(
+              """
+              {
+                  "agencyId": "$agencyId",
+                  "description": "$description",
+                  "agencyType": "$agencyType",
+                  "active": true
+                }
+            """.trimIndent()
+            )
+        )
+    )
+  }
 }

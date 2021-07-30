@@ -7,6 +7,8 @@ import com.nhaarman.mockitokotlin2.never
 import com.nhaarman.mockitokotlin2.times
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
+import java.time.LocalDateTime
+import javax.persistence.EntityNotFoundException
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -22,8 +24,6 @@ import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.Ag
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.OffenderBookingResponse
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.repositories.RestrictedPatientsRepository
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services.RestrictedPatientCleanup
-import java.time.LocalDateTime
-import javax.persistence.EntityNotFoundException
 
 class RestrictedPatientCleanupTest {
   private val prisonApiGateway: PrisonApiGateway = mock()
@@ -74,12 +74,23 @@ class RestrictedPatientCleanupTest {
     fun beforeEach() {
       whenever(prisonApiGateway.getOffenderBooking(1L)).thenReturn(OffenderBookingResponse(1L, "A12345"))
       whenever(restrictedPatientsRepository.findByPrisonerNumber(anyString())).thenReturn(makeRestrictedPatient())
-      whenever(prisonApiGateway.getAgencyLocationsByType("INST")).thenReturn(listOf(Agency(agencyId = "MDI", active = true, agencyType = "INST")))
+      whenever(prisonApiGateway.getAgencyById("MDI")).thenReturn(
+        Agency(
+          agencyId = "MDI",
+          active = true,
+          agencyType = "INST"
+        )
+      )
     }
 
     @Test
     fun `skips event if movement does not move the prisoner back into prison`() {
-      restrictedPatientCleanup.deleteRestrictedPatientOnExternalMovementIntoPrison(makeExternalPrisonerMovementMessage(directionCode = "OUT", toAgencyLocationId = "OUT"))
+      restrictedPatientCleanup.deleteRestrictedPatientOnExternalMovementIntoPrison(
+        makeExternalPrisonerMovementMessage(
+          directionCode = "OUT",
+          toAgencyLocationId = "OUT"
+        )
+      )
 
       verify(restrictedPatientsRepository, never()).findByPrisonerNumber(anyString())
       verify(telemetryClient, never()).trackEvent(anyString(), any(), any())

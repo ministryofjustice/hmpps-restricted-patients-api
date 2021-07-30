@@ -58,7 +58,7 @@ class WebClientConfig(
       .build()
 
     return WebClient.builder()
-      .baseUrl(prisonApiUrl)
+      .baseUrl("$prisonApiUrl/api")
       .apply(oauth2Client.oauth2Configuration())
       .exchangeStrategies(exchangeStrategies)
       .build()

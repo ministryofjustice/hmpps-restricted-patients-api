@@ -109,7 +109,7 @@ fun makeExternalMovementEventAsJson(offenderNumber: String) =
   "MessageId": "message2",
   "Type": "Notification",
   "Timestamp": "2019-11-11T11:11:11.111111Z",
-  "Message": "{\"eventType\": \"EXTERNAL_MOVEMENT_RECORD-INSERTED\", \"bookingId\": 100001, \"movementSeq\": 3, \"offenderIdDisplay\": \"$offenderNumber\", \"movementDateTime\": \"2020-02-29T12:34:56\", \"movementType\": \"ADM\", \"movementReasonCode\": \"ADM\", \"directionCode\": \"IN\", \"escortCode\": \"POL\", \"fromAgencyLocationId\": \"CRTTRN\", \"toAgencyLocationId\": \"MDI\"}",
+  "Message": "{\"eventType\": \"EXTERNAL_MOVEMENT_RECORD-INSERTED\", \"bookingId\": 1, \"movementSeq\": 3, \"offenderIdDisplay\": \"$offenderNumber\", \"movementDateTime\": \"2020-02-29T12:34:56\", \"movementType\": \"ADM\", \"movementReasonCode\": \"ADM\", \"directionCode\": \"IN\", \"escortCode\": \"POL\", \"fromAgencyLocationId\": \"CRTTRN\", \"toAgencyLocationId\": \"MDI\"}",
   "TopicArn": "arn:aws:sns:eu-west-2:000000000000:offender_events",
   "MessageAttributes": {
     "eventType": {

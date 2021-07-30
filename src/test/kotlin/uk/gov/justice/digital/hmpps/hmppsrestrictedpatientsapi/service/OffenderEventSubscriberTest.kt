@@ -25,7 +25,7 @@ class OffenderEventSubscriberTest {
     offenderEventSubscriber.handleEvents(makeExternalMovementEventAsJson("A12345"))
     verify(restrictedPatientCleanup).deleteRestrictedPatientOnExternalMovementIntoPrison(
       ExternalPrisonerMovementMessage(
-        bookingId = 100001,
+        bookingId = 1L,
         movementSeq = 3,
         offenderIdDisplay = "A12345",
         fromAgencyLocationId = "CRTTRN",

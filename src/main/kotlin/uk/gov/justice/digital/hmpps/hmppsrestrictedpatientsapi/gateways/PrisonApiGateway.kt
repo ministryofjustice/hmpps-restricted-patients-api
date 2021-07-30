@@ -35,6 +35,13 @@ class PrisonApiGateway(private val prisonApiWithAuthWebClient: WebClient) {
     .bodyToMono(object : ParameterizedTypeReference<List<Agency>>() {})
     .block()!!
 
+  fun getAgencyById(agencyId: String) : Agency? = prisonApiWithAuthWebClient
+    .get()
+    .uri("/agencies/$agencyId")
+    .retrieve()
+    .bodyToMono(Agency::class.java)
+    .block()!!
+
   fun createExternalMovement(createExternalMovement: CreateExternalMovement) {
     prisonApiWithAuthWebClient
       .post()
@@ -47,7 +54,7 @@ class PrisonApiGateway(private val prisonApiWithAuthWebClient: WebClient) {
 
   fun getOffenderBooking(bookingId: Long): OffenderBookingResponse = prisonApiWithAuthWebClient
     .get()
-    .uri("/api/booings/$bookingId")
+    .uri("/bookings/$bookingId")
     .retrieve()
     .bodyToMono(OffenderBookingResponse::class.java)
     .block()!!
