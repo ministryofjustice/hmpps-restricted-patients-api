@@ -35,7 +35,7 @@ class PrisonApiGateway(private val prisonApiWithAuthWebClient: WebClient) {
     .bodyToMono(object : ParameterizedTypeReference<List<Agency>>() {})
     .block()!!
 
-  fun getAgencyById(agencyId: String) : Agency? = prisonApiWithAuthWebClient
+  fun getAgencyById(agencyId: String): Agency? = prisonApiWithAuthWebClient
     .get()
     .uri("/agencies/$agencyId")
     .retrieve()

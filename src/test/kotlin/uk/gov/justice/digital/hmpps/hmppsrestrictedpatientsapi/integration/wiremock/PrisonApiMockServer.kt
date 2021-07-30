@@ -186,7 +186,7 @@ class PrisonApiMockServer : WireMockServer(8999) {
                 "bookingId": $bookingId,
                 "offenderNo": "$prisonerNumber"
               }              
-            """.trimIndent()
+              """.trimIndent()
             )
         )
     )
@@ -207,7 +207,7 @@ class PrisonApiMockServer : WireMockServer(8999) {
                   "agencyType": "$agencyType",
                   "active": true
                 }
-            """.trimIndent()
+              """.trimIndent()
             )
         )
     )

@@ -1,14 +1,14 @@
 package uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services
 
 import com.microsoft.applicationinsights.TelemetryClient
-import javax.persistence.EntityNotFoundException
-import javax.transaction.Transactional
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClientResponseException
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.PrisonApiGateway
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.entities.RestrictedPatient
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.repositories.RestrictedPatientsRepository
+import javax.persistence.EntityNotFoundException
+import javax.transaction.Transactional
 
 @Service
 class RestrictedPatientCleanup(

@@ -36,7 +36,6 @@ class OffenderEventQueueIntegrationTest : IntegrationTestBase() {
       .exchange()
       .expectStatus().is2xxSuccessful
 
-
     awsSqsClient.sendMessage(queueAdminService.queueUrl, makeExternalMovementEventAsJson("A12345"))
 
     await untilCallTo { getNumberOfMessagesCurrentlyOnQueue() } matches { it == 0 }
@@ -45,7 +44,6 @@ class OffenderEventQueueIntegrationTest : IntegrationTestBase() {
       .exchange()
       .expectStatus().isNotFound
   }
-
 
   fun getNumberOfMessagesCurrentlyOnQueue(): Int? {
     val queueAttributes =
