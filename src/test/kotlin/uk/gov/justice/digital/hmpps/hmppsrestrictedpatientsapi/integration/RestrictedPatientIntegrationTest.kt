@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.integration
 
+import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock.equalToJson
 import com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor
 import com.github.tomakehurst.wiremock.client.WireMock.putRequestedFor
@@ -58,7 +59,7 @@ class RestrictedPatientIntegrationTest : IntegrationTestBase() {
       putRequestedFor(urlEqualTo("/api/offenders/A12345/discharge-to-hospital"))
         .withRequestBody(
           equalToJson(loadResourceFile("discharge-to-hospital-request.json"))
-        )
+        ).withHeader("Authorization", WireMock.containing("Bearer"))
     )
 
     prisonerSearchApiMockServer.verify(
@@ -66,6 +67,7 @@ class RestrictedPatientIntegrationTest : IntegrationTestBase() {
         .withRequestBody(
           equalToJson(loadResourceFile("prisoner-search-request.json"))
         )
+        .withHeader("Authorization", WireMock.containing("Bearer"))
     )
   }
 
