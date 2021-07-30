@@ -36,7 +36,7 @@ spring:
     oauth2:
       client:
         registration:
-          restricted-patient-api:
+          restricted-patients-api:
             provider: hmpps-auth
             client-id: ${restricted.patient.api.client.id}
             client-secret: ${restricted.patient.api.client.secret}
