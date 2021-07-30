@@ -1,6 +1,7 @@
 package uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services
 
 import com.microsoft.applicationinsights.TelemetryClient
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.PrisonApiGateway
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.PrisonerSearchApiGateway
@@ -20,7 +21,7 @@ import javax.validation.ValidationException
 
 @Service
 class RestrictedPatientsService(
-  private val prisonApiGateway: PrisonApiGateway,
+  @Qualifier("PrisonApiGatewayWithAuth") private val prisonApiGateway: PrisonApiGateway,
   private val prisonerSearchApiGateway: PrisonerSearchApiGateway,
   private val restrictedPatientsRepository: RestrictedPatientsRepository,
   private val telemetryClient: TelemetryClient,

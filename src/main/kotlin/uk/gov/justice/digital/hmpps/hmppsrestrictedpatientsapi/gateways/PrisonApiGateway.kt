@@ -7,8 +7,9 @@ import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.request.Cre
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.request.DischargeToHospitalRequest
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.Agency
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.DischargeToHospitalResponse
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.OffenderBookingResponse
 
-@Component
+@Component("PrisonApiGatewayWithAuth")
 class PrisonApiGateway(private val prisonApiWithAuthWebClient: WebClient) {
   fun dischargeToHospital(dischargeToHospitalDetails: DischargeToHospitalRequest): DischargeToHospitalResponse? =
     prisonApiWithAuthWebClient
@@ -43,4 +44,15 @@ class PrisonApiGateway(private val prisonApiWithAuthWebClient: WebClient) {
       .bodyToMono(String::class.java)
       .block()
   }
+
+  fun getOffenderBooking(bookingId: Long): OffenderBookingResponse = prisonApiWithAuthWebClient
+    .get()
+    .uri("/api/booings/$bookingId")
+    .retrieve()
+    .bodyToMono(OffenderBookingResponse::class.java)
+    .block()!!
 }
+
+@Component("PrisonApiGatewayClientCreds")
+class PrisonApiGatewayClientCreds(prisonApiClientCredsWebclient: WebClient) :
+  PrisonApiGateway(prisonApiClientCredsWebclient)

@@ -32,6 +32,20 @@ spring:
     url: 'jdbc:h2:mem:restricted-patients-api-db;MODE=PostgreSQL'
     continue-on-error: true
 
+  security:
+    oauth2:
+      client:
+        registration:
+          restricted-patient-api:
+            provider: hmpps-auth
+            client-id: ${restricted.patient.api.client.id}
+            client-secret: ${restricted.patient.api.client.secret}
+            authorization-grant-type: client_credentials
+            scope: read
+        provider:
+          hmpps-auth:
+            token-uri: ${oauth.endpoint.url}/oauth/token
+
 server:
   port: 8080
   servlet:
@@ -63,6 +77,7 @@ management:
     info:
       cache:
         time-to-live: 2000ms
+
 
 offender-events-sqs:
   provider: aws

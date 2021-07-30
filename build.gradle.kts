@@ -21,6 +21,8 @@ dependencies {
   implementation("org.springframework:spring-jms")
   implementation("com.amazonaws:amazon-sqs-java-messaging-lib:1.0.8")
 
+  implementation("com.google.code.gson:gson:2.8.6")
+
   runtimeOnly("com.h2database:h2")
   runtimeOnly("org.flywaydb:flyway-core")
   runtimeOnly("org.postgresql:postgresql")
