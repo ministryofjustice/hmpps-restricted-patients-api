@@ -1,16 +1,17 @@
 package uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.integration
 
+import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock.equalToJson
 import com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor
 import com.github.tomakehurst.wiremock.client.WireMock.putRequestedFor
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 import com.nhaarman.mockitokotlin2.whenever
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
-import org.springframework.boot.test.mock.mockito.MockBean
 import java.time.Clock
 import java.time.LocalDate
 import java.time.ZoneId
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.springframework.boot.test.mock.mockito.MockBean
 
 class RestrictedPatientIntegrationTest : IntegrationTestBase() {
 
@@ -58,14 +59,16 @@ class RestrictedPatientIntegrationTest : IntegrationTestBase() {
       putRequestedFor(urlEqualTo("/api/offenders/A12345/discharge-to-hospital"))
         .withRequestBody(
           equalToJson(loadResourceFile("discharge-to-hospital-request.json"))
-        )
+        ).withHeader("Authorization", WireMock.containing("Bearer"))
     )
+
 
     prisonerSearchApiMockServer.verify(
       postRequestedFor(urlEqualTo("/prisoner-search/prisoner-numbers"))
         .withRequestBody(
           equalToJson(loadResourceFile("prisoner-search-request.json"))
         )
+        .withHeader("Authorization", WireMock.containing("Bearer"))
     )
   }
 
