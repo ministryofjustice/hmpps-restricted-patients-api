@@ -1,6 +1,7 @@
 package uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.config
 
 import UserContext
+import org.springframework.core.annotation.Order
 import org.springframework.http.HttpHeaders
 import org.springframework.stereotype.Component
 import java.io.IOException
@@ -13,6 +14,7 @@ import javax.servlet.ServletResponse
 import javax.servlet.http.HttpServletRequest
 
 @Component
+@Order(4)
 class UserContextFilter : Filter {
   @Throws(IOException::class, ServletException::class)
   override fun doFilter(servletRequest: ServletRequest, servletResponse: ServletResponse, filterChain: FilterChain) {
