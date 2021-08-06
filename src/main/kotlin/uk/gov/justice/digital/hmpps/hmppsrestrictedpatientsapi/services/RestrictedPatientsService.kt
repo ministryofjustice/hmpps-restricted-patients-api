@@ -38,22 +38,28 @@ class RestrictedPatientsService(
     if (!isCorrectLegalStatus(prisonerResult.legalStatus))
       throw ValidationException("Can not discharge prisoner with a legal status of ${prisonerResult.legalStatus}")
 
-    val response = prisonApiGateway.dischargeToHospital(dischargeToHospital)
-
-    val restrictedPatient = RestrictedPatient(
-      prisonerNumber = dischargeToHospital.offenderNo,
-      fromLocationId = dischargeToHospital.fromLocationId,
-      hospitalLocationCode = dischargeToHospital.hospitalLocationCode,
-      supportingPrisonId = dischargeToHospital.supportingPrisonId,
-      dischargeTime = dischargeToHospital.dischargeTime,
-      commentText = dischargeToHospital.commentText
+    val dischargeToHospitalWithDefaultSupportingPrison = dischargeToHospital.copy(
+      supportingPrisonId = dischargeToHospital.supportingPrisonId ?: dischargeToHospital.fromLocationId
     )
 
+    prisonApiGateway.dischargeToHospital(dischargeToHospitalWithDefaultSupportingPrison)
+
+    val restrictedPatient = RestrictedPatient(
+      prisonerNumber = dischargeToHospitalWithDefaultSupportingPrison.offenderNo,
+      fromLocationId = dischargeToHospitalWithDefaultSupportingPrison.fromLocationId,
+      hospitalLocationCode = dischargeToHospitalWithDefaultSupportingPrison.hospitalLocationCode,
+      supportingPrisonId = dischargeToHospitalWithDefaultSupportingPrison.supportingPrisonId!!,
+      dischargeTime = dischargeToHospitalWithDefaultSupportingPrison.dischargeTime,
+      commentText = dischargeToHospitalWithDefaultSupportingPrison.commentText
+    )
+
+    val newRestrictedPatient = restrictedPatientsRepository.save(restrictedPatient)
+
     return transform(
-      restrictedPatientsRepository.save(restrictedPatient),
-      response?.restrictivePatient?.supportingPrison,
-      response?.restrictivePatient?.dischargedHospital,
-      response?.restrictivePatient?.supportingPrison
+      newRestrictedPatient,
+      Agency(agencyId = restrictedPatient.fromLocationId),
+      Agency(agencyId = restrictedPatient.hospitalLocationCode),
+      Agency(agencyId = restrictedPatient.supportingPrisonId),
     )
   }
 

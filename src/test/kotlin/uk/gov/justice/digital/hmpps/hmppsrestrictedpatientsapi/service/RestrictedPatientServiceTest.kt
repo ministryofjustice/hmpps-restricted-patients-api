@@ -18,7 +18,6 @@ import org.mockito.ArgumentMatchers.anyString
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.dataBuilders.HOSPITAL
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.dataBuilders.PRISON
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.dataBuilders.makeDischargeRequest
-import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.dataBuilders.makeDischargeToHospitalResponse
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.dataBuilders.makePrisonerResult
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.dataBuilders.makeRestrictedPatient
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.PrisonApiGateway
@@ -28,6 +27,7 @@ import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.enums.Legal
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.exceptions.NoResultsReturnedException
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.request.CreateExternalMovement
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.request.DischargeToHospitalRequest
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.Agency
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.PrisonerResult
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.repositories.RestrictedPatientsRepository
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services.RestrictedPatientsService
@@ -240,9 +240,36 @@ class RestrictedPatientServiceTest {
 
       @Test
       fun `make a call to prison api to discharge a prisoner to hospital`() {
-        whenever(prisonApiGateway.dischargeToHospital(any())).thenReturn(makeDischargeToHospitalResponse())
+        val response = service.dischargeToHospital(makeDischargeRequest().copy(supportingPrisonId = "LEI"))
 
-        val response = service.dischargeToHospital(makeDischargeRequest())
+        verify(prisonApiGateway).dischargeToHospital(
+          DischargeToHospitalRequest(
+            offenderNo = "A12345",
+            commentText = "test",
+            dischargeTime = LocalDateTime.parse("2020-10-10T20:00:01"),
+            fromLocationId = "MDI",
+            hospitalLocationCode = "HAZLWD",
+            supportingPrisonId = "LEI"
+          )
+        )
+
+        assertThat(response.fromLocation).isEqualTo(Agency(agencyId = "MDI"))
+        assertThat(response.supportingPrison).isEqualTo(Agency(agencyId = "LEI"))
+        assertThat(response.hospitalLocation).isEqualTo(Agency(agencyId = "HAZLWD"))
+
+        assertThat(response)
+          .extracting(
+            "id",
+            "prisonerNumber",
+            "dischargeTime",
+            "commentText"
+          )
+          .contains(1L, "A12345", LocalDateTime.parse("2020-10-10T20:00:01"), "test")
+      }
+
+      @Test
+      fun `default to from prison id for supporting prison when not suppled`() {
+        service.dischargeToHospital(makeDischargeRequest())
 
         verify(prisonApiGateway).dischargeToHospital(
           DischargeToHospitalRequest(
@@ -254,19 +281,6 @@ class RestrictedPatientServiceTest {
             supportingPrisonId = "MDI"
           )
         )
-
-        assertThat(response.fromLocation).isEqualTo(PRISON)
-        assertThat(response.supportingPrison).isEqualTo(PRISON)
-        assertThat(response.hospitalLocation).isEqualTo(HOSPITAL)
-
-        assertThat(response)
-          .extracting(
-            "id",
-            "prisonerNumber",
-            "dischargeTime",
-            "commentText"
-          )
-          .contains(1L, "A12345", LocalDateTime.parse("2020-10-10T20:00:01"), "test")
       }
 
       @Test

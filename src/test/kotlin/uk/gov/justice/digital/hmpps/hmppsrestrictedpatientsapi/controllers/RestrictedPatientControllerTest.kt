@@ -40,7 +40,7 @@ class RestrictedPatientControllerTest : ControllerTestBase() {
         )
         .andExpect(MockMvcResultMatchers.status().isCreated)
 
-      verify(restrictedPatientsService).dischargeToHospital(makeDischargeRequest())
+      verify(restrictedPatientsService).dischargeToHospital(makeDischargeRequest().copy(supportingPrisonId = "MDI"))
     }
 
     @Test

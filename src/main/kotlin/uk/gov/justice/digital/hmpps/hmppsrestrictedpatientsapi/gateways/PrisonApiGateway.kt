@@ -6,12 +6,11 @@ import org.springframework.web.reactive.function.client.WebClient
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.request.CreateExternalMovement
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.request.DischargeToHospitalRequest
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.Agency
-import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.DischargeToHospitalResponse
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.OffenderBookingResponse
 
 @Component("PrisonApiGatewayWithAuth")
 class PrisonApiGateway(private val prisonApiWithAuthWebClient: WebClient) {
-  fun dischargeToHospital(dischargeToHospitalDetails: DischargeToHospitalRequest): DischargeToHospitalResponse? =
+  fun dischargeToHospital(dischargeToHospitalDetails: DischargeToHospitalRequest) =
     prisonApiWithAuthWebClient
       .put()
       .uri("/offenders/${dischargeToHospitalDetails.offenderNo}/discharge-to-hospital")
@@ -25,7 +24,7 @@ class PrisonApiGateway(private val prisonApiWithAuthWebClient: WebClient) {
         )
       )
       .retrieve()
-      .bodyToMono(DischargeToHospitalResponse::class.java)
+      .bodyToMono(String::class.java)
       .block()
 
   fun getAgencyLocationsByType(type: String): List<Agency> = prisonApiWithAuthWebClient

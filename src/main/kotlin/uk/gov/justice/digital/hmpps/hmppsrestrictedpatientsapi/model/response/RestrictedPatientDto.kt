@@ -1,9 +1,11 @@
 package uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response
 
+import com.fasterxml.jackson.annotation.JsonInclude
 import io.swagger.annotations.ApiModel
 import io.swagger.annotations.ApiModelProperty
 import java.time.LocalDateTime
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @ApiModel(description = "Restricted patient")
 data class RestrictedPatientDto(
   @ApiModelProperty(value = "Id of the restricted patient record", example = "1")
@@ -26,10 +28,11 @@ data class RestrictedPatientDto(
   var createUserId: String? = null
 )
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 data class Agency(
   val agencyId: String,
   val description: String? = null,
   val longDescription: String? = null,
-  val agencyType: String,
-  val active: Boolean
+  val agencyType: String? = null,
+  val active: Boolean = true
 )
