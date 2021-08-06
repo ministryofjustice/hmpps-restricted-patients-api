@@ -38,11 +38,8 @@ class RestrictedPatientIntegrationTest : IntegrationTestBase() {
       .jsonPath("$.id").isNumber
       .jsonPath("$.prisonerNumber").isEqualTo("A12345")
       .jsonPath("$.fromLocation.agencyId").isEqualTo("MDI")
-      .jsonPath("$.fromLocation.active").isEqualTo(true)
       .jsonPath("$.hospitalLocation.agencyId").isEqualTo("HAZLWD")
-      .jsonPath("$.hospitalLocation.active").isEqualTo(true)
       .jsonPath("$.supportingPrison.agencyId").isEqualTo("MDI")
-      .jsonPath("$.supportingPrison.active").isEqualTo(true)
       .jsonPath("$.dischargeTime").isEqualTo("2021-06-07T13:40:32.498")
       .jsonPath("$.commentText").isEqualTo("Prisoner was released on bail")
 

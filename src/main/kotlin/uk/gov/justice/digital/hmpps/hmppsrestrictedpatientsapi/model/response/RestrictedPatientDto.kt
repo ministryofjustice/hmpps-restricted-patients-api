@@ -34,5 +34,5 @@ data class Agency(
   val description: String? = null,
   val longDescription: String? = null,
   val agencyType: String? = null,
-  val active: Boolean = true
+  val active: Boolean? = null
 )

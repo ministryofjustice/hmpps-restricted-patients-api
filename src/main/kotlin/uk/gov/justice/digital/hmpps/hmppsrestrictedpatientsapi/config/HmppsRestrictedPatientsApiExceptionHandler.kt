@@ -132,6 +132,19 @@ class HmppsRestrictedPatientsApiExceptionHandler {
       )
   }
 
+  @ExceptionHandler(IllegalStateException::class)
+  fun handleException(e: IllegalStateException): ResponseEntity<ErrorResponse> {
+    log.debug("Bad request {}", e.message)
+    return ResponseEntity
+      .status(BAD_REQUEST)
+      .body(
+        ErrorResponse(
+          status = BAD_REQUEST.value(),
+          developerMessage = e.message
+        )
+      )
+  }
+
   @ExceptionHandler(MethodArgumentNotValidException::class)
   fun handleException(e: MethodArgumentNotValidException): ResponseEntity<ErrorResponse> {
     log.debug("Request parameters not valid {}", e.message)

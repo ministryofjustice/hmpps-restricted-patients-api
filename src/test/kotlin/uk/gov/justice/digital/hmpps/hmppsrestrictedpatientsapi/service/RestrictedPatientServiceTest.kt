@@ -207,6 +207,15 @@ class RestrictedPatientServiceTest {
           service.dischargeToHospital(makeDischargeRequest())
         }
       }
+
+      @Test
+      fun `throws exception when the offender is already a restricted patient`() {
+        whenever(restrictedPatientsRepository.findByPrisonerNumber(anyString())).thenReturn(makeRestrictedPatient())
+
+        Assertions.assertThrows(IllegalStateException::class.java) {
+          service.dischargeToHospital(makeDischargeRequest())
+        }
+      }
     }
 
     @Nested

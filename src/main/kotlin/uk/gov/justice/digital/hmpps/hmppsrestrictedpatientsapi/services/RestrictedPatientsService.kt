@@ -30,6 +30,10 @@ class RestrictedPatientsService(
 
   @Transactional
   fun dischargeToHospital(dischargeToHospital: DischargeToHospitalRequest): RestrictedPatientDto {
+    restrictedPatientsRepository.findByPrisonerNumber(dischargeToHospital.offenderNo)?.let {
+      throw IllegalStateException("Prisoner (${dischargeToHospital.offenderNo}) is already a restricted patient")
+    }
+
     val prisonerSearchResponse = prisonerSearchApiGateway.searchByPrisonNumber(dischargeToHospital.offenderNo)
 
     val prisonerResult = prisonerSearchResponse.firstOrNull()
