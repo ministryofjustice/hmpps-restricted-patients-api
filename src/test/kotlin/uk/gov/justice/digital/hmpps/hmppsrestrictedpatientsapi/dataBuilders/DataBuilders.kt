@@ -28,7 +28,7 @@ fun makeDischargeRequest(
   dischargeTime: LocalDateTime = LocalDateTime.parse("2020-10-10T20:00:01"),
   fromLocationId: String = "MDI",
   hospitalLocationCode: String = "HAZLWD",
-  supportingPrisonId: String = "MDI"
+  supportingPrisonId: String? = null
 ) = DischargeToHospitalRequest(
   offenderNo,
   commentText,

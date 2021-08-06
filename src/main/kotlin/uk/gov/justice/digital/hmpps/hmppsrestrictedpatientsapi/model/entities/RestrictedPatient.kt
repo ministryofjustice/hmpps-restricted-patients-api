@@ -17,7 +17,7 @@ class RestrictedPatient(
   val prisonerNumber: String,
   val fromLocationId: String,
   val hospitalLocationCode: String,
-  val supportingPrisonId: String? = null,
+  val supportingPrisonId: String,
   val dischargeTime: LocalDateTime,
   val commentText: String? = null
 ) : BaseEntity(id) {
