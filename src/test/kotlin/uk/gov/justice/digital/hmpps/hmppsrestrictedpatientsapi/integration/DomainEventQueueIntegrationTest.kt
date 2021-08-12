@@ -10,14 +10,14 @@ import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.test.context.ActiveProfiles
-import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.dataBuilders.makeExternalMovementEventAsJson
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.dataBuilders.makePrisonerReceiveEvent
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services.QueueAdminService
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles(profiles = ["test"])
-class OffenderEventQueueIntegrationTest : IntegrationTestBase() {
+class DomainEventQueueIntegrationTest : IntegrationTestBase() {
   @SpyBean
-  @Qualifier("awsSqsClientForOffenderEvents")
+  @Qualifier("awsSqsClientForDomainEvents")
   protected lateinit var awsSqsClient: AmazonSQS
 
   @Autowired
@@ -25,9 +25,6 @@ class OffenderEventQueueIntegrationTest : IntegrationTestBase() {
 
   @Test
   fun `will remove restricted patient from the system`() {
-    prisonApiMockServer.stubGetOffenderBooking(1L, "A12345")
-    prisonApiMockServer.stubGetAgency("MDI", "INST", "Moorland")
-
     dischargePrisonerWebClient(prisonerNumber = "A12345")
       .exchange()
       .expectStatus().isCreated
@@ -36,7 +33,7 @@ class OffenderEventQueueIntegrationTest : IntegrationTestBase() {
       .exchange()
       .expectStatus().is2xxSuccessful
 
-    awsSqsClient.sendMessage(queueAdminService.queueUrl, makeExternalMovementEventAsJson("A12345"))
+    awsSqsClient.sendMessage(queueAdminService.queueUrl, makePrisonerReceiveEvent("A12345"))
 
     await untilCallTo { getNumberOfMessagesCurrentlyOnQueue() } matches { it == 0 }
 

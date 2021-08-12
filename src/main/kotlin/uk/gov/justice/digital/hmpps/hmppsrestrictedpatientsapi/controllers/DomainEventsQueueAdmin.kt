@@ -10,14 +10,14 @@ import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
-import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services.OffenderEventsAdminService
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services.DomainEventsAdminService
 
 @RestController
 @Validated
-@ConditionalOnExpression("{'aws', 'localstack'}.contains('\${offender-events-sqs.provider}')")
-@RequestMapping("/offender-events-queue-admin", produces = [MediaType.APPLICATION_JSON_VALUE])
-class OffenderEventsQueueAdmin(
-  private val queueAdminService: OffenderEventsAdminService
+@ConditionalOnExpression("{'aws', 'localstack'}.contains('\${domain-events-sqs.provider}')")
+@RequestMapping("/domain-events-queue-admin", produces = [MediaType.APPLICATION_JSON_VALUE])
+class DomainEventsQueueAdmin(
+  private val queueAdminService: DomainEventsAdminService
 ) {
 
   @PutMapping("/purge-dlq")

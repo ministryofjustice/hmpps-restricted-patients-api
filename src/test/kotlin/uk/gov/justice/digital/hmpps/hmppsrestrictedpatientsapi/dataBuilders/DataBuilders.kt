@@ -8,7 +8,6 @@ import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.Di
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.PrisonerResult
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.RestrictedPatientDto
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.RestrictivePatient
-import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services.ExternalPrisonerMovementMessage
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -103,42 +102,13 @@ fun makePrisonerResult(
   bookingId: Long = 1L
 ): PrisonerResult = PrisonerResult(prisonerNumber = prisonerNumber, legalStatus = legalStatus, bookingId = bookingId)
 
-fun makeExternalMovementEventAsJson(offenderNumber: String) =
+fun makePrisonerReceiveEvent(prisonerNumber: String) =
   """
 {
-  "MessageId": "message2",
-  "Type": "Notification",
-  "Timestamp": "2019-11-11T11:11:11.111111Z",
-  "Message": "{\"eventType\": \"EXTERNAL_MOVEMENT_RECORD-INSERTED\", \"bookingId\": 1, \"movementSeq\": 3, \"offenderIdDisplay\": \"$offenderNumber\", \"movementDateTime\": \"2020-02-29T12:34:56\", \"movementType\": \"ADM\", \"movementReasonCode\": \"ADM\", \"directionCode\": \"IN\", \"escortCode\": \"POL\", \"fromAgencyLocationId\": \"CRTTRN\", \"toAgencyLocationId\": \"MDI\"}",
-  "TopicArn": "arn:aws:sns:eu-west-2:000000000000:offender_events",
-  "MessageAttributes": {
-    "eventType": {
-      "Type": "String",
-      "Value": "EXTERNAL_MOVEMENT_RECORD-INSERTED"
-    },
-    "contentType": {
-      "Type": "String",
-      "Value": "text/plain;charset=UTF-8"
+    "eventType": "prison-offender-events.prisoner.receive",
+    "additionalInformation": {
+      "nomsNumber": $prisonerNumber
     }
-  }
 }
 
   """.trimIndent()
-
-fun makeExternalPrisonerMovementMessage(
-  bookingId: Long = 1L,
-  movementSeq: Long = 2L,
-  offenderIdDisplay: String = "A12345",
-  fromAgencyLocationId: String = "OUT",
-  toAgencyLocationId: String = "MDI",
-  directionCode: String = "IN",
-  movementType: String = "ADM"
-): ExternalPrisonerMovementMessage = ExternalPrisonerMovementMessage(
-  bookingId,
-  movementSeq,
-  offenderIdDisplay,
-  fromAgencyLocationId,
-  toAgencyLocationId,
-  directionCode,
-  movementType
-)

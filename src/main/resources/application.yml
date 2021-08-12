@@ -79,7 +79,7 @@ management:
         time-to-live: 2000ms
 
 
-offender-events-sqs:
+domain-events-sqs:
   provider: aws
   endpoint.region: eu-west-2
 

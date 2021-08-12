@@ -16,7 +16,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.dataBuilders.makeExternalMovementEventAsJson
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.dataBuilders.makePrisonerReceiveEvent
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services.QueueAdminService
 
 internal class QueueAdminServiceTest {
@@ -62,7 +62,7 @@ internal class QueueAdminServiceTest {
     internal fun `will read single message from event dlq`() {
       stubDlqMessageCount(1)
       whenever(awsSqsDlqClient.receiveMessage(any<ReceiveMessageRequest>()))
-        .thenReturn(ReceiveMessageResult().withMessages(Message().withBody(makeExternalMovementEventAsJson("Z1234AA"))))
+        .thenReturn(ReceiveMessageResult().withMessages(Message().withBody(makePrisonerReceiveEvent("Z1234AA"))))
 
       queueAdminService.transferMessages()
 
@@ -77,9 +77,9 @@ internal class QueueAdminServiceTest {
     internal fun `will read multiple messages from dlq`() {
       stubDlqMessageCount(3)
       whenever(awsSqsDlqClient.receiveMessage(any<ReceiveMessageRequest>()))
-        .thenReturn(ReceiveMessageResult().withMessages(Message().withBody(makeExternalMovementEventAsJson("Z1234AA"))))
-        .thenReturn(ReceiveMessageResult().withMessages(Message().withBody(makeExternalMovementEventAsJson("Z1234BB"))))
-        .thenReturn(ReceiveMessageResult().withMessages(Message().withBody(makeExternalMovementEventAsJson("Z1234CC"))))
+        .thenReturn(ReceiveMessageResult().withMessages(Message().withBody(makePrisonerReceiveEvent("Z1234AA"))))
+        .thenReturn(ReceiveMessageResult().withMessages(Message().withBody(makePrisonerReceiveEvent("Z1234BB"))))
+        .thenReturn(ReceiveMessageResult().withMessages(Message().withBody(makePrisonerReceiveEvent("Z1234CC"))))
 
       queueAdminService.transferMessages()
 
@@ -94,26 +94,26 @@ internal class QueueAdminServiceTest {
     internal fun `will send single message to the event queue`() {
       stubDlqMessageCount(1)
       whenever(awsSqsDlqClient.receiveMessage(any<ReceiveMessageRequest>()))
-        .thenReturn(ReceiveMessageResult().withMessages(Message().withBody(makeExternalMovementEventAsJson("Z1234AA"))))
+        .thenReturn(ReceiveMessageResult().withMessages(Message().withBody(makePrisonerReceiveEvent("Z1234AA"))))
 
       queueAdminService.transferMessages()
 
-      verify(awsSqsClient).sendMessage(eventQueueUrl, makeExternalMovementEventAsJson("Z1234AA"))
+      verify(awsSqsClient).sendMessage(eventQueueUrl, makePrisonerReceiveEvent("Z1234AA"))
     }
 
     @Test
     internal fun `will send multiple messages to the event queue`() {
       stubDlqMessageCount(3)
       whenever(awsSqsDlqClient.receiveMessage(any<ReceiveMessageRequest>()))
-        .thenReturn(ReceiveMessageResult().withMessages(Message().withBody(makeExternalMovementEventAsJson("Z1234AA"))))
-        .thenReturn(ReceiveMessageResult().withMessages(Message().withBody(makeExternalMovementEventAsJson("Z1234BB"))))
-        .thenReturn(ReceiveMessageResult().withMessages(Message().withBody(makeExternalMovementEventAsJson("Z1234CC"))))
+        .thenReturn(ReceiveMessageResult().withMessages(Message().withBody(makePrisonerReceiveEvent("Z1234AA"))))
+        .thenReturn(ReceiveMessageResult().withMessages(Message().withBody(makePrisonerReceiveEvent("Z1234BB"))))
+        .thenReturn(ReceiveMessageResult().withMessages(Message().withBody(makePrisonerReceiveEvent("Z1234CC"))))
 
       queueAdminService.transferMessages()
 
-      verify(awsSqsClient).sendMessage(eventQueueUrl, makeExternalMovementEventAsJson("Z1234AA"))
-      verify(awsSqsClient).sendMessage(eventQueueUrl, makeExternalMovementEventAsJson("Z1234BB"))
-      verify(awsSqsClient).sendMessage(eventQueueUrl, makeExternalMovementEventAsJson("Z1234CC"))
+      verify(awsSqsClient).sendMessage(eventQueueUrl, makePrisonerReceiveEvent("Z1234AA"))
+      verify(awsSqsClient).sendMessage(eventQueueUrl, makePrisonerReceiveEvent("Z1234BB"))
+      verify(awsSqsClient).sendMessage(eventQueueUrl, makePrisonerReceiveEvent("Z1234CC"))
     }
 
     private fun stubDlqMessageCount(count: Int) =
