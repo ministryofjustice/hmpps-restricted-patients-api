@@ -38,12 +38,12 @@ enum class QueueAttributes(val awsName: String, val healthName: String) {
 }
 
 @Component
-@ConditionalOnProperty("offender-events-sqs.provider")
+@ConditionalOnProperty("domain-events-sqs.provider")
 class QueueHealth(
-  @Autowired @Qualifier("awsSqsClientForOffenderEvents") private val awsSqsClient: AmazonSQS,
-  @Autowired @Qualifier("awsSqsDlqClientForOffenderEvents") private val awsSqsDlqClient: AmazonSQS,
-  @Value("\${offender-events-sqs.queue.name}") private val queueName: String,
-  @Value("\${offender-events-sqs.dlq.name}") private val dlqName: String
+  @Autowired @Qualifier("awsSqsClientForDomainEvents") private val awsSqsClient: AmazonSQS,
+  @Autowired @Qualifier("awsSqsDlqClientForDomainEvents") private val awsSqsDlqClient: AmazonSQS,
+  @Value("\${domain-events-sqs.queue.name}") private val queueName: String,
+  @Value("\${domain-events-sqs.dlq.name}") private val dlqName: String
 ) : HealthIndicator {
 
   companion object {

@@ -26,19 +26,19 @@ import java.util.function.Consumer
 class HealthCheckTest : IntegrationTestBase() {
 
   @SpyBean
-  @Qualifier("awsSqsClientForOffenderEvents")
+  @Qualifier("awsSqsClientForDomainEvents")
   protected lateinit var awsSqsClient: AmazonSQS
 
   @Autowired
   private lateinit var queueHealth: QueueHealth
 
   @Autowired
-  @Value("\${offender-events-sqs.queue.name}")
-  private lateinit var offenderEventsQueueName: String
+  @Value("\${domain-events-sqs.queue.name}")
+  private lateinit var domainEventsQueueName: String
 
   @Autowired
-  @Value("\${offender-events-sqs.dlq.name}")
-  private lateinit var offenderEventsDlqName: String
+  @Value("\${domain-events-sqs.dlq.name}")
+  private lateinit var domainEventsDlqName: String
 
   @BeforeEach
   fun beforeEach() {
@@ -49,12 +49,12 @@ class HealthCheckTest : IntegrationTestBase() {
 
   @AfterEach
   fun tearDown() {
-    ReflectionTestUtils.setField(queueHealth, "queueName", offenderEventsQueueName)
-    ReflectionTestUtils.setField(queueHealth, "dlqName", offenderEventsDlqName)
+    ReflectionTestUtils.setField(queueHealth, "queueName", domainEventsQueueName)
+    ReflectionTestUtils.setField(queueHealth, "dlqName", domainEventsDlqName)
   }
 
   @Nested
-  inner class OffenderEventQueueTests {
+  inner class DomainEventQueueTests {
     @Test
     fun `Queue does not exist reports down`() {
       ReflectionTestUtils.setField(queueHealth, "queueName", "missing_queue")

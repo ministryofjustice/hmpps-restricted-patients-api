@@ -12,12 +12,12 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression
 import org.springframework.stereotype.Service
 
 @Service
-@ConditionalOnExpression("{'aws', 'localstack'}.contains('\${offender-events-sqs.provider}')")
-class OffenderEventsAdminService(
-  @Qualifier("awsSqsClientForOffenderEvents") private val awsSqsClient: AmazonSQS,
-  @Qualifier("awsSqsDlqClientForOffenderEvents") private val awsSqsDlqClient: AmazonSQS,
-  @Value("\${offender-events-sqs.queue.name}") private val queueName: String,
-  @Value("\${offender-events-sqs.dlq.name}") private val dlqName: String
+@ConditionalOnExpression("{'aws', 'localstack'}.contains('\${domain-events-sqs.provider}')")
+class DomainEventsAdminService(
+  @Qualifier("awsSqsClientForDomainEvents") private val awsSqsClient: AmazonSQS,
+  @Qualifier("awsSqsDlqClientForDomainEvents") private val awsSqsDlqClient: AmazonSQS,
+  @Value("\${domain-events-sqs.queue.name}") private val queueName: String,
+  @Value("\${domain-events-sqs.dlq.name}") private val dlqName: String
 ) : QueueAdminService(awsSqsClient, awsSqsDlqClient, queueName, dlqName)
 
 open class QueueAdminService(
