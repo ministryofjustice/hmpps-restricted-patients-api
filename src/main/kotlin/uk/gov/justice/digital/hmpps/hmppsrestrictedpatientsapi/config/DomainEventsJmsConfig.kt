@@ -9,7 +9,6 @@ import com.amazonaws.client.builder.AwsClientBuilder
 import com.amazonaws.services.sqs.AmazonSQS
 import com.amazonaws.services.sqs.AmazonSQSClientBuilder
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
@@ -23,7 +22,7 @@ import javax.jms.Session
 @Configuration
 @ConditionalOnExpression("{'aws', 'localstack'}.contains('\${domain-events-sqs.provider}')")
 @EnableJms
-class OffenderEventsJmsConfig {
+class DomainEventsJmsConfig {
   companion object {
     private val log = LoggerFactory.getLogger(this::class.java)
   }
@@ -85,12 +84,4 @@ class OffenderEventsJmsConfig {
       .withEndpointConfiguration(AwsClientBuilder.EndpointConfiguration(serviceEndpoint, region))
       .withCredentials(AWSStaticCredentialsProvider(AnonymousAWSCredentials()))
       .build()
-
-  @Bean("queueUrlForOffenderEvents")
-  @ConditionalOnProperty(name = ["domain-events-sqs.provider"], havingValue = "localstack")
-  @Suppress("SpringJavaInjectionPointsAutowiringInspection")
-  fun queueUrl(
-    @Autowired awsSqsClientForDomainEvents: AmazonSQS,
-    @Value("\${domain-events-sqs.queue.name}") queueName: String
-  ): String = awsSqsClientForDomainEvents.getQueueUrl(queueName).queueUrl
 }
