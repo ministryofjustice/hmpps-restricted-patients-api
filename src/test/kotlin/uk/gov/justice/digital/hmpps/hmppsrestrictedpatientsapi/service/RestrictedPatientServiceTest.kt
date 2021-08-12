@@ -3,7 +3,6 @@ package uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.service
 import com.microsoft.applicationinsights.TelemetryClient
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.never
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import org.assertj.core.api.Assertions.assertThat
@@ -36,7 +35,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
 import javax.persistence.EntityNotFoundException
-import javax.validation.ValidationException
 
 class RestrictedPatientServiceTest {
 
@@ -184,19 +182,6 @@ class RestrictedPatientServiceTest {
   inner class DischargeToHospital {
     @Nested
     inner class Failures {
-      @Test
-      fun `will not discharge a prisoner with the wrong legal status`() {
-        whenever(prisonerSearchApiGateway.searchByPrisonNumber(any())).thenReturn(
-          listOf(PrisonerResult(prisonerNumber = "A12345", legalStatus = LegalStatus.UNKNOWN, bookingId = 1L))
-        )
-
-        Assertions.assertThrows(ValidationException::class.java) {
-          service.dischargeToHospital(makeDischargeRequest())
-        }
-
-        verify(prisonApiGateway, never()).dischargeToHospital(any())
-      }
-
       @Test
       fun `throws not found exception`() {
         whenever(prisonerSearchApiGateway.searchByPrisonNumber(any())).thenReturn(

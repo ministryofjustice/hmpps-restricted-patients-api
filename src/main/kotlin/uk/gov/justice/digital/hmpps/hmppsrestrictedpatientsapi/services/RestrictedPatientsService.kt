@@ -6,7 +6,6 @@ import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.PrisonApiGateway
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.PrisonerSearchApiGateway
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.entities.RestrictedPatient
-import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.enums.LegalStatus
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.exceptions.NoResultsReturnedException
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.request.CreateExternalMovement
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.request.DischargeToHospitalRequest
@@ -17,7 +16,6 @@ import java.time.Clock
 import java.time.LocalDateTime
 import javax.persistence.EntityNotFoundException
 import javax.transaction.Transactional
-import javax.validation.ValidationException
 
 @Service
 class RestrictedPatientsService(
@@ -36,11 +34,8 @@ class RestrictedPatientsService(
 
     val prisonerSearchResponse = prisonerSearchApiGateway.searchByPrisonNumber(dischargeToHospital.offenderNo)
 
-    val prisonerResult = prisonerSearchResponse.firstOrNull()
+    prisonerSearchResponse.firstOrNull()
       ?: throw NoResultsReturnedException("No prisoner search results returned for ${dischargeToHospital.offenderNo}")
-
-    if (!isCorrectLegalStatus(prisonerResult.legalStatus))
-      throw ValidationException("Can not discharge prisoner with a legal status of ${prisonerResult.legalStatus}")
 
     val dischargeToHospitalWithDefaultSupportingPrison = dischargeToHospital.copy(
       supportingPrisonId = dischargeToHospital.supportingPrisonId ?: dischargeToHospital.fromLocationId
@@ -135,7 +130,4 @@ class RestrictedPatientsService(
     createUserId = restrictedPatient.createUserId,
     createDateTime = restrictedPatient.createDateTime
   )
-
-  private fun isCorrectLegalStatus(legalStatus: LegalStatus?): Boolean =
-    LegalStatus.permissibleLegalStatusesForDischargingPrisonersToHospital().contains(legalStatus)
 }
