@@ -33,14 +33,14 @@ generic-service:
       APPINSIGHTS_INSTRUMENTATIONKEY: "APPINSIGHTS_INSTRUMENTATIONKEY"
       RESTRICTED_PATIENTS_API_CLIENT_ID: "RESTRICTED_PATIENTS_API_CLIENT_ID"
       RESTRICTED_PATIENTS_API_CLIENT_SECRET: "RESTRICTED_PATIENTS_API_CLIENT_SECRET"
-    restricted-patients-sub-queue-for-offender-events-instance-output:
-      OFFENDER_EVENTS_SQS_AWS_ACCESS_KEY_ID: "access_key_id"
-      OFFENDER_EVENTS_SQS_AWS_SECRET_ACCESS_KEY: "secret_access_key"
-      OFFENDER_EVENTS_SQS_QUEUE_NAME: "sqs_wb_name"
-    restricted-patients-sub-queue-for-offender-events-dl-instance-output:
-      OFFENDER_EVENTS_SQS_AWS_DLQ_ACCESS_KEY_ID: "access_key_id"
-      OFFENDER_EVENTS_SQS_AWS_DLQ_SECRET_ACCESS_KEY: "secret_access_key"
-      OFFENDER_EVENTS_SQS_DLQ_NAME: "sqs_wb_name"
+    restricted-patients-sub-queue-for-domain-events-instance-output:
+      DOMAIN_EVENTS_SQS_AWS_ACCESS_KEY_ID: "access_key_id"
+      DOMAIN_EVENTS_SQS_AWS_SECRET_ACCESS_KEY: "secret_access_key"
+      DOMAIN_EVENTS_SQS_QUEUE_NAME: "sqs_wb_name"
+    restricted-patients-sub-queue-for-domain-events-dl-instance-output:
+      DOMAIN_EVENTS_SQS_AWS_DLQ_ACCESS_KEY_ID: "access_key_id"
+      DOMAIN_EVENTS_SQS_AWS_DLQ_SECRET_ACCESS_KEY: "secret_access_key"
+      DOMAIN_EVENTS_SQS_DLQ_NAME: "sqs_wb_name"
 
 
   allowlist:
