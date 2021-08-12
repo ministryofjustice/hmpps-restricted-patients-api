@@ -44,7 +44,7 @@ class DomainEventsJmsConfig {
   fun awsSqsClientForDomainEvents(
     @Value("\${domain-events-sqs.aws.access.key.id}") accessKey: String,
     @Value("\${domain-events-sqs.aws.secret.access.key}") secretKey: String,
-    @Value("\${dmain-events-sqs.endpoint.region}") region: String
+    @Value("\${domain-events-sqs.endpoint.region}") region: String
   ): AmazonSQS =
     AmazonSQSClientBuilder.standard()
       .withCredentials(AWSStaticCredentialsProvider(BasicAWSCredentials(accessKey, secretKey)))
