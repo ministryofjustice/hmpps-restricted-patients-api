@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.service
 
 import com.microsoft.applicationinsights.TelemetryClient
 import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.inOrder
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
@@ -10,10 +11,9 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.EnumSource
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.anyString
+import org.springframework.web.reactive.function.client.WebClientResponseException
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.dataBuilders.HOSPITAL
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.dataBuilders.PRISON
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.dataBuilders.makeDischargeRequest
@@ -22,7 +22,6 @@ import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.dataBuilders.make
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.PrisonApiGateway
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.PrisonerSearchApiGateway
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.entities.RestrictedPatient
-import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.enums.LegalStatus
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.exceptions.NoResultsReturnedException
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.request.CreateExternalMovement
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.request.DischargeToHospitalRequest
@@ -201,24 +200,30 @@ class RestrictedPatientServiceTest {
           service.dischargeToHospital(makeDischargeRequest())
         }
       }
-    }
 
-    @Nested
-    inner class TestAllLegalStatuses {
-      @ParameterizedTest
-      @EnumSource(
-        value = LegalStatus::class,
-        names = ["INDETERMINATE_SENTENCE", "RECALL", "SENTENCED", "CONVICTED_UNSENTENCED", "IMMIGRATION_DETAINEE"]
-      )
-      fun `discharge an prisoner to hospital when they have the correct legal status`(status: LegalStatus) {
-        whenever(restrictedPatientsRepository.save(any())).thenReturn(makeRestrictedPatient())
+      @Test
+      fun `removes recently persisted restricted patient on prison api discharge error`() {
+        whenever(restrictedPatientsRepository.saveAndFlush(any())).thenReturn(makeRestrictedPatient())
         whenever(prisonerSearchApiGateway.searchByPrisonNumber(any())).thenReturn(
-          listOf(PrisonerResult(prisonerNumber = "A12345", legalStatus = status, bookingId = 1L))
+          listOf(PrisonerResult(prisonerNumber = "A12345", bookingId = 1L))
         )
+        whenever(prisonApiGateway.dischargeToHospital(any())).thenThrow(WebClientResponseException::class.java)
 
-        service.dischargeToHospital(makeDischargeRequest())
+        Assertions.assertThrows(WebClientResponseException::class.java) {
+          service.dischargeToHospital(makeDischargeRequest())
+        }
 
-        verify(prisonApiGateway).dischargeToHospital(any())
+        val argumentCaptor = ArgumentCaptor.forClass(RestrictedPatient::class.java)
+
+        verify(restrictedPatientsRepository).delete(argumentCaptor.capture())
+
+        assertThat(argumentCaptor.value).extracting(
+          "id",
+          "fromLocationId",
+          "supportingPrisonId",
+          "hospitalLocationCode",
+          "commentText",
+        ).contains(1L, "MDI", "MDI", "HAZLWD", "test")
       }
     }
 
@@ -227,9 +232,9 @@ class RestrictedPatientServiceTest {
       @BeforeEach
       fun beforeEach() {
         whenever(prisonerSearchApiGateway.searchByPrisonNumber(any())).thenReturn(
-          listOf(PrisonerResult(prisonerNumber = "A12345", legalStatus = LegalStatus.SENTENCED, bookingId = 1L))
+          listOf(PrisonerResult(prisonerNumber = "A12345", bookingId = 1L))
         )
-        whenever(restrictedPatientsRepository.save(any())).thenReturn(makeRestrictedPatient())
+        whenever(restrictedPatientsRepository.saveAndFlush(any())).thenReturn(makeRestrictedPatient())
       }
 
       @Test
@@ -283,7 +288,7 @@ class RestrictedPatientServiceTest {
 
         service.dischargeToHospital(makeDischargeRequest())
 
-        verify(restrictedPatientsRepository).save(argumentCaptor.capture())
+        verify(restrictedPatientsRepository).saveAndFlush(argumentCaptor.capture())
 
         assertThat(argumentCaptor.value).extracting(
           "fromLocationId",
@@ -292,6 +297,16 @@ class RestrictedPatientServiceTest {
           "commentText",
           "dischargeTime"
         ).contains("MDI", "MDI", "HAZLWD", "test", LocalDateTime.parse("2020-10-10T20:00:01"))
+      }
+
+      @Test
+      fun `ensures that the restricted patient is saved to the database before the prison api call`() {
+        service.dischargeToHospital(makeDischargeRequest())
+
+        val inOrder = inOrder(restrictedPatientsRepository, prisonApiGateway)
+
+        inOrder.verify(restrictedPatientsRepository).saveAndFlush(any())
+        inOrder.verify(prisonApiGateway).dischargeToHospital(any())
       }
     }
 
