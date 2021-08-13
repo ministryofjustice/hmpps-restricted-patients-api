@@ -1,7 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.dataBuilders
 
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.entities.RestrictedPatient
-import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.enums.LegalStatus
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.request.DischargeToHospitalRequest
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.Agency
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.DischargeToHospitalResponse
@@ -98,9 +97,8 @@ fun makeDischargeToHospitalResponse(
 
 fun makePrisonerResult(
   prisonerNumber: String = "A12345",
-  legalStatus: LegalStatus = LegalStatus.SENTENCED,
   bookingId: Long = 1L
-): PrisonerResult = PrisonerResult(prisonerNumber = prisonerNumber, legalStatus = legalStatus, bookingId = bookingId)
+): PrisonerResult = PrisonerResult(prisonerNumber = prisonerNumber, bookingId = bookingId)
 
 fun makePrisonerReceiveEvent(prisonerNumber: String) =
   """
