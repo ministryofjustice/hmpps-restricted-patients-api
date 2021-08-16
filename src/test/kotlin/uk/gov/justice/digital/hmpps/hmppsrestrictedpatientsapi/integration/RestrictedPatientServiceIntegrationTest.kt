@@ -35,6 +35,19 @@ class RestrictedPatientServiceIntegrationTest : IntegrationTestBase() {
     Assertions.assertThrows(RuntimeException::class.java) {
       restrictedPatientsService.dischargeToHospital(makeDischargeRequest().copy(offenderNo = "F12345"))
     }
+  }
+
+  @Test
+  fun `the recently added restricted patient gets removed`() {
+    prisonerSearchApiMockServer.stubSearchByPrisonNumber("F12345")
+
+    doAnswer {
+      throw RuntimeException()
+    }.whenever(prisonApiGateway).dischargeToHospital(any())
+
+    Assertions.assertThrows(RuntimeException::class.java) {
+      restrictedPatientsService.dischargeToHospital(makeDischargeRequest().copy(offenderNo = "F12345"))
+    }
 
     getRestrictedPatient(prisonerNumber = "F12345").exchange().expectStatus().isNotFound
   }
