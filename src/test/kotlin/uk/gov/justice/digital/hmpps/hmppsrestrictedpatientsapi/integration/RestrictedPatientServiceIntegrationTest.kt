@@ -35,5 +35,7 @@ class RestrictedPatientServiceIntegrationTest : IntegrationTestBase() {
     Assertions.assertThrows(RuntimeException::class.java) {
       restrictedPatientsService.dischargeToHospital(makeDischargeRequest().copy(offenderNo = "F12345"))
     }
+
+    getRestrictedPatient(prisonerNumber = "F12345").exchange().expectStatus().isNotFound
   }
 }
