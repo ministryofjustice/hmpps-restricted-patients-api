@@ -26,7 +26,7 @@ class RestrictedPatientsService(
   private val clock: Clock
 ) {
 
-  @Transactional
+  @Transactional(value = Transactional.TxType.NOT_SUPPORTED)
   fun dischargeToHospital(dischargeToHospital: DischargeToHospitalRequest): RestrictedPatientDto {
     restrictedPatientsRepository.findByPrisonerNumber(dischargeToHospital.offenderNo)?.let {
       throw IllegalStateException("Prisoner (${dischargeToHospital.offenderNo}) is already a restricted patient")
