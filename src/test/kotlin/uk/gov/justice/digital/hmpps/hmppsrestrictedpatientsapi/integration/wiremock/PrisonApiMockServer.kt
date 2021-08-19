@@ -36,7 +36,7 @@ class PrisonApiMockServer : WireMockServer(8999) {
             .withBody(
               """
               {
-                  "offenderNo": "G3417UE",
+                  "offenderNo": "$offenderNo",
                   "bookingId": 960606,
                   "bookingNo": "P81288",
                   "offenderId": 2317754,
