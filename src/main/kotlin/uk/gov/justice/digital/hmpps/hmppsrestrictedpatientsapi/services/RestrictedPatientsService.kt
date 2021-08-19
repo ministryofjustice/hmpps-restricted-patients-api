@@ -89,7 +89,7 @@ class RestrictedPatientsService(
     return transform(restrictedPatient, prisonSentFrom, hospitalSentTo, supportingPrison)
   }
 
-  @Transactional
+  @Transactional(value = Transactional.TxType.NOT_SUPPORTED)
   fun removeRestrictedPatient(prisonerNumber: String) {
     val restrictedPatient = restrictedPatientsRepository.findByPrisonerNumber(prisonerNumber)
       ?: throw EntityNotFoundException("No restricted patient record found for prison number $prisonerNumber")
@@ -99,31 +99,36 @@ class RestrictedPatientsService(
     val prisonerResult = prisonerSearchResponse.firstOrNull()
       ?: throw NoResultsReturnedException("No prisoner search results returned for $prisonerNumber")
 
-    prisonApiGateway.createExternalMovement(
-      CreateExternalMovement(
-        bookingId = prisonerResult.bookingId,
-        fromAgencyId = restrictedPatient.hospitalLocationCode,
-        toAgencyId = "OUT",
-        movementTime = LocalDateTime.now(clock),
-        movementType = "REL",
-        movementReason = "CR",
-        directionCode = "OUT"
-      )
-    )
-
     restrictedPatientsRepository.delete(restrictedPatient)
 
-    telemetryClient.trackEvent(
-      "restricted-patient-removed",
-      mapOf(
-        "prisonerNumber" to prisonerNumber,
-        "fromLocationId" to restrictedPatient.fromLocationId,
-        "hospitalLocationCode" to restrictedPatient.hospitalLocationCode,
-        "supportingPrisonId" to restrictedPatient.supportingPrisonId,
-        "dischargeTime" to restrictedPatient.dischargeTime.toString(),
-      ),
-      null
-    )
+    try {
+      prisonApiGateway.createExternalMovement(
+        CreateExternalMovement(
+          bookingId = prisonerResult.bookingId,
+          fromAgencyId = restrictedPatient.hospitalLocationCode,
+          toAgencyId = "OUT",
+          movementTime = LocalDateTime.now(clock),
+          movementType = "REL",
+          movementReason = "CR",
+          directionCode = "OUT"
+        )
+      )
+
+      telemetryClient.trackEvent(
+        "restricted-patient-removed",
+        mapOf(
+          "prisonerNumber" to prisonerNumber,
+          "fromLocationId" to restrictedPatient.fromLocationId,
+          "hospitalLocationCode" to restrictedPatient.hospitalLocationCode,
+          "supportingPrisonId" to restrictedPatient.supportingPrisonId,
+          "dischargeTime" to restrictedPatient.dischargeTime.toString(),
+        ),
+        null
+      )
+    } catch (e: Exception) {
+      restrictedPatientsRepository.saveAndFlush(restrictedPatient)
+      throw e
+    }
   }
 
   fun transform(

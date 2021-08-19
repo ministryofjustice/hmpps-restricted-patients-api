@@ -175,6 +175,19 @@ class RestrictedPatientServiceTest {
         null
       )
     }
+
+    @Test
+    fun `ensures that the restricted patient is removed before the prison api call`() {
+      whenever(restrictedPatientsRepository.findByPrisonerNumber(any())).thenReturn(makeRestrictedPatient())
+      whenever(prisonerSearchApiGateway.searchByPrisonNumber(anyString())).thenReturn(listOf(makePrisonerResult()))
+
+      service.removeRestrictedPatient("A12345")
+
+      val inOrder = inOrder(restrictedPatientsRepository, prisonApiGateway)
+
+      inOrder.verify(restrictedPatientsRepository).delete(any())
+      inOrder.verify(prisonApiGateway).createExternalMovement(any())
+    }
   }
 
   @Nested
