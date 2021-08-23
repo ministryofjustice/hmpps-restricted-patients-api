@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.integration
 
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock.equalToJson
+import com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor
 import com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor
 import com.github.tomakehurst.wiremock.client.WireMock.putRequestedFor
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
@@ -76,6 +77,7 @@ class RestrictedPatientIntegrationTest : IntegrationTestBase() {
   @Test
   fun `remove restricted patient`() {
     prisonApiMockServer.stubCreateExternalMovement()
+    prisonerSearchApiMockServer.stubRefreshIndex("A12345")
 
     dischargePrisonerWebClient(prisonerNumber = "A12345")
       .exchange()
@@ -95,6 +97,10 @@ class RestrictedPatientIntegrationTest : IntegrationTestBase() {
         .withRequestBody(
           equalToJson(loadResourceFile("create-external-movement-request.json"))
         )
+    )
+
+    prisonerSearchApiMockServer.verify(
+      getRequestedFor(urlEqualTo("/prisoner-index/index/prisoner/A12345"))
     )
 
     getRestrictedPatient(prisonerNumber = "A12345")

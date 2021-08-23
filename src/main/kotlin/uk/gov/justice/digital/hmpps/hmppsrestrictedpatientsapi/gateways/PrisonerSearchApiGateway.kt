@@ -19,4 +19,11 @@ class PrisonerSearchApiGateway(private val prisonerSearchWithAuthWebClient: WebC
     .retrieve()
     .bodyToMono(object : ParameterizedTypeReference<List<PrisonerResult>>() {})
     .block()!!
+
+  fun refreshPrisonerIndex(prisonerNumber: String): PrisonerResult = prisonerSearchWithAuthWebClient
+    .get()
+    .uri("/prisoner-index/index/prisoner/$prisonerNumber")
+    .retrieve()
+    .bodyToMono(PrisonerResult::class.java)
+    .block()!!
 }
