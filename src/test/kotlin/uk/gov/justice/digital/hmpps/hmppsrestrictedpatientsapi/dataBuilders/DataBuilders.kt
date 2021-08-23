@@ -3,11 +3,8 @@ package uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.dataBuilders
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.entities.RestrictedPatient
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.request.DischargeToHospitalRequest
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.Agency
-import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.DischargeToHospitalResponse
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.PrisonerResult
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.RestrictedPatientDto
-import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.RestrictivePatient
-import java.time.LocalDate
 import java.time.LocalDateTime
 
 val PRISON =
@@ -37,7 +34,6 @@ fun makeDischargeRequest(
 )
 
 fun makeRestrictedPatientDto(
-  id: Long = 1,
   fromLocationId: Agency = PRISON,
   supportingPrisonId: Agency = PRISON,
   prisonerNumber: String = "A12345",
@@ -47,7 +43,6 @@ fun makeRestrictedPatientDto(
   createDateTime: LocalDateTime = LocalDateTime.parse("2020-10-10T20:00:01"),
   createUserId: String = "user"
 ): RestrictedPatientDto = RestrictedPatientDto(
-  id,
   prisonerNumber,
   fromLocationId,
   hospitalLocationCode,
@@ -59,7 +54,6 @@ fun makeRestrictedPatientDto(
 )
 
 fun makeRestrictedPatient(
-  id: Long = 1,
   fromLocationId: String = "MDI",
   supportingPrisonId: String = "MDI",
   prisonerNumber: String = "A12345",
@@ -70,7 +64,6 @@ fun makeRestrictedPatient(
   createUserId: String = "ITAG_USER"
 ): RestrictedPatient {
   val patient = RestrictedPatient(
-    id,
     prisonerNumber,
     fromLocationId,
     hospitalLocationCode,
@@ -82,18 +75,6 @@ fun makeRestrictedPatient(
   patient.createUserId = createUserId
   return patient
 }
-
-fun makeDischargeToHospitalResponse(
-  dischargeDate: LocalDate = LocalDate.now(),
-  dischargeDetails: String = "test"
-): DischargeToHospitalResponse = DischargeToHospitalResponse(
-  restrictivePatient = RestrictivePatient(
-    supportingPrison = PRISON,
-    dischargedHospital = HOSPITAL,
-    dischargeDate = dischargeDate,
-    dischargeDetails = dischargeDetails
-  )
-)
 
 fun makePrisonerResult(
   prisonerNumber: String = "A12345",

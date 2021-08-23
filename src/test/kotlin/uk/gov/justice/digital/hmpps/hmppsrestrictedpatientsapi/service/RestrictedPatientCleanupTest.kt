@@ -17,7 +17,7 @@ import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.entities.Re
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.repositories.RestrictedPatientsRepository
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services.RestrictedPatientCleanup
 import java.time.LocalDateTime
-import javax.persistence.EntityNotFoundException
+import java.util.Optional
 
 class RestrictedPatientCleanupTest {
   private val restrictedPatientsRepository: RestrictedPatientsRepository = mock()
@@ -34,7 +34,7 @@ class RestrictedPatientCleanupTest {
   inner class ErrorHandling {
     @Test
     fun `fails gracefully when the restricted patient record no longer exists`() {
-      whenever(restrictedPatientsRepository.findByPrisonerNumber(anyString())).thenThrow(EntityNotFoundException::class.java)
+      whenever(restrictedPatientsRepository.findById(anyString())).thenReturn(Optional.empty())
 
       restrictedPatientCleanup.deleteRestrictedPatientOnExternalMovementIntoPrison("A12345")
 
@@ -46,14 +46,14 @@ class RestrictedPatientCleanupTest {
   inner class WithValidBookingAndRestrictedPatient {
     @BeforeEach
     fun beforeEach() {
-      whenever(restrictedPatientsRepository.findByPrisonerNumber(anyString())).thenReturn(makeRestrictedPatient())
+      whenever(restrictedPatientsRepository.findById(anyString())).thenReturn(Optional.of(makeRestrictedPatient()))
     }
 
     @Test
     fun `loads the restricted patient by prisoner number`() {
       restrictedPatientCleanup.deleteRestrictedPatientOnExternalMovementIntoPrison("A12345")
 
-      verify(restrictedPatientsRepository).findByPrisonerNumber("A12345")
+      verify(restrictedPatientsRepository).findById("A12345")
     }
 
     @Test
@@ -65,14 +65,13 @@ class RestrictedPatientCleanupTest {
       verify(restrictedPatientsRepository).delete(argumentCaptor.capture())
 
       assertThat(argumentCaptor.value).extracting(
-        "id",
         "prisonerNumber",
         "fromLocationId",
         "hospitalLocationCode",
         "supportingPrisonId",
         "dischargeTime",
         "commentText"
-      ).contains(1L, "A12345", "MDI", "HAZLWD", "MDI", LocalDateTime.parse("2020-10-10T20:00:01"), "test")
+      ).contains("A12345", "MDI", "HAZLWD", "MDI", LocalDateTime.parse("2020-10-10T20:00:01"), "test")
     }
 
     @Test

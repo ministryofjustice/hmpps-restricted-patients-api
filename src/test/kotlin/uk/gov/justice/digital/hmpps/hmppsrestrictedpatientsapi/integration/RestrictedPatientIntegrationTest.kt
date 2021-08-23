@@ -36,7 +36,6 @@ class RestrictedPatientIntegrationTest : IntegrationTestBase() {
       .exchange()
       .expectStatus().isCreated
       .expectBody()
-      .jsonPath("$.id").isNumber
       .jsonPath("$.prisonerNumber").isEqualTo("A12345")
       .jsonPath("$.fromLocation.agencyId").isEqualTo("MDI")
       .jsonPath("$.hospitalLocation.agencyId").isEqualTo("HAZLWD")

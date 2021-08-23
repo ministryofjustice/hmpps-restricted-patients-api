@@ -33,6 +33,7 @@ import java.time.Clock
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
+import java.util.Optional
 import javax.persistence.EntityNotFoundException
 
 class RestrictedPatientServiceTest {
@@ -65,19 +66,19 @@ class RestrictedPatientServiceTest {
   inner class RemovesRestrictedPatient {
     @Test
     fun `checks to see if there is a restricted patient associated with the prisoner number`() {
-      whenever(restrictedPatientsRepository.findByPrisonerNumber(anyString())).thenReturn(
-        makeRestrictedPatient()
+      whenever(restrictedPatientsRepository.findById(anyString())).thenReturn(
+        Optional.of(makeRestrictedPatient())
       )
       whenever(prisonerSearchApiGateway.searchByPrisonNumber(anyString())).thenReturn(listOf(makePrisonerResult()))
 
       service.removeRestrictedPatient("A12345")
 
-      verify(restrictedPatientsRepository).findByPrisonerNumber("A12345")
+      verify(restrictedPatientsRepository).findById("A12345")
     }
 
     @Test
     fun `handles no restricted patient record exists`() {
-      whenever(restrictedPatientsRepository.findByPrisonerNumber(anyString())).thenReturn(null)
+      whenever(restrictedPatientsRepository.findById(anyString())).thenReturn(Optional.empty())
 
       val exception = Assertions.assertThrows(EntityNotFoundException::class.java) {
         service.removeRestrictedPatient("A12345")
@@ -89,8 +90,8 @@ class RestrictedPatientServiceTest {
     @Test
     fun `makes a call to prisoner offender search`() {
       whenever(prisonerSearchApiGateway.searchByPrisonNumber(anyString())).thenReturn(listOf(makePrisonerResult()))
-      whenever(restrictedPatientsRepository.findByPrisonerNumber(anyString())).thenReturn(
-        makeRestrictedPatient()
+      whenever(restrictedPatientsRepository.findById(anyString())).thenReturn(
+        Optional.of(makeRestrictedPatient())
       )
 
       service.removeRestrictedPatient("A12345")
@@ -100,8 +101,8 @@ class RestrictedPatientServiceTest {
 
     @Test
     fun `handles no prisoner offender search results returned`() {
-      whenever(restrictedPatientsRepository.findByPrisonerNumber(anyString())).thenReturn(
-        makeRestrictedPatient()
+      whenever(restrictedPatientsRepository.findById(anyString())).thenReturn(
+        Optional.of(makeRestrictedPatient())
       )
       whenever(prisonerSearchApiGateway.searchByPrisonNumber(anyString())).thenReturn(emptyList())
 
@@ -114,8 +115,8 @@ class RestrictedPatientServiceTest {
 
     @Test
     fun `makes a call to prison api to create an external movement form hospital to community`() {
-      whenever(restrictedPatientsRepository.findByPrisonerNumber(anyString())).thenReturn(
-        makeRestrictedPatient()
+      whenever(restrictedPatientsRepository.findById(anyString())).thenReturn(
+        Optional.of(makeRestrictedPatient())
       )
       whenever(prisonerSearchApiGateway.searchByPrisonNumber(anyString())).thenReturn(listOf(makePrisonerResult()))
 
@@ -136,7 +137,7 @@ class RestrictedPatientServiceTest {
 
     @Test
     fun `remove restricted patient`() {
-      whenever(restrictedPatientsRepository.findByPrisonerNumber(anyString())).thenReturn(makeRestrictedPatient())
+      whenever(restrictedPatientsRepository.findById(anyString())).thenReturn(Optional.of(makeRestrictedPatient()))
       whenever(prisonerSearchApiGateway.searchByPrisonNumber(anyString())).thenReturn(listOf(makePrisonerResult()))
 
       service.removeRestrictedPatient("A12345")
@@ -146,19 +147,18 @@ class RestrictedPatientServiceTest {
       verify(restrictedPatientsRepository).delete(argumentCaptor.capture())
 
       assertThat(argumentCaptor.value).extracting(
-        "id",
         "prisonerNumber",
         "fromLocationId",
         "hospitalLocationCode",
         "supportingPrisonId",
         "dischargeTime",
         "commentText"
-      ).contains(1L, "A12345", "MDI", "HAZLWD", "MDI", LocalDateTime.parse("2020-10-10T20:00:01"), "test")
+      ).contains("A12345", "MDI", "HAZLWD", "MDI", LocalDateTime.parse("2020-10-10T20:00:01"), "test")
     }
 
     @Test
     fun `triggers a telemetry event`() {
-      whenever(restrictedPatientsRepository.findByPrisonerNumber(anyString())).thenReturn(makeRestrictedPatient())
+      whenever(restrictedPatientsRepository.findById(anyString())).thenReturn(Optional.of(makeRestrictedPatient()))
       whenever(prisonerSearchApiGateway.searchByPrisonNumber(anyString())).thenReturn(listOf(makePrisonerResult()))
 
       service.removeRestrictedPatient("A12345")
@@ -178,7 +178,7 @@ class RestrictedPatientServiceTest {
 
     @Test
     fun `ensures that the restricted patient is removed before the prison api calls`() {
-      whenever(restrictedPatientsRepository.findByPrisonerNumber(any())).thenReturn(makeRestrictedPatient())
+      whenever(restrictedPatientsRepository.findById(any())).thenReturn(Optional.of(makeRestrictedPatient()))
       whenever(prisonerSearchApiGateway.searchByPrisonNumber(anyString())).thenReturn(listOf(makePrisonerResult()))
       whenever(prisonerSearchApiGateway.refreshPrisonerIndex(anyString())).thenReturn(makePrisonerResult())
 
@@ -209,7 +209,7 @@ class RestrictedPatientServiceTest {
 
       @Test
       fun `throws exception when the offender is already a restricted patient`() {
-        whenever(restrictedPatientsRepository.findByPrisonerNumber(anyString())).thenReturn(makeRestrictedPatient())
+        whenever(restrictedPatientsRepository.findById(anyString())).thenReturn(Optional.of(makeRestrictedPatient()))
 
         Assertions.assertThrows(IllegalStateException::class.java) {
           service.dischargeToHospital(makeDischargeRequest())
@@ -233,12 +233,11 @@ class RestrictedPatientServiceTest {
         verify(restrictedPatientsRepository).delete(argumentCaptor.capture())
 
         assertThat(argumentCaptor.value).extracting(
-          "id",
           "fromLocationId",
           "supportingPrisonId",
           "hospitalLocationCode",
           "commentText",
-        ).contains(1L, "MDI", "MDI", "HAZLWD", "test")
+        ).contains("MDI", "MDI", "HAZLWD", "test")
       }
     }
 
@@ -273,12 +272,11 @@ class RestrictedPatientServiceTest {
 
         assertThat(response)
           .extracting(
-            "id",
             "prisonerNumber",
             "dischargeTime",
             "commentText"
           )
-          .contains(1L, "A12345", LocalDateTime.parse("2020-10-10T20:00:01"), "test")
+          .contains("A12345", LocalDateTime.parse("2020-10-10T20:00:01"), "test")
       }
 
       @Test
@@ -329,7 +327,7 @@ class RestrictedPatientServiceTest {
     inner class GetRestrictedPatient {
       @Test
       fun `throws entity not found`() {
-        whenever(restrictedPatientsRepository.findByPrisonerNumber(any())).thenReturn(null)
+        whenever(restrictedPatientsRepository.findById(any())).thenReturn(Optional.empty())
 
         Assertions.assertThrows(EntityNotFoundException::class.java) {
           service.getRestrictedPatient("A12345")
@@ -340,8 +338,8 @@ class RestrictedPatientServiceTest {
       fun `by prison number`() {
         whenever(prisonApiGateway.getAgencyLocationsByType("HSHOSP")).thenReturn(listOf(HOSPITAL))
         whenever(prisonApiGateway.getAgencyLocationsByType("INST")).thenReturn(listOf(PRISON))
-        whenever(restrictedPatientsRepository.findByPrisonerNumber(anyString())).thenReturn(
-          makeRestrictedPatient()
+        whenever(restrictedPatientsRepository.findById(anyString())).thenReturn(
+          Optional.of(makeRestrictedPatient())
         )
 
         val restrictedPatient = service.getRestrictedPatient("A12345")
@@ -351,14 +349,12 @@ class RestrictedPatientServiceTest {
         assertThat(restrictedPatient.hospitalLocation).isEqualTo(HOSPITAL)
 
         assertThat(restrictedPatient).extracting(
-          "id",
           "prisonerNumber",
           "dischargeTime",
           "commentText",
           "createDateTime",
           "createUserId"
         ).contains(
-          1L,
           "A12345",
           LocalDateTime.parse("2020-10-10T20:00:01"),
           "test",

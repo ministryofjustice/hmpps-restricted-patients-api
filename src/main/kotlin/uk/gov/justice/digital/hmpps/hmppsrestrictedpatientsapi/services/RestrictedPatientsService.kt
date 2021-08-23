@@ -28,7 +28,7 @@ class RestrictedPatientsService(
 
   @Transactional(value = Transactional.TxType.NOT_SUPPORTED)
   fun dischargeToHospital(dischargeToHospital: DischargeToHospitalRequest): RestrictedPatientDto {
-    restrictedPatientsRepository.findByPrisonerNumber(dischargeToHospital.offenderNo)?.let {
+    restrictedPatientsRepository.findById(dischargeToHospital.offenderNo).map {
       throw IllegalStateException("Prisoner (${dischargeToHospital.offenderNo}) is already a restricted patient")
     }
 
@@ -75,8 +75,8 @@ class RestrictedPatientsService(
   }
 
   fun getRestrictedPatient(prisonerNumber: String): RestrictedPatientDto {
-    val restrictedPatient = restrictedPatientsRepository.findByPrisonerNumber(prisonerNumber)
-      ?: throw EntityNotFoundException("No restricted patient record found for prison number $prisonerNumber")
+    val restrictedPatient = restrictedPatientsRepository.findById(prisonerNumber)
+      .orElseThrow { EntityNotFoundException("No restricted patient record found for prison number $prisonerNumber") }
 
     val agencies = prisonApiGateway.getAgencyLocationsByType("INST")
     val hospitals =
@@ -91,8 +91,8 @@ class RestrictedPatientsService(
 
   @Transactional(value = Transactional.TxType.NOT_SUPPORTED)
   fun removeRestrictedPatient(prisonerNumber: String) {
-    val restrictedPatient = restrictedPatientsRepository.findByPrisonerNumber(prisonerNumber)
-      ?: throw EntityNotFoundException("No restricted patient record found for prison number $prisonerNumber")
+    val restrictedPatient = restrictedPatientsRepository.findById(prisonerNumber)
+      .orElseThrow { throw EntityNotFoundException("No restricted patient record found for prison number $prisonerNumber") }
 
     val prisonerSearchResponse = prisonerSearchApiGateway.searchByPrisonNumber(prisonerNumber)
 
@@ -139,7 +139,6 @@ class RestrictedPatientsService(
     toAgency: Agency? = null,
     supportingPrisonAgency: Agency? = null
   ): RestrictedPatientDto = RestrictedPatientDto(
-    id = restrictedPatient.id!!,
     prisonerNumber = restrictedPatient.prisonerNumber,
     fromLocation = fromAgency,
     supportingPrison = supportingPrisonAgency,

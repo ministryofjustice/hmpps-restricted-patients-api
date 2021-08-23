@@ -4,7 +4,6 @@ import com.microsoft.applicationinsights.TelemetryClient
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.entities.RestrictedPatient
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.repositories.RestrictedPatientsRepository
-import javax.persistence.EntityNotFoundException
 import javax.transaction.Transactional
 
 @Service
@@ -28,9 +27,6 @@ class RestrictedPatientCleanup(
     )
   }
 
-  private fun tryGetRestrictedPatient(prisonerNumber: String): RestrictedPatient? = try {
-    restrictedPatientsRepository.findByPrisonerNumber(prisonerNumber)
-  } catch (e: EntityNotFoundException) {
-    null
-  }
+  private fun tryGetRestrictedPatient(prisonerNumber: String): RestrictedPatient? =
+    restrictedPatientsRepository.findById(prisonerNumber).orElse(null)
 }
