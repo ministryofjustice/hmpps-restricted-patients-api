@@ -114,6 +114,8 @@ class RestrictedPatientsService(
         )
       )
 
+      prisonerSearchApiGateway.refreshPrisonerIndex(prisonerNumber)
+
       telemetryClient.trackEvent(
         "restricted-patient-removed",
         mapOf(

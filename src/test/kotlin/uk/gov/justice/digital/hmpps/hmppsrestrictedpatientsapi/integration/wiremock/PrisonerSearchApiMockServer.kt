@@ -55,4 +55,27 @@ class PrisonerSearchApiMockServer : WireMockServer(8100) {
         )
     )
   }
+
+  fun stubRefreshIndex(prisonerNumber: String) {
+    stubFor(
+      get(urlEqualTo("/prisoner-index/index/prisoner/$prisonerNumber"))
+        .willReturn(
+          aResponse()
+            .withHeader("Content-Type", "application/json")
+            .withStatus(200)
+            .withBody(
+              """             
+                {
+                  "prisonerNumber": "$prisonerNumber",
+                  "pncNumber": "96/371915Q",
+                  "pncNumberCanonicalShort": "96/371915Q",
+                  "pncNumberCanonicalLong": "1996/371915Q",
+                  "croNumber": "177155/96K",
+                  "bookingId": "1138058"    
+                }               
+              """.trimIndent()
+            )
+        )
+    )
+  }
 }
