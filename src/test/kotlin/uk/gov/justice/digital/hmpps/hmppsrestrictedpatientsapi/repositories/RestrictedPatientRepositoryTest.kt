@@ -44,13 +44,12 @@ class RestrictedPatientRepositoryTest {
         hospitalLocationCode = "HAZLWD",
         commentText = "test"
       )
-    ).id
+    ).prisonerNumber
 
-    val entity = repository.findById(id!!).orElseThrow()
+    val entity = repository.findById(id).orElseThrow()
 
     assertThat(entity)
       .extracting(
-        "id",
         "prisonerNumber",
         "fromLocationId",
         "supportingPrisonId",
@@ -59,7 +58,7 @@ class RestrictedPatientRepositoryTest {
         "commentText",
         "createUserId"
       )
-      .contains(id, "A12345", "MDI", "LEI", now, "HAZLWD", "test", "user")
+      .contains("A12345", "MDI", "LEI", now, "HAZLWD", "test", "user")
 
     entityManager.remove(entity)
   }
@@ -77,7 +76,7 @@ class RestrictedPatientRepositoryTest {
       )
     )
 
-    val entity = repository.findByPrisonerNumber("A12345")
+    val entity = repository.findById("A12345").get()
 
     assertThat(entity)
       .extracting(

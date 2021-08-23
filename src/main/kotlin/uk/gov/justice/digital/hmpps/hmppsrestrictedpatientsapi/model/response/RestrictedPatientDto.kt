@@ -8,8 +8,6 @@ import java.time.LocalDateTime
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @ApiModel(description = "Restricted patient")
 data class RestrictedPatientDto(
-  @ApiModelProperty(value = "Id of the restricted patient record", example = "1")
-  val id: Long,
   @ApiModelProperty(value = "Then NOMS Id of the restricted patient", example = "G1072GT")
   val prisonerNumber: String,
   @ApiModelProperty(value = "Previous location id", example = "MDI")
