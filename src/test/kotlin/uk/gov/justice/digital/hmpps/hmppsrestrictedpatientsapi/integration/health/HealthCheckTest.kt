@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.mock.mockito.SpyBean
+import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.util.ReflectionTestUtils
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.config.DlqStatus
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.config.QueueAttributes
@@ -23,6 +24,7 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.function.Consumer
 
+@ActiveProfiles("test")
 class HealthCheckTest : IntegrationTestBase() {
 
   @SpyBean

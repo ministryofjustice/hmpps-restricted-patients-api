@@ -46,4 +46,20 @@ tasks {
       jvmTarget = "16"
     }
   }
+  test {
+    useJUnitPlatform {
+      excludeTags("race-condition-test")
+    }
+  }
+
+  task<Test>("testTargetAppScope") {
+    include("race-condition-test")
+    shouldRunAfter(test)
+    useJUnitPlatform()
+  }
+
+  build {
+    dependsOn(compileKotlin)
+    dependsOn("testTargetAppScope")
+  }
 }

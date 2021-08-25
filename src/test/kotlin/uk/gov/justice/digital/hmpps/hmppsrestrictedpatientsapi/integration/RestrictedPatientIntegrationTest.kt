@@ -10,10 +10,12 @@ import com.nhaarman.mockitokotlin2.whenever
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.test.context.ActiveProfiles
 import java.time.Clock
 import java.time.LocalDate
 import java.time.ZoneId
 
+@ActiveProfiles("test")
 class RestrictedPatientIntegrationTest : IntegrationTestBase() {
 
   @MockBean
@@ -65,8 +67,7 @@ class RestrictedPatientIntegrationTest : IntegrationTestBase() {
       .exchange()
       .expectStatus().isCreated
 
-    webTestClient.get().uri("/restricted-patient/prison-number/A16345")
-      .headers(setHeaders())
+    getRestrictedPatient("A16345")
       .exchange()
       .expectStatus().is2xxSuccessful
       .expectBody()
