@@ -1,23 +1,23 @@
 package uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways
 
 import org.springframework.core.ParameterizedTypeReference
-import org.springframework.stereotype.Component
+import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClient
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.request.CreateExternalMovement
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.request.DischargeToHospitalRequest
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.Agency
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.OffenderBookingResponse
 
-@Component("PrisonApiGatewayWithAuth")
-class PrisonApiGateway(private val prisonApiWithAuthWebClient: WebClient) {
+@Service
+class PrisonApiGateway(private val prisonApiClientCreds: WebClient) {
   fun dischargeToHospital(dischargeToHospitalDetails: DischargeToHospitalRequest) =
-    prisonApiWithAuthWebClient
+    prisonApiClientCreds
       .put()
       .uri("/offenders/${dischargeToHospitalDetails.offenderNo}/discharge-to-hospital")
       .bodyValue(
         mapOf(
           "commentText" to dischargeToHospitalDetails.commentText,
-          "dischargeTime" to dischargeToHospitalDetails.dischargeTime,
+          "dischargeTime" to dischargeToHospitalDetails.dischargeTime.toString(),
           "fromLocationId" to dischargeToHospitalDetails.fromLocationId,
           "hospitalLocationCode" to dischargeToHospitalDetails.hospitalLocationCode,
           "supportingPrisonId" to dischargeToHospitalDetails.supportingPrisonId
@@ -27,14 +27,14 @@ class PrisonApiGateway(private val prisonApiWithAuthWebClient: WebClient) {
       .bodyToMono(String::class.java)
       .block()
 
-  fun getAgencyLocationsByType(type: String): List<Agency> = prisonApiWithAuthWebClient
+  fun getAgencyLocationsByType(type: String): List<Agency> = prisonApiClientCreds
     .get()
     .uri("/agencies/type/$type")
     .retrieve()
     .bodyToMono(object : ParameterizedTypeReference<List<Agency>>() {})
     .block()!!
 
-  fun getAgencyById(agencyId: String): Agency? = prisonApiWithAuthWebClient
+  fun getAgencyById(agencyId: String): Agency? = prisonApiClientCreds
     .get()
     .uri("/agencies/$agencyId")
     .retrieve()
@@ -42,7 +42,7 @@ class PrisonApiGateway(private val prisonApiWithAuthWebClient: WebClient) {
     .block()!!
 
   fun createExternalMovement(createExternalMovement: CreateExternalMovement) {
-    prisonApiWithAuthWebClient
+    prisonApiClientCreds
       .post()
       .uri("/movements")
       .bodyValue(createExternalMovement)
@@ -51,14 +51,10 @@ class PrisonApiGateway(private val prisonApiWithAuthWebClient: WebClient) {
       .block()
   }
 
-  fun getOffenderBooking(bookingId: Long): OffenderBookingResponse = prisonApiWithAuthWebClient
+  fun getOffenderBooking(bookingId: Long): OffenderBookingResponse = prisonApiClientCreds
     .get()
     .uri("/bookings/$bookingId")
     .retrieve()
     .bodyToMono(OffenderBookingResponse::class.java)
     .block()!!
 }
-
-@Component("PrisonApiGatewayClientCreds")
-class PrisonApiGatewayClientCreds(prisonApiClientCredsWebclient: WebClient) :
-  PrisonApiGateway(prisonApiClientCredsWebclient)

@@ -6,11 +6,11 @@ import com.nhaarman.mockitokotlin2.whenever
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.test.mock.mockito.MockBean
-import org.springframework.security.test.context.support.WithMockUser
+import org.springframework.test.context.ActiveProfiles
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.dataBuilders.makeDischargeRequest
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.dataBuilders.makeRestrictedPatient
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.PrisonApiGateway
@@ -19,11 +19,11 @@ import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services.Restrict
 
 class BreakFlow : RuntimeException()
 
-@WithMockUser("ITAG_USER")
+@ActiveProfiles("test", "app-scope")
+@Tag("race-condition-test")
 class RestrictedPatientServiceIntegrationTest : IntegrationTestBase() {
 
   @MockBean
-  @Qualifier("PrisonApiGatewayWithAuth")
   lateinit var prisonApiGateway: PrisonApiGateway
 
   @Autowired
