@@ -63,8 +63,8 @@ abstract class IntegrationTestBase {
     flyway.migrate()
   }
 
-  fun setHeaders(contentType: MediaType = MediaType.APPLICATION_JSON): (HttpHeaders) -> Unit = {
-    it.setBearerAuth(jwtAuthHelper.createJwt(subject = "ITAG_USER"))
+  fun setHeaders(contentType: MediaType = MediaType.APPLICATION_JSON, username: String? = "ITAG_USER"): (HttpHeaders) -> Unit = {
+    it.setBearerAuth(jwtAuthHelper.createJwt(subject = username))
     it.contentType = contentType
   }
 
