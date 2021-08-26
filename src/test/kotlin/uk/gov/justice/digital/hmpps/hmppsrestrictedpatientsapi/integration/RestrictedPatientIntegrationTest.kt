@@ -1,6 +1,7 @@
 package uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.integration
 
 import com.github.tomakehurst.wiremock.client.WireMock
+import com.github.tomakehurst.wiremock.client.WireMock.equalTo
 import com.github.tomakehurst.wiremock.client.WireMock.equalToJson
 import com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor
 import com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor
@@ -44,6 +45,11 @@ class RestrictedPatientIntegrationTest : IntegrationTestBase() {
       .jsonPath("$.supportingPrison.agencyId").isEqualTo("MDI")
       .jsonPath("$.dischargeTime").isEqualTo("2021-06-07T13:40:32.498")
       .jsonPath("$.commentText").isEqualTo("Prisoner was released on bail")
+
+    oAuthMockServer.verify(
+      postRequestedFor(urlEqualTo("/auth/oauth/token"))
+        .withRequestBody(equalTo("grant_type=client_credentials&scope=write&username=ITAG_USER"))
+    )
 
     prisonApiMockServer.verify(
       putRequestedFor(urlEqualTo("/api/offenders/A12345/discharge-to-hospital"))
@@ -91,6 +97,11 @@ class RestrictedPatientIntegrationTest : IntegrationTestBase() {
       .headers(setHeaders())
       .exchange()
       .expectStatus().is2xxSuccessful
+
+    oAuthMockServer.verify(
+      postRequestedFor(urlEqualTo("/auth/oauth/token"))
+        .withRequestBody(equalTo("grant_type=client_credentials&scope=write&username=ITAG_USER"))
+    )
 
     prisonApiMockServer.verify(
       postRequestedFor(urlEqualTo("/api/movements"))
