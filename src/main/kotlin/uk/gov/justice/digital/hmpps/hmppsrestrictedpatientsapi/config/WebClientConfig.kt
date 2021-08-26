@@ -1,12 +1,13 @@
 package uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.config
 
-import UserContext
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Profile
 import org.springframework.http.codec.ClientCodecConfigurer
+import org.springframework.security.core.Authentication
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.oauth2.client.AuthorizedClientServiceOAuth2AuthorizedClientManager
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientProviderBuilder
@@ -115,12 +116,11 @@ class WebClientConfig(
     authorizedClientRepository: OAuth2AuthorizedClientRepository
   ): OAuth2AuthorizedClientManager {
     val defaultClientCredentialsTokenResponseClient = DefaultClientCredentialsTokenResponseClient()
-    val authentication = UserContext.getAuthentication()
+    val authentication: Authentication = SecurityContextHolder.getContext().authentication
 
     defaultClientCredentialsTokenResponseClient.setRequestEntityConverter { grantRequest: OAuth2ClientCredentialsGrantRequest? ->
       val converter = CustomOAuth2ClientCredentialsGrantRequestEntityConverter()
-      val username = authentication?.name
-      converter.enhanceWithUsername(grantRequest, username)
+      converter.enhanceWithUsername(grantRequest, authentication.name)
     }
 
     val authorizedClientProvider = OAuth2AuthorizedClientProviderBuilder.builder()
