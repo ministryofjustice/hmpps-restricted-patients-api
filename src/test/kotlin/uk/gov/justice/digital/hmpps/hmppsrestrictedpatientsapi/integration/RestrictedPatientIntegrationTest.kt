@@ -2,7 +2,6 @@ package uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.integration
 
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock.equalToJson
-import com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor
 import com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor
 import com.github.tomakehurst.wiremock.client.WireMock.putRequestedFor
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
@@ -100,7 +99,7 @@ class RestrictedPatientIntegrationTest : IntegrationTestBase() {
     )
 
     prisonerSearchApiMockServer.verify(
-      getRequestedFor(urlEqualTo("/prisoner-index/index/prisoner/A12345"))
+      putRequestedFor(urlEqualTo("/prisoner-index/index/prisoner/A12345"))
     )
 
     getRestrictedPatient(prisonerNumber = "A12345")

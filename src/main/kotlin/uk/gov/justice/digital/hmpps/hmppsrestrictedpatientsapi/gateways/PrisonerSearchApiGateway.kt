@@ -22,7 +22,7 @@ class PrisonerSearchApiGateway(@Qualifier("prisonerSearchClientCreds") private v
     .block()!!
 
   fun refreshPrisonerIndex(prisonerNumber: String): PrisonerResult = prisonerSearchClientCreds
-    .get()
+    .put()
     .uri("/prisoner-index/index/prisoner/$prisonerNumber")
     .retrieve()
     .bodyToMono(PrisonerResult::class.java)

@@ -4,6 +4,7 @@ import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock.aResponse
 import com.github.tomakehurst.wiremock.client.WireMock.get
 import com.github.tomakehurst.wiremock.client.WireMock.post
+import com.github.tomakehurst.wiremock.client.WireMock.put
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 
 class PrisonerSearchApiMockServer : WireMockServer(8100) {
@@ -58,7 +59,7 @@ class PrisonerSearchApiMockServer : WireMockServer(8100) {
 
   fun stubRefreshIndex(prisonerNumber: String) {
     stubFor(
-      get(urlEqualTo("/prisoner-index/index/prisoner/$prisonerNumber"))
+      put(urlEqualTo("/prisoner-index/index/prisoner/$prisonerNumber"))
         .willReturn(
           aResponse()
             .withHeader("Content-Type", "application/json")
