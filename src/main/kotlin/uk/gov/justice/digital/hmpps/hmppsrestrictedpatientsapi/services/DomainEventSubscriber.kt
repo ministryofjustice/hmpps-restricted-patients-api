@@ -30,10 +30,10 @@ class DomainEventSubscriber(
   fun handleEvents(requestJson: String?) {
     val prisonerReceivedEvent = gson.fromJson(requestJson, PrisonerReceivedEvent::class.java)
 
-    log.debug("Domain event received: {}", prisonerReceivedEvent.eventType)
+    log.info("Domain event received: {}", prisonerReceivedEvent.eventType)
 
     when (prisonerReceivedEvent.eventType) {
-      "prison-offender-events.prisoner.receive" ->
+      "prison-offender-events.prisoner.received" ->
         restrictedPatientCleanup.deleteRestrictedPatientOnExternalMovementIntoPrison(
           prisonerReceivedEvent.additionalInformation.nomsNumber
         )
