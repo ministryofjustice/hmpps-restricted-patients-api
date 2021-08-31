@@ -84,7 +84,7 @@ fun makePrisonerResult(
 fun makePrisonerReceiveEvent(prisonerNumber: String) =
   """
 {
-    "eventType": "prison-offender-events.prisoner.receive",
+    "eventType": "prison-offender-events.prisoner.received",
     "additionalInformation": {
       "nomsNumber": $prisonerNumber
     }
