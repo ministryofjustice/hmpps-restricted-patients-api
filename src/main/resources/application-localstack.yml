@@ -1,4 +1,4 @@
-offender-events-sqs:
+domain-events-sqs:
   provider: localstack
   endpoint.url: http://localhost:4566
   queue.name: rp_api_queue

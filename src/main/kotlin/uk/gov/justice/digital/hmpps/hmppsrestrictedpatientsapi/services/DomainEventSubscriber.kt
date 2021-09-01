@@ -16,6 +16,8 @@ data class AdditionalInformation(
   val nomsNumber: String
 )
 
+data class Event(val Message: String)
+
 @Service
 @ConditionalOnProperty("domain-events-sqs.provider")
 class DomainEventSubscriber(
@@ -28,7 +30,8 @@ class DomainEventSubscriber(
     containerFactory = "jmsListenerContainerFactoryForDomainEvents"
   )
   fun handleEvents(requestJson: String?) {
-    val prisonerReceivedEvent = gson.fromJson(requestJson, PrisonerReceivedEvent::class.java)
+    val event = gson.fromJson(requestJson, Event::class.java)
+    val prisonerReceivedEvent = gson.fromJson(event.Message, PrisonerReceivedEvent::class.java)
 
     log.info("Domain event received: {}", prisonerReceivedEvent.eventType)
 
