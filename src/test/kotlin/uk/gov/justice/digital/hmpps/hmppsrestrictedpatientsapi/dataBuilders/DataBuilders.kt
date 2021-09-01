@@ -83,11 +83,16 @@ fun makePrisonerResult(
 
 fun makePrisonerReceiveEvent(prisonerNumber: String) =
   """
-{
-    "eventType": "prison-offender-events.prisoner.received",
-    "additionalInformation": {
-      "nomsNumber": $prisonerNumber
+    {
+        "Type": "Notification",
+        "MessageId": "5b90ee7d-67bc-5959-a4d8-b7d420180853",
+        "Message": "{\"eventType\":\"prison-offender-events.prisoner.received\",\"additionalInformation\":{\"nomsNumber\":\"$prisonerNumber\",\"reason\":\"ADMISSION\",\"probableCause\":\"RECALL\",\"source\":\"PRISON\",\"details\":\"ACTIVE IN:ADM-24\",\"currentLocation\":\"IN_PRISON\",\"prisonId\":\"LEI\",\"currentPrisonStatus\":\"UNDER_PRISON_CARE\"},\"version\":1,\"occurredAt\":\"2021-09-01T10:16:57.435579+01:00\",\"publishedAt\":\"2021-09-01T10:18:28.69751046+01:00\",\"description\":\"A prisoner has been received into prison\"}",
+        "Timestamp": "2021-09-01T09:18:28.725Z",
+        "MessageAttributes": {
+            "eventType": {
+                "Type": "String",
+                "Value": "prison-offender-events.prisoner.received"
+            }
+        }
     }
-}
-
   """.trimIndent()
