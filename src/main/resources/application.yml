@@ -83,5 +83,10 @@ domain-events-sqs:
   provider: aws
   endpoint.region: eu-west-2
 
+
+domain-events-sns:
+  provider: aws
+  region: eu-west-2
+
 api:
   health-timeout-ms: 1000
