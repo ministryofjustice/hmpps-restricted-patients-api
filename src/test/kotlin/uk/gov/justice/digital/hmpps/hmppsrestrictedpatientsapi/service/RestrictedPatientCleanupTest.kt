@@ -15,19 +15,22 @@ import org.mockito.ArgumentMatchers.anyString
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.dataBuilders.makeRestrictedPatient
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.entities.RestrictedPatient
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.repositories.RestrictedPatientsRepository
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services.DomainEventPublisher
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services.RestrictedPatientCleanup
 import java.time.LocalDateTime
 import java.util.Optional
 
 class RestrictedPatientCleanupTest {
   private val restrictedPatientsRepository: RestrictedPatientsRepository = mock()
+  private val domainEventPublisher: DomainEventPublisher = mock()
   private val telemetryClient: TelemetryClient = mock()
 
   private lateinit var restrictedPatientCleanup: RestrictedPatientCleanup
 
   @BeforeEach
   fun beforeEach() {
-    restrictedPatientCleanup = RestrictedPatientCleanup(restrictedPatientsRepository, telemetryClient)
+    restrictedPatientCleanup =
+      RestrictedPatientCleanup(restrictedPatientsRepository, domainEventPublisher, telemetryClient)
   }
 
   @Nested
@@ -85,6 +88,13 @@ class RestrictedPatientCleanupTest {
         ),
         null
       )
+    }
+
+    @Test
+    fun `calls the domainEventPublisher service to raise a restricted patient removed event`() {
+      restrictedPatientCleanup.deleteRestrictedPatientOnExternalMovementIntoPrison("A12345")
+
+      verify(domainEventPublisher).publishRestrictedPatientRemoved("A12345")
     }
   }
 }

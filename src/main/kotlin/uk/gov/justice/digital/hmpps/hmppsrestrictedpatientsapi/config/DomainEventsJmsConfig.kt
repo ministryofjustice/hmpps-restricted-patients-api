@@ -6,12 +6,18 @@ import com.amazonaws.auth.AWSStaticCredentialsProvider
 import com.amazonaws.auth.AnonymousAWSCredentials
 import com.amazonaws.auth.BasicAWSCredentials
 import com.amazonaws.client.builder.AwsClientBuilder
+import com.amazonaws.services.sns.AmazonSNS
+import com.amazonaws.services.sns.AmazonSNSAsync
+import com.amazonaws.services.sns.AmazonSNSAsyncClientBuilder
 import com.amazonaws.services.sqs.AmazonSQS
 import com.amazonaws.services.sqs.AmazonSQSClientBuilder
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
+import org.springframework.cloud.aws.messaging.core.NotificationMessagingTemplate
+import org.springframework.cloud.aws.messaging.core.TopicMessageChannel
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.jms.annotation.EnableJms
@@ -84,4 +90,31 @@ class DomainEventsJmsConfig {
       .withEndpointConfiguration(AwsClientBuilder.EndpointConfiguration(serviceEndpoint, region))
       .withCredentials(AWSStaticCredentialsProvider(AnonymousAWSCredentials()))
       .build()
+
+  @Bean
+  @ConditionalOnProperty(name = ["domain-events-sns.provider"], havingValue = "aws")
+  fun awsSnsClientForDomainEvents(
+    @Value("\${domain-events-sns.aws.access.key.id}") accessKey: String,
+    @Value("\${domain-events-sns.aws.secret.access.key}") secretKey: String
+  ): AmazonSNSAsync = AmazonSNSAsyncClientBuilder.standard()
+    .withCredentials(AWSStaticCredentialsProvider(BasicAWSCredentials(accessKey, secretKey)))
+    .build()
+
+  @Bean("awsSnsClientForDomainEvents")
+  @ConditionalOnProperty(name = ["domain-events-sns.provider"], havingValue = "localstack")
+  fun awsSnsClientForDomainEventsLocalStack(@Value("\${domain-events-sns.region}") region: String): AmazonSNSAsync =
+    AmazonSNSAsyncClientBuilder.standard()
+      .withCredentials(AWSStaticCredentialsProvider(AnonymousAWSCredentials()))
+      .withRegion(region)
+      .build()
+
+  @Bean
+  fun topicTemplate(@Qualifier("awsSnsClientForDomainEvents") client: AmazonSNS): NotificationMessagingTemplate =
+    NotificationMessagingTemplate(client)
+
+  @Bean
+  fun topicMessageChannel(
+    @Qualifier("awsSnsClientForDomainEvents") client: AmazonSNS,
+    @Value("\${domain-events-sns.topic.arn}") topicArn: String
+  ): TopicMessageChannel = TopicMessageChannel(client, topicArn)
 }

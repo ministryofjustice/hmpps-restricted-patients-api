@@ -8,6 +8,7 @@ import javax.transaction.Transactional
 @Service
 class RestrictedPatientCleanup(
   private val restrictedPatientsRepository: RestrictedPatientsRepository,
+  private val domainEventPublisher: DomainEventPublisher,
   private val telemetryClient: TelemetryClient
 ) {
 
@@ -16,6 +17,8 @@ class RestrictedPatientCleanup(
     val restrictedPatient = restrictedPatientsRepository.findById(prisonerNumber).orElse(null) ?: return
 
     restrictedPatientsRepository.delete(restrictedPatient)
+
+    domainEventPublisher.publishRestrictedPatientRemoved(prisonerNumber)
 
     telemetryClient.trackEvent(
       "restricted-patient-removed-on-prison-offender-events.prisoner.receive",

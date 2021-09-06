@@ -28,6 +28,7 @@ import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.request.Dis
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.Agency
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.PrisonerResult
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.repositories.RestrictedPatientsRepository
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services.DomainEventPublisher
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services.RestrictedPatientsService
 import java.time.Clock
 import java.time.LocalDate
@@ -41,6 +42,7 @@ class RestrictedPatientServiceTest {
   private val prisonApiGateway: PrisonApiGateway = mock()
   private val prisonerSearchApiGateway: PrisonerSearchApiGateway = mock()
   private val restrictedPatientsRepository: RestrictedPatientsRepository = mock()
+  private val domainEventPublisher: DomainEventPublisher = mock()
   private val telemetryClient: TelemetryClient = mock()
   private val clock: Clock = mock()
 
@@ -57,6 +59,7 @@ class RestrictedPatientServiceTest {
       prisonApiGateway,
       prisonerSearchApiGateway,
       restrictedPatientsRepository,
+      domainEventPublisher,
       telemetryClient,
       clock
     )
@@ -189,6 +192,16 @@ class RestrictedPatientServiceTest {
       inOrder.verify(restrictedPatientsRepository).delete(any())
       inOrder.verify(prisonApiGateway).createExternalMovement(any())
       inOrder.verify(prisonerSearchApiGateway).refreshPrisonerIndex(any())
+    }
+
+    @Test
+    fun `publish a restricted patient remove event`() {
+      whenever(restrictedPatientsRepository.findById(any())).thenReturn(Optional.of(makeRestrictedPatient()))
+      whenever(prisonerSearchApiGateway.searchByPrisonNumber(anyString())).thenReturn(listOf(makePrisonerResult()))
+
+      service.removeRestrictedPatient("A12345")
+
+      verify(domainEventPublisher).publishRestrictedPatientRemoved("A12345")
     }
   }
 
