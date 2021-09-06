@@ -3,7 +3,3 @@ domain-events-sqs:
   endpoint.url: http://localhost:4566
   queue.name: rp_api_queue
   dlq.name: rp_api_dlq
-
-domain-events-sns:
-  provider: localstack
-  topic.arn: arn:aws:sns:eu-west-2:000000000000:domain_events
