@@ -13,6 +13,6 @@ aws --endpoint-url=http://localhost:4566 sqs create-queue --queue-name rp_api_qu
 aws --endpoint-url=http://localhost:4566 sns subscribe \
     --topic-arn arn:aws:sns:eu-west-2:000000000000:domain_events \
     --protocol sqs \
-    --notification-endpoint http://localhost:4566/queue/rp_api_queue \
+    --notification-endpoint http://localhost:4566/queue/rp_api_queue
 
 
