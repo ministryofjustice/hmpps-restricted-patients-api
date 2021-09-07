@@ -1,32 +1,46 @@
-# hmpps-template-kotlin
+# Hmpps restricted patients API
+[![CircleCI](https://circleci.com/gh/ministryofjustice/hmpps-restricted-patients-api/tree/main.svg?style=svg)](https://circleci.com/gh/ministryofjustice/prisoner-offender-search)
+[![Docker](https://quay.io/repository/hmpps/hmpps-restricted-patients-api/status)](https://quay.io/repository/hmpps/prisoner-offender-search/status)
+[![API docs](https://img.shields.io/badge/API_docs_-view-85EA2D.svg?logo=swagger)](https://restricted-patients-api-dev.hmpps.service.justice.gov.uk/swagger-ui/index.html?configUrl=/v3/api-docs/swagger-config)
 
-This is a skeleton project from which to create new kotlin projects from.
+# Features
+* Discharge  a prisoner to hospital 
+* Surface a restricted patients details
+* Remove restricted patients from the service 
+
+The frontend can be found here: <https://github.com/ministryofjustice/hmpps-restricted-patients>
 
 # Instructions
+###Tests
+Before running the tests `docker-compose -f docker-compose-test.yml up` needs to be running and to have finished loading 
+before you start running the tests. Once done you can run the tests by running `./gradlew build`
 
-If this is a Digital Prison Services project then the project will be created as part of bootstrapping - 
-see https://github.com/ministryofjustice/dps-project-bootstrap.
+###Running locally 
+`./gradlew bootRun --args='--spring.profiles.active=dev,stdout,localstack'`
 
-## Renaming from HMPPS Template Kotlin - github Actions
+## Domain events
+This service publishes the  `restricted-patients.patient.removed` domain event whenever a restricted patient 
+is removed from the service. 
 
-Once the new repository is deployed. Navigate to the repository in github, and select the `Actions` tab.
-Click the link to `Enable Actions on this repository`.
+####Publish -> restricted-patients.patient.removed
+The message is published via amazon sns. The payload is defined below. 
+```javascript
+{
+   "eventType": "restricted-patients.patient.removed",
+   "occurredAt": "2021-02-08T14:41:11.526762", //ISO offset date time when the restricted patient was removed
+   "publishedAt": "2020-10-12T20:00:00", //ISO offset date time when the event was published
+   "version": 1, 
+   "description": "Prisoner no longer a restricted patient"     
+   "additionalInformation": { "prisonerNumber": "A12345"}     
+}
+```
 
-Find the Action workflow named: `rename-project-create-pr` and click `Run workflow`.  This workflow will will
-execute the `rename-project.bash` and create Pull Request for you to review.  Review the PR and merge.
+This service subscribes to two types of events:
+* prison-offender-events.prisoner.received
+* restricted-patients.patient.removed 
 
-Note: ideally this workflow would run automatically however due to a recent change github Actions are not
-enabled by default on newly created repos. There is no way to enable Actions other then to click the button in the UI.
-If this situation changes we will update this project so that the workflow is triggered during the bootstrap project.
-Further reading: <https://github.community/t/workflow-isnt-enabled-in-repos-generated-from-template/136421>
+The service receives a `prison-offender-events.prisoner.received` event it will check to see if the 
+prisoner is recorded as a restricted patient and if that's the case the record will be removed.
 
-## Manually renaming from HMPPS Template Kotlin
+When the service receives a `restricted-patients.patient.removed ` the event will logged and then ignored. 
 
-Run the `rename-project.bash` and create a PR.
-
-The `rename-project.bash` script takes a single argument - the name of the project and calculates from it:
-* The main class name (project name converted to pascal case) 
-* The project description (class name with spaces between the words)
-* The main package name (project name with hyphens removed)
-
-It then performs a search and replace and directory renames so the project is ready to be used.

@@ -5,13 +5,15 @@ import com.google.gson.Gson
 import org.springframework.cloud.aws.messaging.core.NotificationMessagingTemplate
 import org.springframework.cloud.aws.messaging.core.TopicMessageChannel
 import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
 data class DomainEvent(
   val eventType: String,
   val additionalInformation: RestrictedPatientRemovedAdditionalInformation,
   val version: Int,
-  val occurredAt: LocalDateTime,
-  val publishedAt: LocalDateTime,
+  val occurredAt: String,
+  val publishedAt: String,
   val description: String
 )
 
@@ -28,15 +30,18 @@ class StubDomainEventPublisher : DomainEventPublisher {
 class DomainEventPublisherImpl(client: AmazonSNS, topicArn: String, private val gson: Gson) :
   DomainEventPublisher {
 
-  val topicTemplate = NotificationMessagingTemplate(client)
-  val topicMessageChannel = TopicMessageChannel(client, topicArn)
+  private val topicTemplate = NotificationMessagingTemplate(client)
+  private val topicMessageChannel = TopicMessageChannel(client, topicArn)
 
   override fun publishRestrictedPatientRemoved(prisonerNumber: String) {
+    val now = LocalDateTime.now().atZone(ZoneId.of("Europe/London")).toOffsetDateTime()
+      .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
+
     val domainEvent = DomainEvent(
-      eventType = "prison-offender-events.restricted-patient.removed",
+      eventType = "restricted-patients.patient.removed",
       version = 1,
-      occurredAt = LocalDateTime.now(),
-      publishedAt = LocalDateTime.now(),
+      occurredAt = now,
+      publishedAt = now,
       description = "Prisoner no longer a restricted patient",
       additionalInformation = RestrictedPatientRemovedAdditionalInformation(prisonerNumber)
     )
