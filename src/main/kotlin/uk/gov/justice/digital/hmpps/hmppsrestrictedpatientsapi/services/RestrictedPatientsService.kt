@@ -21,6 +21,7 @@ class RestrictedPatientsService(
   private val prisonApiGateway: PrisonApiGateway,
   private val prisonerSearchApiGateway: PrisonerSearchApiGateway,
   private val restrictedPatientsRepository: RestrictedPatientsRepository,
+  private val domainEventPublisher: DomainEventPublisher,
   private val telemetryClient: TelemetryClient,
   private val clock: Clock
 ) {
@@ -114,6 +115,8 @@ class RestrictedPatientsService(
       )
 
       prisonerSearchApiGateway.refreshPrisonerIndex(prisonerNumber)
+
+      domainEventPublisher.publishRestrictedPatientRemoved(prisonerNumber)
 
       telemetryClient.trackEvent(
         "restricted-patient-removed",
