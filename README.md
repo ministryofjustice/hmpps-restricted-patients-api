@@ -22,13 +22,13 @@ before you start running the tests. Once done you can run the tests by running `
 This service publishes the  `restricted-patients.patient.removed` domain event whenever a restricted patient 
 is removed from the service. 
 
-####Publish -> restricted-patients.patient.removed
+###Publish -> restricted-patients.patient.removed
 The message is published via amazon sns. The payload is defined below. 
 ```javascript
 {
    "eventType": "restricted-patients.patient.removed",
-   "occurredAt": "2021-02-08T14:41:11.526762", //ISO offset date time when the restricted patient was removed
-   "publishedAt": "2020-10-12T20:00:00", //ISO offset date time when the event was published
+   "occurredAt": "2021-02-08T14:41:11.526762Z", //ISO offset date time when the restricted patient was removed
+   "publishedAt": "2021-02-08T14:41:11.526762Z", //ISO offset date time when the event was published
    "version": 1, 
    "description": "Prisoner no longer a restricted patient"     
    "additionalInformation": { "prisonerNumber": "A12345"}     
