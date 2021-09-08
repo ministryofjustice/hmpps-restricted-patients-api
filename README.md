@@ -27,8 +27,8 @@ The message is published via amazon sns. The payload is defined below.
 ```javascript
 {
    "eventType": "restricted-patients.patient.removed",
-   "occurredAt": "2021-02-08T14:41:11.526762", //ISO offset date time when the restricted patient was removed
-   "publishedAt": "2020-10-12T20:00:00", //ISO offset date time when the event was published
+   "occurredAt": "2021-02-08T14:41:11.526762Z", //ISO offset date time when the restricted patient was removed
+   "publishedAt": "2021-02-08T14:41:11.526762Z", //ISO offset date time when the event was published
    "version": 1, 
    "description": "Prisoner no longer a restricted patient"     
    "additionalInformation": { "prisonerNumber": "A12345"}     
