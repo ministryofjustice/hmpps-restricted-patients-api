@@ -39,8 +39,7 @@ This service subscribes to two types of events:
 * prison-offender-events.prisoner.received
 * restricted-patients.patient.removed 
 
-The service receives a `prison-offender-events.prisoner.received` event it will check to see if the 
-prisoner is recorded as a restricted patient and if that's the case the record will be removed.
+Restricted patients are removed automatically when a `prison-offender-events.prisoner.received` domain event has been received.
 
-When the service receives a `restricted-patients.patient.removed ` the event will logged and then ignored. 
+When the service receives a `restricted-patients.patient.removed ` the event will logged and then ignored. This is for ease of testing.
 
