@@ -22,7 +22,7 @@ before you start running the tests. Once done you can run the tests by running `
 This service publishes the  `restricted-patients.patient.removed` domain event whenever a restricted patient 
 is removed from the service. 
 
-####Publish -> restricted-patients.patient.removed
+###Publish -> restricted-patients.patient.removed
 The message is published via amazon sns. The payload is defined below. 
 ```javascript
 {
