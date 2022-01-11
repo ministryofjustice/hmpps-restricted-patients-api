@@ -46,6 +46,10 @@ spring:
           hmpps-auth:
             token-uri: ${oauth.endpoint.url}/oauth/token
 
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
+
 server:
   port: 8080
   servlet:
@@ -77,6 +81,9 @@ management:
     info:
       cache:
         time-to-live: 2000ms
+  info:
+    env:
+      enabled: true
 
 
 domain-events-sqs:
