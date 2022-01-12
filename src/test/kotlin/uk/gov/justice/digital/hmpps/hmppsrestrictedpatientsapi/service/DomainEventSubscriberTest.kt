@@ -1,10 +1,10 @@
 package uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.service
 
 import com.google.gson.GsonBuilder
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.verify
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
 import org.springframework.boot.autoconfigure.gson.GsonAutoConfiguration
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.dataBuilders.makePrisonerReceiveEvent
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services.DomainEventSubscriber
