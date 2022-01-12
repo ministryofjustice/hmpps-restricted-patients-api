@@ -1,7 +1,7 @@
 # Hmpps restricted patients API
 [![CircleCI](https://circleci.com/gh/ministryofjustice/hmpps-restricted-patients-api/tree/main.svg?style=svg)](https://circleci.com/gh/ministryofjustice/hmpps-restricted-patients-api)
 [![Docker](https://quay.io/repository/hmpps/hmpps-restricted-patients-api/status)](https://quay.io/repository/hmpps-restricted-patients-api/status)
-[![API docs](https://img.shields.io/badge/API_docs_(needs_VPN)-view-85EA2D.svg?logo=swagger)](https://restricted-patients-api-dev.hmpps.service.justice.gov.uk/swagger-ui/?configUrl=/v3/api-docs)
+[![API docs](https://img.shields.io/badge/API_docs_-view-85EA2D.svg?logo=swagger)](https://restricted-patients-api-dev.hmpps.service.justice.gov.uk/swagger-ui/?configUrl=/v3/api-docs)
 
 # Features
 * Discharge  a prisoner to hospital 
