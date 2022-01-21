@@ -13,6 +13,7 @@ generic-service:
     enabled: true
     host: app-hostname.local    # override per environment
     tlsSecretName: hmpps-restricted-patients-api-cert
+    contextColour: green
     path: /
 
   # Environment variables to load into the deployment
