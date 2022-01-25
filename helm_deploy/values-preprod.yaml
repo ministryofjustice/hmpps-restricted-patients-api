@@ -6,6 +6,7 @@ generic-service:
 
   ingress:
     host: restricted-patients-api-preprod.hmpps.service.justice.gov.uk
+    contextColour: green
 
   env:
     APPLICATIONINSIGHTS_CONFIGURATION_FILE: applicationinsights.json
