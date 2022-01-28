@@ -20,3 +20,5 @@ generic-prometheus-alerts:
 # CloudPlatform AlertManager receiver to route promethues alerts to slack
 generic-prometheus-alerts:
   alertSeverity: hmpps_tech
+
+environment: prod
