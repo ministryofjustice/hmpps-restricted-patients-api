@@ -23,7 +23,7 @@ dependencies {
   implementation("com.amazonaws:aws-java-sdk-sns:1.12.96")
   implementation("org.springframework.cloud:spring-cloud-aws-messaging:2.2.6.RELEASE")
 
-  runtimeOnly("com.h2database:h2:2.0.206")
+  runtimeOnly("com.h2database:h2:2.1.210")
   runtimeOnly("org.flywaydb:flyway-core:8.4.1")
   runtimeOnly("org.postgresql:postgresql")
 
