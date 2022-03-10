@@ -1,25 +1,19 @@
 package uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.integration
 
-import com.amazonaws.services.sqs.AmazonSQS
 import org.awaitility.kotlin.await
 import org.awaitility.kotlin.matches
 import org.awaitility.kotlin.untilCallTo
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Qualifier
-import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.test.context.ActiveProfiles
+import uk.gov.justice.hmpps.sqs.HmppsQueue
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.dataBuilders.makePrisonerReceiveEvent
-import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services.QueueAdminService
+import uk.gov.justice.hmpps.sqs.HmppsQueueService
 
 @ActiveProfiles(profiles = ["test"])
 class DomainEventQueueIntegrationTest : IntegrationTestBase() {
-  @SpyBean
-  @Qualifier("awsSqsClientForDomainEvents")
-  protected lateinit var awsSqsClient: AmazonSQS
-
   @Autowired
-  lateinit var queueAdminService: QueueAdminService
+  lateinit var hmppsQueueService: HmppsQueueService
 
   @Test
   fun `will remove restricted patient from the system`() {
@@ -31,18 +25,20 @@ class DomainEventQueueIntegrationTest : IntegrationTestBase() {
       .exchange()
       .expectStatus().is2xxSuccessful
 
-    awsSqsClient.sendMessage(queueAdminService.queueUrl, makePrisonerReceiveEvent("A12345"))
+    hmppsQueueService.findByQueueId("domainevents")!!.let {
+      it.sqsClient.sendMessage(it.queueUrl, makePrisonerReceiveEvent("A12345"))
 
-    await untilCallTo { getNumberOfMessagesCurrentlyOnQueue() } matches { it == 0 }
+      await untilCallTo { getNumberOfMessagesCurrentlyOnQueue(it) } matches { it == 0 }
+    }
 
     getRestrictedPatient(prisonerNumber = "A12345")
       .exchange()
       .expectStatus().isNotFound
   }
 
-  fun getNumberOfMessagesCurrentlyOnQueue(): Int? {
+  fun getNumberOfMessagesCurrentlyOnQueue(hmppsQueue: HmppsQueue): Int? {
     val queueAttributes =
-      awsSqsClient.getQueueAttributes(queueAdminService.queueUrl, listOf("ApproximateNumberOfMessages"))
+      hmppsQueue.sqsClient.getQueueAttributes(hmppsQueue.queueUrl, listOf("ApproximateNumberOfMessages"))
     return queueAttributes.attributes["ApproximateNumberOfMessages"]?.toInt()
   }
 }

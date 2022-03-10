@@ -7,7 +7,7 @@ import com.github.tomakehurst.wiremock.client.WireMock.post
 import com.github.tomakehurst.wiremock.client.WireMock.put
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 
-class PrisonApiMockServer : WireMockServer(8999) {
+class PrisonApiMockServer : WireMockServer(8989) {
   fun stubHealth() {
     stubFor(
       get(urlEqualTo("/health/ping"))
