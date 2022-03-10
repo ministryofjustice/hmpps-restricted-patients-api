@@ -6,9 +6,12 @@ orbs:
 jobs:
   validate:
     executor:
-      name: hmpps/localstack
+      name: hmpps/java_localstack_postgres
       jdk_tag: "17.0"
       localstack_tag: "0.14.0"
+      postgres_tag: "13.2"
+      postgres_password: "test"
+      postgres_username: "test"
     steps:
       - run:
           command: |
