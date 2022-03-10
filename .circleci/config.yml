@@ -1,17 +1,33 @@
 version: 2.1
 
 orbs:
-  hmpps: ministryofjustice/hmpps@3.14.3
+  hmpps: ministryofjustice/hmpps@3.11
+
+# We provide a custom setup as the java_localstack_postgres orb does not allow us to specify a DB name
+executors:
+  integration-tests:
+    docker:
+      - image: cimg/openjdk:17.0
+      - image: localstack/localstack:0.14.0
+        environment:
+          - DEBUG=${DEBUG- }
+          - DATA_DIR=/tmp/localstack/data
+          - SERVICES=sqs,sns
+          - DATA_DIR=/tmp/localstack/data
+          - DOCKER_HOST=unix:///var/run/docker.sock
+          - DEFAULT_REGION=eu-west-2
+      - image: circleci/postgres:13.2
+        environment:
+          - POSTGRES_PASSWORD=test
+          - POSTGRES_USER=test
+          - POSTGRES_DB=restricted-patients-api-db
+    environment:
+      _JAVA_OPTIONS: -Xmx256m -XX:ParallelGCThreads=2 -XX:ConcGCThreads=2 -XX:ParallelGCThreads=2 -Djava.util.concurrent.ForkJoinPool.common.parallelism=2 -Dorg.gradle.daemon=false -Dorg.gradle.jvmargs=-XX:+UseContainerSupport -Dkotlin.compiler.execution.strategy=in-process -Dorg.gradle.workers.max=2
+    working_directory: ~/app
 
 jobs:
   validate:
-    executor:
-      name: hmpps/java_localstack_postgres
-      jdk_tag: "17.0"
-      localstack_tag: "0.14.0"
-      postgres_tag: "13.2"
-      postgres_password: "test"
-      postgres_username: "test"
+    executor: integration-tests
     steps:
       - run:
           command: |
