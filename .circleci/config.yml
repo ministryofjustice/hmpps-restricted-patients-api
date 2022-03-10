@@ -4,6 +4,17 @@ orbs:
   hmpps: ministryofjustice/hmpps@3.11
 
 # We provide a custom setup as the java_localstack_postgres orb does not allow us to specify a DB name
+# orbs:
+#   hmpps: ministryofjustice/hmpps@3.14.3
+# jobs:
+#   validate:
+#     executor:
+#       name: hmpps/java_localstack_postgres
+#       jdk_tag: "17.0"
+#       localstack_tag: "0.14.0"
+#       postgres_tag: "13.2"
+#       postgres_password: "test"
+#       postgres_username: "test"
 executors:
   integration-tests:
     docker:
@@ -39,6 +50,8 @@ jobs:
           background: true
       - checkout
       - hmpps/wait_till_ready
+      # Replace the next lines and .sh file with the following if/when we get the orb working
+      # - hmpps/wait_till_ready_postgres
       - run:
           name: Wait for Postgres to be ready
           command: ./postgres-check.sh
