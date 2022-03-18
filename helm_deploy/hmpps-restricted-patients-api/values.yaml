@@ -50,9 +50,9 @@ generic-service:
       HMPPS_SQS_QUEUES_DOMAINEVENTS_DLQ_SECRET_ACCESS_KEY: "secret_access_key"
       HMPPS_SQS_QUEUES_DOMAINEVENTS_DLQ_NAME: "sqs_wb_name"
     hmpps-domain-events-topic:
-      HMPPS_SQS_TOPICS_DOMAINEVENTSOUTBOUND_TOPIC_ACCESS_KEY_ID: "access_key_id"
-      HMPPS_SQS_TOPICS_DOMAINEVENTSOUTBOUND_TOPIC_SECRET_ACCESS_KEY: "secret_access_key"
-      HMPPS_SQS_TOPICS_DOMAINEVENTSOUTBOUND_TOPIC_ARN: "topic_arn"
+      HMPPS_SQS_TOPICS_DOMAINEVENTSOUTBOUND_ACCESS_KEY_ID: "access_key_id"
+      HMPPS_SQS_TOPICS_DOMAINEVENTSOUTBOUND_SECRET_ACCESS_KEY: "secret_access_key"
+      HMPPS_SQS_TOPICS_DOMAINEVENTSOUTBOUND_ARN: "topic_arn"
     rp-rds-instance-output:
       DATABASE_ENDPOINT: "rds_instance_endpoint"
       DATABASE_NAME: "database_name"
