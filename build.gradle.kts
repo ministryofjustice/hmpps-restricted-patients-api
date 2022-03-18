@@ -18,10 +18,7 @@ dependencies {
   implementation("io.springfox:springfox-boot-starter:3.0.0")
   implementation("org.springframework:spring-jms")
   implementation("com.google.code.gson:gson:2.9.0")
-  implementation("org.awaitility:awaitility-kotlin:4.1.1")
-  implementation("com.amazonaws:amazon-sqs-java-messaging-lib:1.0.8")
-  implementation("com.amazonaws:aws-java-sdk-sns:1.12.171")
-  implementation("org.springframework.cloud:spring-cloud-aws-messaging:2.2.6.RELEASE")
+  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:1.0.6")
 
   runtimeOnly("com.h2database:h2:2.1.210")
   runtimeOnly("org.flywaydb:flyway-core:8.5.1")
@@ -32,6 +29,7 @@ dependencies {
   testImplementation("com.github.tomakehurst:wiremock-standalone:2.27.2")
   testImplementation("org.springframework.security:spring-security-test")
   testImplementation("net.javacrumbs.json-unit:json-unit-assertj:2.32.0")
+  testImplementation("org.awaitility:awaitility-kotlin:4.1.1")
 }
 
 allOpen {

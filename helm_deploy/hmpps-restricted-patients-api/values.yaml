@@ -15,6 +15,13 @@ generic-service:
     tlsSecretName: hmpps-restricted-patients-api-cert
     contextColour: green
     path: /
+    # Secure the retry all dlqs endpoint from outside of the Kubernetes ingress
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      server_tokens off;
+      location /queue-admin/retry-all-dlqs {
+        deny all;
+        return 401;
+      }
 
   # Environment variables to load into the deployment
   env:
@@ -35,17 +42,17 @@ generic-service:
       RESTRICTED_PATIENTS_API_CLIENT_ID: "RESTRICTED_PATIENTS_API_CLIENT_ID"
       RESTRICTED_PATIENTS_API_CLIENT_SECRET: "RESTRICTED_PATIENTS_API_CLIENT_SECRET"
     restricted-patients-sub-queue-for-domain-events-instance-output:
-      DOMAIN_EVENTS_SQS_AWS_ACCESS_KEY_ID: "access_key_id"
-      DOMAIN_EVENTS_SQS_AWS_SECRET_ACCESS_KEY: "secret_access_key"
-      DOMAIN_EVENTS_SQS_QUEUE_NAME: "sqs_wb_name"
+      HMPPS_SQS_QUEUES_DOMAINEVENTS_QUEUE_ACCESS_KEY_ID: "access_key_id"
+      HMPPS_SQS_QUEUES_DOMAINEVENTS_QUEUE_SECRET_ACCESS_KEY: "secret_access_key"
+      HMPPS_SQS_QUEUES_DOMAINEVENTS_QUEUE_NAME: "sqs_wb_name"
     restricted-patients-sub-queue-for-domain-events-dl-instance-output:
-      DOMAIN_EVENTS_SQS_AWS_DLQ_ACCESS_KEY_ID: "access_key_id"
-      DOMAIN_EVENTS_SQS_AWS_DLQ_SECRET_ACCESS_KEY: "secret_access_key"
-      DOMAIN_EVENTS_SQS_DLQ_NAME: "sqs_wb_name"
+      HMPPS_SQS_QUEUES_DOMAINEVENTS_DLQ_ACCESS_KEY_ID: "access_key_id"
+      HMPPS_SQS_QUEUES_DOMAINEVENTS_DLQ_SECRET_ACCESS_KEY: "secret_access_key"
+      HMPPS_SQS_QUEUES_DOMAINEVENTS_DLQ_NAME: "sqs_wb_name"
     hmpps-domain-events-topic:
-      DOMAIN_EVENTS_SNS_AWS_ACCESS_KEY_ID: "access_key_id"
-      DOMAIN_EVENTS_SNS_AWS_SECRET_ACCESS_KEY: "secret_access_key"
-      DOMAIN_EVENTS_SNS_TOPIC_ARN: "topic_arn"
+      HMPPS_SQS_TOPICS_DOMAINEVENTSOUTBOUND_TOPIC_ACCESS_KEY_ID: "access_key_id"
+      HMPPS_SQS_TOPICS_DOMAINEVENTSOUTBOUND_TOPIC_SECRET_ACCESS_KEY: "secret_access_key"
+      HMPPS_SQS_TOPICS_DOMAINEVENTSOUTBOUND_TOPIC_ARN: "topic_arn"
     rp-rds-instance-output:
       DATABASE_ENDPOINT: "rds_instance_endpoint"
       DATABASE_NAME: "database_name"

@@ -12,8 +12,13 @@ The frontend can be found here: <https://github.com/ministryofjustice/hmpps-rest
 
 # Instructions
 ###Tests
-Before running the tests `docker-compose -f docker-compose-test.yml up` needs to be running and to have finished loading 
+Before running the tests:
+ - `docker-compose -f docker-compose-test.yml up` needs to be running and to have finished loading 
 before you start running the tests. Once done you can run the tests by running `./gradlew build`.
+ - Start the localstack instance using the SQS library, e.g.
+   - `cd ../hmpps-spring-boot-sqs`
+   - `docker-compose -f docker-compose-test.yml up localstack`
+   - See the instructions in the `hmpps-spring-boot-sqs` project for me details
 
 ###Running locally 
 `./gradlew bootRun --args='--spring.profiles.active=dev,stdout,localstack'`

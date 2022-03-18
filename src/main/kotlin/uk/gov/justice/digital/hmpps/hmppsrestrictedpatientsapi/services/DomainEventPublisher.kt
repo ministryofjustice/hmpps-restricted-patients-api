@@ -1,9 +1,12 @@
 package uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services
 
-import com.amazonaws.services.sns.AmazonSNS
+import com.amazonaws.services.sns.model.MessageAttributeValue
+import com.amazonaws.services.sns.model.PublishRequest
 import com.google.gson.Gson
-import org.springframework.cloud.aws.messaging.core.NotificationMessagingTemplate
-import org.springframework.cloud.aws.messaging.core.TopicMessageChannel
+import org.slf4j.LoggerFactory
+import org.springframework.stereotype.Service
+import uk.gov.justice.hmpps.sqs.HmppsQueueService
+import uk.gov.justice.hmpps.sqs.MissingTopicException
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -19,21 +22,12 @@ data class DomainEvent(
 
 data class RestrictedPatientRemovedAdditionalInformation(val prisonerNumber: String)
 
-interface DomainEventPublisher {
-  fun publishRestrictedPatientRemoved(prisonerNumber: String)
-}
+@Service
+class DomainEventPublisher(hmppsQueueService: HmppsQueueService, private val gson: Gson) {
 
-class StubDomainEventPublisher : DomainEventPublisher {
-  override fun publishRestrictedPatientRemoved(prisonerNumber: String) {}
-}
+  private val outboundTopic = hmppsQueueService.findByTopicId("domaineventsoutbound") ?: throw MissingTopicException("Could not find topic domaineventsoutbound")
 
-class DomainEventPublisherImpl(client: AmazonSNS, topicArn: String, private val gson: Gson) :
-  DomainEventPublisher {
-
-  private val topicTemplate = NotificationMessagingTemplate(client)
-  private val topicMessageChannel = TopicMessageChannel(client, topicArn)
-
-  override fun publishRestrictedPatientRemoved(prisonerNumber: String) {
+  fun publishRestrictedPatientRemoved(prisonerNumber: String) {
     val now = LocalDateTime.now().atZone(ZoneId.of("Europe/London")).toOffsetDateTime()
       .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
 
@@ -48,10 +42,16 @@ class DomainEventPublisherImpl(client: AmazonSNS, topicArn: String, private val 
 
     val payload = gson.toJson(domainEvent)
 
-    topicTemplate.convertAndSend(
-      topicMessageChannel,
-      payload,
-      mapOf("eventType" to domainEvent.eventType)
+    outboundTopic.snsClient.publish(
+      PublishRequest(outboundTopic.arn, payload)
+        .withMessageAttributes(
+          mapOf("eventType" to MessageAttributeValue().withDataType("String").withStringValue(domainEvent.eventType))
+        )
+        .also { log.info("Published event to outbound topic. Type: ${domainEvent.eventType}") }
     )
+  }
+
+  companion object {
+    private val log = LoggerFactory.getLogger(this::class.java)
   }
 }

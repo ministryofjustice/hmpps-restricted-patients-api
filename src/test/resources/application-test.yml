@@ -5,7 +5,7 @@ management.endpoint:
   health.cache.time-to-live: 0
   info.cache.time-to-live: 0
 
-prison.api.endpoint.url: http://localhost:8999
+prison.api.endpoint.url: http://localhost:8989
 prisoner.search.api.endpoint.url: http://localhost:8100
 oauth.endpoint.url: http://localhost:8090/auth
 
@@ -16,15 +16,17 @@ spring:
     password: test
     continueOnError: true
 
-domain-events-sqs:
+hmpps.sqs:
   provider: localstack
-  endpoint.url: http://localhost:4566
-  queue.name: rp_api_queue
-  dlq.name: rp_api_dlq
-
-
-
-domain-events-sns:
-  provider: localstack
+  queues:
+    domainevents:
+      queueName: rp_api_queue
+      dlqName: rp_api_dlq
+      subscribeTopicId: domaineventsqueue
+  topics:
+    domaineventsqueue:
+      arn: arn:aws:sns:eu-west-2:000000000000:domain_events_queue
+    domaineventsoutbound:
+      arn: arn:aws:sns:eu-west-2:000000000000:domain_events_outbound
 
 

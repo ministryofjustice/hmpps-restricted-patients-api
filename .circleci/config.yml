@@ -3,12 +3,23 @@ version: 2.1
 orbs:
   hmpps: ministryofjustice/hmpps@3.14
 
-
+# We provide a custom setup as the java_localstack_postgres orb does not allow us to specify a DB name
+# orbs:
+#   hmpps: ministryofjustice/hmpps@3.14.3
+# jobs:
+#   validate:
+#     executor:
+#       name: hmpps/java_localstack_postgres
+#       jdk_tag: "17.0"
+#       localstack_tag: "0.14.0"
+#       postgres_tag: "13.2"
+#       postgres_password: "test"
+#       postgres_username: "test"
 executors:
   integration-tests:
     docker:
-      - image: cimg/openjdk:16.0
-      - image: localstack/localstack:0.12.9.1
+      - image: cimg/openjdk:17.0
+      - image: localstack/localstack:0.14.0
         environment:
           - DEBUG=${DEBUG- }
           - DATA_DIR=/tmp/localstack/data
@@ -25,7 +36,6 @@ executors:
       _JAVA_OPTIONS: -Xmx256m -XX:ParallelGCThreads=2 -XX:ConcGCThreads=2 -XX:ParallelGCThreads=2 -Djava.util.concurrent.ForkJoinPool.common.parallelism=2 -Dorg.gradle.daemon=false -Dorg.gradle.jvmargs=-XX:+UseContainerSupport -Dkotlin.compiler.execution.strategy=in-process -Dorg.gradle.workers.max=2
     working_directory: ~/app
 
-
 jobs:
   validate:
     executor: integration-tests
@@ -39,13 +49,9 @@ jobs:
             done
           background: true
       - checkout
-      - hmpps/install_aws_cli
-      - run:
-          name: Wait for SQS to be ready
-          command: curl -4 --connect-timeout 30 --retry-connrefused --retry 30 --retry-delay 5 http://localhost:4566
-      - run:
-          name: Set up es domain
-          command: src/test/resources/localstack/setup-queue.sh
+      - hmpps/wait_till_ready
+      # Replace the next lines and .sh file with the following if/when we get the orb working
+      # - hmpps/wait_till_ready_postgres
       - run:
           name: Wait for Postgres to be ready
           command: ./postgres-check.sh
@@ -54,8 +60,6 @@ jobs:
             - gradle-{{ checksum "build.gradle.kts" }}
             - gradle-
       - run:
-          environment:
-            - AWS_PROVIDER: localstack
           command: ./gradlew -Dorg.gradle.jvmargs="--illegal-access=permit" -Dkotlin.daemon.jvm.options="--illegal-access=permit" check
       - save_cache:
           paths:
