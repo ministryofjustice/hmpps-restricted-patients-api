@@ -22,7 +22,7 @@ class ResourceServerConfiguration : WebSecurityConfigurerAdapter() {
           "/webjars/**", "/favicon.ico", "/csrf",
           "/health/**", "/info",
           "/v3/api-docs/**", "/api/swagger.json", "/swagger-ui/**",
-          "/v3/api-docs", "/swagger-ui/**",
+          "/v3/api-docs", "/swagger-ui.html",
           "/swagger-resources", "/swagger-resources/configuration/ui", "/swagger-resources/configuration/security",
           "/queue-admin/retry-all-dlqs",
         ).permitAll()
