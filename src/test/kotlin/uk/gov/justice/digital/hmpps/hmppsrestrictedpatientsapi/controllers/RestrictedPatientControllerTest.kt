@@ -123,7 +123,7 @@ class RestrictedPatientControllerTest : ControllerTestBase() {
           MockMvcRequestBuilders.get("/restricted-patient/prison-number/A12345")
             .header("Content-Type", "application/json")
             .content(
-              objectMapper.writeValueAsString(makeRestrictedPatientDto(/*dischargeTime = now*/))
+              objectMapper.writeValueAsString(makeRestrictedPatientDto())
             )
         )
         .andExpect(MockMvcResultMatchers.status().is2xxSuccessful)
