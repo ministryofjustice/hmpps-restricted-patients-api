@@ -15,13 +15,10 @@ import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.dataBuilders.make
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.dataBuilders.makeRestrictedPatientDto
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.exceptions.NoResultsReturnedException
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services.RestrictedPatientsService
-import java.time.LocalDateTime
 import javax.persistence.EntityNotFoundException
 
 @WebMvcTest(value = [RestrictedPatentsController::class])
 class RestrictedPatientControllerTest : ControllerTestBase() {
-
-  private val now = LocalDateTime.parse("2020-10-10T20:00:01")
 
   @MockBean
   lateinit var restrictedPatientsService: RestrictedPatientsService
@@ -111,7 +108,7 @@ class RestrictedPatientControllerTest : ControllerTestBase() {
           MockMvcRequestBuilders.get("/restricted-patient/prison-number/A12345")
             .header("Content-Type", "application/json")
             .content(
-              objectMapper.writeValueAsString(makeRestrictedPatientDto(dischargeTime = now))
+              objectMapper.writeValueAsString(makeRestrictedPatientDto())
             )
         )
         .andExpect(MockMvcResultMatchers.status().isNotFound)
@@ -119,14 +116,14 @@ class RestrictedPatientControllerTest : ControllerTestBase() {
 
     @Test
     fun `returns a restricted patient for a prisoner number`() {
-      whenever(restrictedPatientsService.getRestrictedPatient("A12345")).thenReturn(makeRestrictedPatientDto(dischargeTime = now))
+      whenever(restrictedPatientsService.getRestrictedPatient("A12345")).thenReturn(makeRestrictedPatientDto())
 
       mockMvc
         .perform(
           MockMvcRequestBuilders.get("/restricted-patient/prison-number/A12345")
             .header("Content-Type", "application/json")
             .content(
-              objectMapper.writeValueAsString(makeRestrictedPatientDto(dischargeTime = now))
+              objectMapper.writeValueAsString(makeRestrictedPatientDto(/*dischargeTime = now*/))
             )
         )
         .andExpect(MockMvcResultMatchers.status().is2xxSuccessful)
@@ -150,7 +147,6 @@ class RestrictedPatientControllerTest : ControllerTestBase() {
   private fun makeDischargeBody() = mapOf(
     "offenderNo" to "A12345",
     "commentText" to "test",
-    "dischargeTime" to "2020-10-10T20:00:01",
     "fromLocationId" to "MDI",
     "hospitalLocationCode" to "HAZLWD",
     "supportingPrisonId" to "MDI"

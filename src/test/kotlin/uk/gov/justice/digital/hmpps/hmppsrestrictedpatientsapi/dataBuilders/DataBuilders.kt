@@ -37,7 +37,7 @@ fun makeRestrictedPatientDto(
   prisonerNumber: String = "A12345",
   hospitalLocationCode: Agency = HOSPITAL,
   commentText: String = "test",
-  dischargeTime: LocalDateTime,
+  dischargeTime: LocalDateTime = LocalDateTime.parse("2020-10-10T20:00:01"),
   createDateTime: LocalDateTime = LocalDateTime.parse("2020-10-10T20:00:01"),
   createUserId: String = "user"
 ): RestrictedPatientDto = RestrictedPatientDto(
