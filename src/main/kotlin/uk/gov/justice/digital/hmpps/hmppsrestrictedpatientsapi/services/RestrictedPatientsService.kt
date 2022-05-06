@@ -46,13 +46,13 @@ class RestrictedPatientsService(
       fromLocationId = dischargeToHospitalWithDefaultSupportingPrison.fromLocationId,
       hospitalLocationCode = dischargeToHospitalWithDefaultSupportingPrison.hospitalLocationCode,
       supportingPrisonId = dischargeToHospitalWithDefaultSupportingPrison.supportingPrisonId!!,
-      dischargeTime = dischargeToHospitalWithDefaultSupportingPrison.dischargeTime,
+      dischargeTime = LocalDateTime.now(clock),
       commentText = dischargeToHospitalWithDefaultSupportingPrison.commentText
     )
 
     val newRestrictedPatient = restrictedPatientsRepository.saveAndFlush(restrictedPatient)
 
-    dischargeOrRollBackAndThrow(dischargeToHospitalWithDefaultSupportingPrison, newRestrictedPatient)
+    dischargeOrRollBackAndThrow(newRestrictedPatient)
 
     return transform(
       newRestrictedPatient,
@@ -63,11 +63,10 @@ class RestrictedPatientsService(
   }
 
   private fun dischargeOrRollBackAndThrow(
-    dischargeToHospitalWithDefaultSupportingPrison: DischargeToHospitalRequest,
     newRestrictedPatient: RestrictedPatient
   ) {
     try {
-      prisonApiGateway.dischargeToHospital(dischargeToHospitalWithDefaultSupportingPrison)
+      prisonApiGateway.dischargeToHospital(newRestrictedPatient)
     } catch (e: Exception) {
       restrictedPatientsRepository.delete(newRestrictedPatient)
       throw e

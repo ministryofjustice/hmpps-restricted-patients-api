@@ -41,7 +41,7 @@ class RestrictedPatientIntegrationTest : IntegrationTestBase() {
       .jsonPath("$.fromLocation.agencyId").isEqualTo("MDI")
       .jsonPath("$.hospitalLocation.agencyId").isEqualTo("HAZLWD")
       .jsonPath("$.supportingPrison.agencyId").isEqualTo("MDI")
-      .jsonPath("$.dischargeTime").isEqualTo("2021-06-07T13:40:32.498")
+      .jsonPath("$.dischargeTime").isEqualTo("2020-10-10T00:00:00")
       .jsonPath("$.commentText").isEqualTo("Prisoner was released on bail")
 
     prisonApiMockServer.verify(
