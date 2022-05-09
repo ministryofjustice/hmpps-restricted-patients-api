@@ -24,7 +24,6 @@ import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.Prisoner
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.entities.RestrictedPatient
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.exceptions.NoResultsReturnedException
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.request.CreateExternalMovement
-import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.request.DischargeToHospitalRequest
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.Agency
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.PrisonerResult
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.repositories.RestrictedPatientsRepository
@@ -45,6 +44,15 @@ class RestrictedPatientServiceTest {
   private val domainEventPublisher: DomainEventPublisher = mock()
   private val telemetryClient: TelemetryClient = mock()
   private val clock: Clock = mock()
+
+  private val restrictedPatient = RestrictedPatient(
+    prisonerNumber = "A12345",
+    fromLocationId = "MDI",
+    hospitalLocationCode = "HAZLWD",
+    supportingPrisonId = "LEI",
+    dischargeTime = LocalDateTime.now(),
+    commentText = "test"
+  )
 
   private lateinit var service: RestrictedPatientsService
 
@@ -268,16 +276,7 @@ class RestrictedPatientServiceTest {
       fun `make a call to prison api to discharge a prisoner to hospital`() {
         val response = service.dischargeToHospital(makeDischargeRequest().copy(supportingPrisonId = "LEI"))
 
-        verify(prisonApiGateway).dischargeToHospital(
-          DischargeToHospitalRequest(
-            offenderNo = "A12345",
-            commentText = "test",
-            dischargeTime = LocalDateTime.parse("2020-10-10T20:00:01"),
-            fromLocationId = "MDI",
-            hospitalLocationCode = "HAZLWD",
-            supportingPrisonId = "LEI"
-          )
-        )
+        verify(prisonApiGateway).dischargeToHospital(restrictedPatient)
 
         assertThat(response.fromLocation).isEqualTo(Agency(agencyId = "MDI"))
         assertThat(response.supportingPrison).isEqualTo(Agency(agencyId = "LEI"))
@@ -296,22 +295,13 @@ class RestrictedPatientServiceTest {
       fun `default to from prison id for supporting prison when not suppled`() {
         service.dischargeToHospital(makeDischargeRequest())
 
-        verify(prisonApiGateway).dischargeToHospital(
-          DischargeToHospitalRequest(
-            offenderNo = "A12345",
-            commentText = "test",
-            dischargeTime = LocalDateTime.parse("2020-10-10T20:00:01"),
-            fromLocationId = "MDI",
-            hospitalLocationCode = "HAZLWD",
-            supportingPrisonId = "MDI"
-          )
-        )
+        verify(prisonApiGateway).dischargeToHospital(restrictedPatient)
       }
 
       @Test
       fun `calls save with the correct parameters`() {
         val argumentCaptor = ArgumentCaptor.forClass(RestrictedPatient::class.java)
-
+        val now = LocalDate.now().atStartOfDay()
         service.dischargeToHospital(makeDischargeRequest())
 
         verify(restrictedPatientsRepository).saveAndFlush(argumentCaptor.capture())
@@ -322,7 +312,7 @@ class RestrictedPatientServiceTest {
           "hospitalLocationCode",
           "commentText",
           "dischargeTime"
-        ).contains("MDI", "MDI", "HAZLWD", "test", LocalDateTime.parse("2020-10-10T20:00:01"))
+        ).contains("MDI", "MDI", "HAZLWD", "test", now)
       }
 
       @Test

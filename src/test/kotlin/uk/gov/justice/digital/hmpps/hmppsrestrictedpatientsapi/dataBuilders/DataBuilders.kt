@@ -20,14 +20,12 @@ val HOSPITAL = Agency(
 fun makeDischargeRequest(
   offenderNo: String = "A12345",
   commentText: String = "test",
-  dischargeTime: LocalDateTime = LocalDateTime.parse("2020-10-10T20:00:01"),
   fromLocationId: String = "MDI",
   hospitalLocationCode: String = "HAZLWD",
   supportingPrisonId: String? = null
 ) = DischargeToHospitalRequest(
   offenderNo,
   commentText,
-  dischargeTime,
   fromLocationId,
   hospitalLocationCode,
   supportingPrisonId

@@ -80,7 +80,6 @@ abstract class IntegrationTestBase {
   fun dischargePrisonerWebClient(
     prisonerNumber: String,
     commentText: String = "Prisoner was released on bail",
-    dischargeTime: String = "2021-06-07T13:40:32.498Z",
     fromLocationId: String = "MDI",
     hospitalLocationCode: String = "HAZLWD",
     supportingPrisonId: String = "MDI"
@@ -99,7 +98,6 @@ abstract class IntegrationTestBase {
         mapOf(
           "offenderNo" to prisonerNumber,
           "commentText" to commentText,
-          "dischargeTime" to dischargeTime,
           "fromLocationId" to fromLocationId,
           "hospitalLocationCode" to hospitalLocationCode,
           "supportingPrisonId" to supportingPrisonId

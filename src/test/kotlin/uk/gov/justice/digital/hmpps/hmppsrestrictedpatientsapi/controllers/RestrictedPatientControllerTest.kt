@@ -147,7 +147,6 @@ class RestrictedPatientControllerTest : ControllerTestBase() {
   private fun makeDischargeBody() = mapOf(
     "offenderNo" to "A12345",
     "commentText" to "test",
-    "dischargeTime" to "2020-10-10T20:00:01",
     "fromLocationId" to "MDI",
     "hospitalLocationCode" to "HAZLWD",
     "supportingPrisonId" to "MDI"
