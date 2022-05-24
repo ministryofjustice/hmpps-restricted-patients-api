@@ -480,7 +480,7 @@ class RestrictedPatientServiceTest {
               commentText = testComment
             )
           )
-        ))
+        )
       }
 
       @Test
