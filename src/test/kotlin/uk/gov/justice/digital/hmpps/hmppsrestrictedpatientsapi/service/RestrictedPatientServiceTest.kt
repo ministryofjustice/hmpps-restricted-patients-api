@@ -472,11 +472,13 @@ class RestrictedPatientServiceTest {
       @BeforeEach
       fun beforeEach() {
         whenever(restrictedPatientsRepository.saveAndFlush(any())).thenReturn(makeRestrictedPatient())
-        whenever(prisonApiGateway.getLatestMovements(any())).thenReturn(listOf(
-          makeLatestMovementReturn(
-            movementDate = dischargeDate,
-            movementTime = dischargeTime,
-            commentText = testComment
+        whenever(prisonApiGateway.getLatestMovements(any())).thenReturn(
+          listOf(
+            makeLatestMovementReturn(
+              movementDate = dischargeDate,
+              movementTime = dischargeTime,
+              commentText = testComment
+            )
           )
         ))
       }
