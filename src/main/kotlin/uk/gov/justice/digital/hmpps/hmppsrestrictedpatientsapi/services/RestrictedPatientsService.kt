@@ -81,24 +81,22 @@ class RestrictedPatientsService(
     return addedPatient
   }
 
-  private fun checkNotExistingPatient(offenderNo: String) {
+  private fun checkNotExistingPatient(offenderNo: String) =
     restrictedPatientsRepository.findById(offenderNo).map {
-      throw IllegalStateException("Prisoner (${offenderNo}) is already a restricted patient")
+      throw IllegalStateException("Prisoner ($offenderNo) is already a restricted patient")
     }
-  }
 
   private fun getExistingRestrictedPatientDischargeData(latestMovements: List<MovementResponse>, offenderNo: String): ExistingDischargeData {
     // TODO - Do we need to check the supporting prison is correct - comparing to one passed in?
     if (latestMovements.isEmpty()) {
-      throw IllegalStateException("Prisoner (${offenderNo}) does not have any existing movements to migrate")
+      throw IllegalStateException("Prisoner ($offenderNo) does not have any existing movements to migrate")
     }
     val latestMovement = latestMovements[0]
     if ("REL" != latestMovement.movementType) {
-      throw IllegalStateException("Prisoner (${offenderNo}) was not released")
+      throw IllegalStateException("Prisoner ($offenderNo) was not released")
     }
     // TODO - I don't think this is necessary - check
-    val fromAgencyId = latestMovement.fromAgency ?:
-      throw IllegalStateException("Prisoner (${offenderNo}) does not have an agency id associated with the last movement")
+    val fromAgencyId = latestMovement.fromAgency ?: throw IllegalStateException("Prisoner ($offenderNo) does not have an agency id associated with the last movement")
     val dischargeDateTime = calculateDischargeDateTime(offenderNo, latestMovement.movementDate, latestMovement.movementTime)
     return ExistingDischargeData(
       dischargeTime = dischargeDateTime,
@@ -109,11 +107,10 @@ class RestrictedPatientsService(
 
   private fun calculateDischargeDateTime(offenderNo: String, movementDate: String?, movementTime: String?): LocalDateTime {
     try {
-      return LocalDateTime.parse("${movementDate}T${movementTime}")
+      return LocalDateTime.parse("${movementDate}T$movementTime")
+    } catch (e: Exception) {
     }
-    catch (e: Exception) {
-    }
-    throw IllegalStateException("Prisoner (${offenderNo}) does not have a valid movement date/time")
+    throw IllegalStateException("Prisoner ($offenderNo) does not have a valid movement date/time")
   }
 
   private fun addRestrictedPatient(restrictedPatient: RestrictedPatient): RestrictedPatientDto {

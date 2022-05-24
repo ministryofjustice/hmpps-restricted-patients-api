@@ -7,7 +7,6 @@ import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.entities.Re
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.request.CreateExternalMovement
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.Agency
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.MovementResponse
-import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.OffenderBookingResponse
 
 @Service
 class PrisonApiGateway(private val prisonApiClientCreds: WebClient) {

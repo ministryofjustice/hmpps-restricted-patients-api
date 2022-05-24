@@ -1,7 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response
 
 import java.time.LocalDate
-import java.time.LocalTime
 
 data class DischargeToHospitalResponse(
   val restrictivePatient: RestrictivePatient
