@@ -108,13 +108,13 @@ fun makePrisonerReceiveEvent(prisonerNumber: String) =
 fun makeLatestMovementReturn(
   fromAgency: String? = "MDI",
   movementDate: String? = "2022-05-01",
-  movementTime: String? =  "15:33:11",
+  movementTime: String? = "15:33:11",
   movementType: String = "REL",
   commentText: String? = "Released for some reason"
 ): MovementResponse = MovementResponse(
-    fromAgency,
-    movementDate,
-    movementTime,
-    movementType,
-    commentText
+  fromAgency,
+  movementDate,
+  movementTime,
+  movementType,
+  commentText
 )
