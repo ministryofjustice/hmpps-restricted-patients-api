@@ -27,8 +27,8 @@ class RestrictedPatentsController(private val restrictedPatientsService: Restric
     value = ["/migrate-in-restricted-patient"], consumes = [MediaType.APPLICATION_JSON_VALUE]
   )
   @ResponseStatus(code = HttpStatus.CREATED)
-  fun migrateInExistingPatient(@RequestBody migrateIn: MigrateInRequest): RestrictedPatientDto =
-    restrictedPatientsService.migrateInExistingPatient(migrateIn)
+  fun migrateInPatient(@RequestBody migrateIn: MigrateInRequest): RestrictedPatientDto =
+    restrictedPatientsService.migrateInPatient(migrateIn)
 
   @GetMapping(
     value = ["/restricted-patient/prison-number/{prison-number}"]

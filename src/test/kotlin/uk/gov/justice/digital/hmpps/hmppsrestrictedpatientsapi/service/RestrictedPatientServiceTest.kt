@@ -371,7 +371,7 @@ class RestrictedPatientServiceTest {
   }
 
   @Nested
-  inner class MigrateInExistingPatient {
+  inner class MigrateInPatient {
     @Nested
     inner class Failures {
       @Test
@@ -379,7 +379,7 @@ class RestrictedPatientServiceTest {
         whenever(restrictedPatientsRepository.findById(anyString())).thenReturn(Optional.of(makeRestrictedPatient()))
 
         Assertions.assertThrows(IllegalStateException::class.java) {
-          service.migrateInExistingPatient(makeMigrateInRequest())
+          service.migrateInPatient(makeMigrateInRequest())
         }
       }
 
@@ -388,7 +388,7 @@ class RestrictedPatientServiceTest {
         whenever(prisonApiGateway.getLatestMovements(any())).thenReturn(emptyList())
 
         Assertions.assertThrows(IllegalStateException::class.java) {
-          service.migrateInExistingPatient(makeMigrateInRequest())
+          service.migrateInPatient(makeMigrateInRequest())
         }
       }
 
@@ -400,7 +400,7 @@ class RestrictedPatientServiceTest {
         whenever(prisonApiGateway.getLatestMovements(any())).thenReturn(listOf(nonRelMovement))
 
         Assertions.assertThrows(IllegalStateException::class.java) {
-          service.migrateInExistingPatient(makeMigrateInRequest())
+          service.migrateInPatient(makeMigrateInRequest())
         }
       }
 
@@ -412,7 +412,7 @@ class RestrictedPatientServiceTest {
         whenever(prisonApiGateway.getLatestMovements(any())).thenReturn(listOf(movementWithoutFromAgency))
 
         Assertions.assertThrows(IllegalStateException::class.java) {
-          service.migrateInExistingPatient(makeMigrateInRequest())
+          service.migrateInPatient(makeMigrateInRequest())
         }
       }
 
@@ -424,7 +424,7 @@ class RestrictedPatientServiceTest {
         whenever(prisonApiGateway.getLatestMovements(any())).thenReturn(listOf(movementWithInvalidDate))
 
         Assertions.assertThrows(IllegalStateException::class.java) {
-          service.migrateInExistingPatient(makeMigrateInRequest())
+          service.migrateInPatient(makeMigrateInRequest())
         }
       }
 
@@ -436,7 +436,7 @@ class RestrictedPatientServiceTest {
         whenever(prisonApiGateway.getLatestMovements(any())).thenReturn(listOf(movementWithInvalidTime))
 
         Assertions.assertThrows(IllegalStateException::class.java) {
-          service.migrateInExistingPatient(makeMigrateInRequest())
+          service.migrateInPatient(makeMigrateInRequest())
         }
       }
 
@@ -447,7 +447,7 @@ class RestrictedPatientServiceTest {
         whenever(prisonApiGateway.dischargeToHospital(any())).thenThrow(WebClientResponseException::class.java)
 
         Assertions.assertThrows(WebClientResponseException::class.java) {
-          service.migrateInExistingPatient(makeMigrateInRequest())
+          service.migrateInPatient(makeMigrateInRequest())
         }
 
         val argumentCaptor = ArgumentCaptor.forClass(RestrictedPatient::class.java)
@@ -467,11 +467,26 @@ class RestrictedPatientServiceTest {
     inner class SuccessfulMigration {
       private val dischargeDate = "2022-05-02"
       private val dischargeTime = "15:00:11"
+      private val dischargeDateTime = LocalDateTime.parse("${dischargeDate}T$dischargeTime")
       private val testComment = "A test comment"
+
+      private val migratedRestrictedPatient = RestrictedPatient(
+        prisonerNumber = "A12345",
+        fromLocationId = "MDI",
+        hospitalLocationCode = "HAZLWD",
+        supportingPrisonId = "MDI",
+        dischargeTime = dischargeDateTime,
+        commentText = testComment
+      )
 
       @BeforeEach
       fun beforeEach() {
-        whenever(restrictedPatientsRepository.saveAndFlush(any())).thenReturn(makeRestrictedPatient())
+        whenever(restrictedPatientsRepository.saveAndFlush(any())).thenReturn(
+          makeRestrictedPatient(
+            dischargeTime = dischargeDateTime,
+            commentText = testComment
+          )
+        )
         whenever(prisonApiGateway.getLatestMovements(any())).thenReturn(
           listOf(
             makeLatestMovementReturn(
@@ -485,9 +500,9 @@ class RestrictedPatientServiceTest {
 
       @Test
       fun `it makes a call to prison api to update discharge record`() {
-        val response = service.migrateInExistingPatient(makeMigrateInRequest())
+        val response = service.migrateInPatient(makeMigrateInRequest())
 
-        verify(prisonApiGateway).dischargeToHospital(restrictedPatient)
+        verify(prisonApiGateway).dischargeToHospital(migratedRestrictedPatient)
 
         assertThat(response.fromLocation).isEqualTo(Agency(agencyId = "MDI"))
         assertThat(response.supportingPrison).isEqualTo(Agency(agencyId = "MDI"))
@@ -499,15 +514,13 @@ class RestrictedPatientServiceTest {
             "dischargeTime",
             "commentText"
           )
-          // TODO - Fix test data to be consistent
-          .contains("A12345", LocalDateTime.parse("2020-10-10T20:00:01"), "test")
-//          .contains("A12345", LocalDateTime.parse("${dischargeDate}T$dischargeTime"), testComment)
+          .contains("A12345", dischargeDateTime, testComment)
       }
 
       @Test
       fun `calls save with the correct parameters`() {
         val argumentCaptor = ArgumentCaptor.forClass(RestrictedPatient::class.java)
-        service.migrateInExistingPatient(makeMigrateInRequest())
+        service.migrateInPatient(makeMigrateInRequest())
 
         verify(restrictedPatientsRepository).saveAndFlush(argumentCaptor.capture())
 
@@ -522,7 +535,7 @@ class RestrictedPatientServiceTest {
 
       @Test
       fun `saves restricted patient data before the index is updated`() {
-        service.migrateInExistingPatient(makeMigrateInRequest())
+        service.migrateInPatient(makeMigrateInRequest())
 
         val inOrder = inOrder(restrictedPatientsRepository, prisonerSearchApiGateway)
 
@@ -532,7 +545,7 @@ class RestrictedPatientServiceTest {
 
       @Test
       fun `ensure that the prisoner search index is updated before completion`() {
-        service.migrateInExistingPatient(makeMigrateInRequest())
+        service.migrateInPatient(makeMigrateInRequest())
 
         verify(prisonerSearchApiGateway).refreshPrisonerIndex("A12345")
       }

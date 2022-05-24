@@ -21,7 +21,7 @@ import javax.transaction.Transactional
 data class ExistingDischargeData(
   val dischargeTime: LocalDateTime,
   val fromLocationId: String,
-  val comment: String? // TODO - What's the best thing to do with comments?
+  val comment: String?
 )
 
 @Service
@@ -58,7 +58,7 @@ class RestrictedPatientsService(
   }
 
   @Transactional(value = Transactional.TxType.NOT_SUPPORTED)
-  fun migrateInExistingPatient(migrateIn: MigrateInRequest): RestrictedPatientDto {
+  fun migrateInPatient(migrateIn: MigrateInRequest): RestrictedPatientDto {
     checkNotExistingPatient(migrateIn.offenderNo)
 
     val latestMovements = prisonApiGateway.getLatestMovements(migrateIn.offenderNo)
@@ -67,7 +67,7 @@ class RestrictedPatientsService(
     val restrictedPatientsToAdd = RestrictedPatient(
       prisonerNumber = migrateIn.offenderNo,
       fromLocationId = dischargeData.fromLocationId,
-      hospitalLocationCode = migrateIn.hospitalLocationCode, // TODO - Is this from the prev movement? The UI designs will inform this.
+      hospitalLocationCode = migrateIn.hospitalLocationCode,
       supportingPrisonId = dischargeData.fromLocationId,
       dischargeTime = dischargeData.dischargeTime,
       commentText = dischargeData.comment
@@ -77,7 +77,6 @@ class RestrictedPatientsService(
     val addedPatient = addRestrictedPatient(restrictedPatientsToAdd)
 
     prisonerSearchApiGateway.refreshPrisonerIndex(migrateIn.offenderNo)
-    // TODO - Send message - how does that work - I can't remember!
     return addedPatient
   }
 
@@ -87,7 +86,6 @@ class RestrictedPatientsService(
     }
 
   private fun getExistingRestrictedPatientDischargeData(latestMovements: List<MovementResponse>, offenderNo: String): ExistingDischargeData {
-    // TODO - Do we need to check the supporting prison is correct - comparing to one passed in?
     if (latestMovements.isEmpty()) {
       throw IllegalStateException("Prisoner ($offenderNo) does not have any existing movements to migrate")
     }
@@ -95,7 +93,6 @@ class RestrictedPatientsService(
     if ("REL" != latestMovement.movementType) {
       throw IllegalStateException("Prisoner ($offenderNo) was not released")
     }
-    // TODO - I don't think this is necessary - check
     val fromAgencyId = latestMovement.fromAgency ?: throw IllegalStateException("Prisoner ($offenderNo) does not have an agency id associated with the last movement")
     val dischargeDateTime = calculateDischargeDateTime(offenderNo, latestMovement.movementDate, latestMovement.movementTime)
     return ExistingDischargeData(
