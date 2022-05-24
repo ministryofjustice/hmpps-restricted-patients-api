@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.request.DischargeToHospitalRequest
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.request.MigrateInRequest
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.RestrictedPatientDto
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services.RestrictedPatientsService
 
@@ -21,6 +22,13 @@ class RestrictedPatentsController(private val restrictedPatientsService: Restric
   @ResponseStatus(code = HttpStatus.CREATED)
   fun dischargeToHospital(@RequestBody dischargeToHospital: DischargeToHospitalRequest): RestrictedPatientDto =
     restrictedPatientsService.dischargeToHospital(dischargeToHospital)
+
+  @PostMapping(
+    value = ["/migrate-in-restricted-patient"], consumes = [MediaType.APPLICATION_JSON_VALUE]
+  )
+  @ResponseStatus(code = HttpStatus.CREATED)
+  fun migrateInExistingPatient(@RequestBody migrateIn: MigrateInRequest): RestrictedPatientDto =
+    restrictedPatientsService.migrateInExistingPatient(migrateIn)
 
   @GetMapping(
     value = ["/restricted-patient/prison-number/{prison-number}"]
