@@ -5,11 +5,15 @@ import com.github.tomakehurst.wiremock.client.WireMock.equalToJson
 import com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor
 import com.github.tomakehurst.wiremock.client.WireMock.putRequestedFor
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.whenever
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.test.context.ActiveProfiles
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.repositories.RestrictedPatientsRepository
 import java.time.Clock
 import java.time.LocalDate
 import java.time.ZoneId
@@ -19,6 +23,9 @@ class RestrictedPatientIntegrationTest : IntegrationTestBase() {
 
   @MockBean
   lateinit var clock: Clock
+
+  @Autowired
+  lateinit var restrictedPatientRepository: RestrictedPatientsRepository
 
   @BeforeEach
   fun beforeEach() {
@@ -58,6 +65,37 @@ class RestrictedPatientIntegrationTest : IntegrationTestBase() {
         )
         .withHeader("Authorization", WireMock.containing("Bearer"))
     )
+  }
+
+  @Test
+  fun `migrate in a patient that has been moved out using NOMIS only`() {
+    val rpEntryBeforeTest = restrictedPatientRepository.findById("A12345")
+    assertFalse(rpEntryBeforeTest.isPresent)
+
+    migrateInRestrictedPatientWebClient(prisonerNumber = "A12345")
+      .exchange()
+      .expectStatus().isCreated
+      .expectBody()
+      .jsonPath("$.prisonerNumber").isEqualTo("A12345")
+      .jsonPath("$.fromLocation.agencyId").isEqualTo("MDI")
+      .jsonPath("$.hospitalLocation.agencyId").isEqualTo("HAZLWD")
+      .jsonPath("$.supportingPrison.agencyId").isEqualTo("MDI")
+      .jsonPath("$.dischargeTime").isEqualTo("2022-05-20T14:36:13")
+      .jsonPath("$.commentText").isEqualTo("Psychiatric Hospital Discharge to Avesbury House, Care UK")
+
+    prisonApiMockServer.verify(
+      postRequestedFor(urlEqualTo("/api/movements/offenders?latestOnly=true&allBookings=true"))
+        .withRequestBody(
+          equalToJson("['A12345']")
+        ).withHeader("Authorization", WireMock.containing("Bearer"))
+    )
+
+    prisonerSearchApiMockServer.verify(
+      putRequestedFor(urlEqualTo("/prisoner-index/index/prisoner/A12345"))
+    )
+
+    val rpEntry = restrictedPatientRepository.findById("A12345")
+    assertTrue(rpEntry.isPresent)
   }
 
   @Test

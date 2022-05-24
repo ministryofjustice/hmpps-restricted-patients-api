@@ -6,7 +6,7 @@ import org.springframework.web.reactive.function.client.WebClient
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.entities.RestrictedPatient
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.request.CreateExternalMovement
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.Agency
-import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.OffenderBookingResponse
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.MovementResponse
 
 @Service
 class PrisonApiGateway(private val prisonApiClientCreds: WebClient) {
@@ -27,18 +27,24 @@ class PrisonApiGateway(private val prisonApiClientCreds: WebClient) {
       .bodyToMono(String::class.java)
       .block()
 
+  fun getLatestMovements(offenderNo: String): List<MovementResponse> =
+    prisonApiClientCreds
+      .post()
+      .uri("/movements/offenders?latestOnly=true&allBookings=true")
+      .bodyValue(
+        listOf(
+          offenderNo
+        )
+      )
+      .retrieve()
+      .bodyToMono(object : ParameterizedTypeReference<List<MovementResponse>>() {})
+      .block()!!
+
   fun getAgencyLocationsByType(type: String): List<Agency> = prisonApiClientCreds
     .get()
     .uri("/agencies/type/$type")
     .retrieve()
     .bodyToMono(object : ParameterizedTypeReference<List<Agency>>() {})
-    .block()!!
-
-  fun getAgencyById(agencyId: String): Agency? = prisonApiClientCreds
-    .get()
-    .uri("/agencies/$agencyId")
-    .retrieve()
-    .bodyToMono(Agency::class.java)
     .block()!!
 
   fun createExternalMovement(createExternalMovement: CreateExternalMovement) {
@@ -50,11 +56,4 @@ class PrisonApiGateway(private val prisonApiClientCreds: WebClient) {
       .bodyToMono(String::class.java)
       .block()
   }
-
-  fun getOffenderBooking(bookingId: Long): OffenderBookingResponse = prisonApiClientCreds
-    .get()
-    .uri("/bookings/$bookingId")
-    .retrieve()
-    .bodyToMono(OffenderBookingResponse::class.java)
-    .block()!!
 }

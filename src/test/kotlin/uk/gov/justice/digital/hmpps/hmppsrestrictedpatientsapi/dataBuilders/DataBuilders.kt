@@ -2,7 +2,9 @@ package uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.dataBuilders
 
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.entities.RestrictedPatient
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.request.DischargeToHospitalRequest
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.request.MigrateInRequest
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.Agency
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.MovementResponse
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.PrisonerResult
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.RestrictedPatientDto
 import java.time.LocalDateTime
@@ -29,6 +31,14 @@ fun makeDischargeRequest(
   fromLocationId,
   hospitalLocationCode,
   supportingPrisonId
+)
+
+fun makeMigrateInRequest(
+  offenderNo: String = "A12345",
+  hospitalLocationCode: String = "HAZLWD",
+) = MigrateInRequest(
+  offenderNo,
+  hospitalLocationCode
 )
 
 fun makeRestrictedPatientDto(
@@ -94,3 +104,17 @@ fun makePrisonerReceiveEvent(prisonerNumber: String) =
         }
     }
   """.trimIndent()
+
+fun makeLatestMovementReturn(
+  fromAgency: String? = "MDI",
+  movementDate: String? = "2022-05-01",
+  movementTime: String? = "15:33:11",
+  movementType: String = "REL",
+  commentText: String? = "Released for some reason"
+): MovementResponse = MovementResponse(
+  fromAgency,
+  movementDate,
+  movementTime,
+  movementType,
+  commentText
+)

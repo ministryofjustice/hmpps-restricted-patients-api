@@ -6,6 +6,14 @@ data class DischargeToHospitalResponse(
   val restrictivePatient: RestrictivePatient
 )
 
+data class MovementResponse(
+  val fromAgency: String?,
+  val movementDate: String?,
+  val movementTime: String?,
+  val movementType: String?,
+  val commentText: String?,
+)
+
 data class RestrictivePatient(
   val supportingPrison: Agency? = null,
   val dischargedHospital: Agency? = null,

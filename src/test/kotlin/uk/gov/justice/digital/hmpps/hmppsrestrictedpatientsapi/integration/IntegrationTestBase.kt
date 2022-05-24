@@ -83,7 +83,6 @@ abstract class IntegrationTestBase {
     fromLocationId: String = "MDI",
     hospitalLocationCode: String = "HAZLWD",
     supportingPrisonId: String = "MDI"
-
   ): WebTestClient.RequestHeadersSpec<*> {
     prisonApiMockServer.stubAgencyLocationForPrisons()
     prisonApiMockServer.stubAgencyLocationForHospitals()
@@ -101,6 +100,26 @@ abstract class IntegrationTestBase {
           "fromLocationId" to fromLocationId,
           "hospitalLocationCode" to hospitalLocationCode,
           "supportingPrisonId" to supportingPrisonId
+        )
+      )
+  }
+
+  fun migrateInRestrictedPatientWebClient(
+    prisonerNumber: String,
+    hospitalLocationCode: String = "HAZLWD",
+  ): WebTestClient.RequestHeadersSpec<*> {
+    prisonApiMockServer.stubGetLatestMovements(prisonerNumber, hospitalLocationCode)
+    prisonApiMockServer.stubDischargeToPrison(prisonerNumber)
+    prisonerSearchApiMockServer.stubRefreshIndex(prisonerNumber)
+
+    return webTestClient
+      .post()
+      .uri("/migrate-in-restricted-patient")
+      .headers(setHeaders())
+      .bodyValue(
+        mapOf(
+          "offenderNo" to prisonerNumber,
+          "hospitalLocationCode" to hospitalLocationCode,
         )
       )
   }
