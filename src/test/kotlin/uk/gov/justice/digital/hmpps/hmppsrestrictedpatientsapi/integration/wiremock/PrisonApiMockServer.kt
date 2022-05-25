@@ -79,7 +79,7 @@ class PrisonApiMockServer : WireMockServer(8989) {
 
   fun stubGetLatestMovements(prisonerNumber: String, hospitalLocationCode: String) {
     stubFor(
-      post(urlEqualTo("/api/movements/offenders?latestOnly=true&allBookings=true"))
+      post(urlEqualTo("/api/movements/offenders?latestOnly=true&allBookings=false"))
         .willReturn(
           aResponse()
             .withHeader("Content-Type", "application/json")

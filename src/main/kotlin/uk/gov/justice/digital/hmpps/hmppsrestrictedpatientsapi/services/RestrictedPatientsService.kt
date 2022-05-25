@@ -86,8 +86,12 @@ class RestrictedPatientsService(
     }
 
   private fun getExistingRestrictedPatientDischargeData(latestMovements: List<MovementResponse>, offenderNo: String): ExistingDischargeData {
+    // These checks ensure the Prison API discharge call will just update the latest movement
     if (latestMovements.isEmpty()) {
-      throw IllegalStateException("Prisoner ($offenderNo) does not have any existing movements to migrate")
+      throw IllegalStateException("Prisoner ($offenderNo) does not have the correct latest movements to migrate")
+    }
+    if (latestMovements.size > 1) {
+      throw RuntimeException("Prisoner ($offenderNo) has multiple latest movements")
     }
     val latestMovement = latestMovements[0]
     if ("REL" != latestMovement.movementType) {

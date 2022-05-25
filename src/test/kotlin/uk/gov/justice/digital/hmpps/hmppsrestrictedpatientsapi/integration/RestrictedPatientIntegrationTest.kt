@@ -84,7 +84,7 @@ class RestrictedPatientIntegrationTest : IntegrationTestBase() {
       .jsonPath("$.commentText").isEqualTo("Psychiatric Hospital Discharge to Avesbury House, Care UK")
 
     prisonApiMockServer.verify(
-      postRequestedFor(urlEqualTo("/api/movements/offenders?latestOnly=true&allBookings=true"))
+      postRequestedFor(urlEqualTo("/api/movements/offenders?latestOnly=true&allBookings=false"))
         .withRequestBody(
           equalToJson("['A12345']")
         ).withHeader("Authorization", WireMock.containing("Bearer"))
