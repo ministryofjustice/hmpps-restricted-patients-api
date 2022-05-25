@@ -393,6 +393,15 @@ class RestrictedPatientServiceTest {
       }
 
       @Test
+      fun `throws exception when Prison API returns multiple movements`() {
+        whenever(prisonApiGateway.getLatestMovements(any())).thenReturn(listOf(makeLatestMovementReturn(), makeLatestMovementReturn()))
+
+        Assertions.assertThrows(RuntimeException::class.java) {
+          service.migrateInPatient(makeMigrateInRequest())
+        }
+      }
+
+      @Test
       fun `throws exception when the offender's latest movement is not a REL`() {
         val nonRelMovement = makeLatestMovementReturn().copy(
           movementType = "TPT"

@@ -30,7 +30,7 @@ class PrisonApiGateway(private val prisonApiClientCreds: WebClient) {
   fun getLatestMovements(offenderNo: String): List<MovementResponse> =
     prisonApiClientCreds
       .post()
-      .uri("/movements/offenders?latestOnly=true&allBookings=true")
+      .uri("/movements/offenders?latestOnly=true&allBookings=false")
       .bodyValue(
         listOf(
           offenderNo
