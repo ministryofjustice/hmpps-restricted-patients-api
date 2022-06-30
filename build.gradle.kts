@@ -1,7 +1,7 @@
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "4.3.0-beta"
-  kotlin("plugin.spring") version "1.6.20"
-  kotlin("plugin.jpa") version "1.6.20"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "4.3.0"
+  kotlin("plugin.spring") version "1.7.0"
+  kotlin("plugin.jpa") version "1.7.0"
 }
 
 configurations {
@@ -46,7 +46,7 @@ allOpen {
 tasks {
   compileKotlin {
     kotlinOptions {
-      jvmTarget = "17"
+      jvmTarget = "18"
     }
   }
   test {
