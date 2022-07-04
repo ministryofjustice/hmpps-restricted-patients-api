@@ -1,7 +1,7 @@
 version: 2.1
 
 orbs:
-  hmpps: ministryofjustice/hmpps@3.14
+  hmpps: ministryofjustice/hmpps@5.1.0
 
 # We provide a custom setup as the java_localstack_postgres orb does not allow us to specify a DB name
 # orbs:
@@ -139,10 +139,10 @@ workflows:
       - hmpps/trivy_latest_scan:
           context:
             - hmpps-common-vars
-      - hmpps/veracode_pipeline_scan:
-          context:
-            - hmpps-common-vars
-            - veracode-credentials
+      #- hmpps/veracode_pipeline_scan:
+      #    context:
+      #      - hmpps-common-vars
+      #      - veracode-credentials
   security-weekly:
     triggers:
       - schedule:
