@@ -14,11 +14,9 @@ generic-service:
     OAUTH_ENDPOINT_URL: https://sign-in-preprod.hmpps.service.justice.gov.uk/auth
     SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: https://sign-in-preprod.hmpps.service.justice.gov.uk/auth/.well-known/jwks.json
 
+# CloudPlatform AlertManager receiver to route promethues alerts to slack
 generic-prometheus-alerts:
   alertSeverity: digital-prison-service-dev
 
-# CloudPlatform AlertManager receiver to route promethues alerts to slack
-generic-prometheus-alerts:
-  alertSeverity: hmpps_tech_non_prod
 
 environment: preprod
