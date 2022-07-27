@@ -27,7 +27,8 @@ import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.entities.Re
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.exceptions.NoResultsReturnedException
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.request.CreateExternalMovement
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.Agency
-import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.PrisonerResult
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.InOutStatus
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.OffenderBookingResponse
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.repositories.RestrictedPatientsRepository
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services.DomainEventPublisher
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services.RestrictedPatientsService
@@ -220,9 +221,18 @@ class RestrictedPatientServiceTest {
     @Nested
     inner class Failures {
       @Test
-      fun `throws not found exception`() {
-        whenever(prisonerSearchApiGateway.searchByPrisonNumber(any())).thenReturn(
-          emptyList()
+      fun `throws exception when offender not found`() {
+        whenever(prisonApiGateway.getOffenderBooking(any())).thenReturn(null)
+
+        Assertions.assertThrows(NoResultsReturnedException::class.java) {
+          service.dischargeToHospital(makeDischargeRequest())
+        }
+      }
+
+      @Test
+      fun `throws exception when offender is OUT`() {
+        whenever(prisonApiGateway.getOffenderBooking(any())).thenReturn(
+          OffenderBookingResponse(1234567, "A1234AA", InOutStatus.OUT)
         )
 
         Assertions.assertThrows(NoResultsReturnedException::class.java) {
@@ -242,8 +252,8 @@ class RestrictedPatientServiceTest {
       @Test
       fun `removes recently persisted restricted patient on prison api discharge error`() {
         whenever(restrictedPatientsRepository.saveAndFlush(any())).thenReturn(makeRestrictedPatient())
-        whenever(prisonerSearchApiGateway.searchByPrisonNumber(any())).thenReturn(
-          listOf(PrisonerResult(prisonerNumber = "A12345", bookingId = 1L))
+        whenever(prisonApiGateway.getOffenderBooking(any())).thenReturn(
+          OffenderBookingResponse(1234567, "A1234AA", InOutStatus.IN)
         )
         whenever(prisonApiGateway.dischargeToHospital(any())).thenThrow(WebClientResponseException::class.java)
 
@@ -268,8 +278,8 @@ class RestrictedPatientServiceTest {
     inner class SuccessfulDischargeToHospital {
       @BeforeEach
       fun beforeEach() {
-        whenever(prisonerSearchApiGateway.searchByPrisonNumber(any())).thenReturn(
-          listOf(PrisonerResult(prisonerNumber = "A12345", bookingId = 1L))
+        whenever(prisonApiGateway.getOffenderBooking(any())).thenReturn(
+          OffenderBookingResponse(1234567, "A1234AA", InOutStatus.IN)
         )
         whenever(restrictedPatientsRepository.saveAndFlush(any())).thenReturn(makeRestrictedPatient())
       }

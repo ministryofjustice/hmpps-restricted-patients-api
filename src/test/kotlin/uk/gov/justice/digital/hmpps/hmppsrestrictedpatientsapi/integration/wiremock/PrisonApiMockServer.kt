@@ -2,10 +2,13 @@ package uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.integration.wire
 
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock.aResponse
+import com.github.tomakehurst.wiremock.client.WireMock.equalTo
 import com.github.tomakehurst.wiremock.client.WireMock.get
 import com.github.tomakehurst.wiremock.client.WireMock.post
 import com.github.tomakehurst.wiremock.client.WireMock.put
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
+import com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.InOutStatus
 
 class PrisonApiMockServer : WireMockServer(8989) {
   fun stubHealth() {
@@ -240,6 +243,34 @@ class PrisonApiMockServer : WireMockServer(8989) {
                   "description": "$description",
                   "agencyType": "$agencyType",
                   "active": true
+                }
+              """.trimIndent()
+            )
+        )
+    )
+  }
+
+  fun stubOffenderBooking(offenderNo: String, inOutStatus: InOutStatus) {
+    stubFor(
+      get(urlPathEqualTo("/api/bookings/offenderNo/$offenderNo"))
+        .withQueryParams(
+          mapOf(
+            "fullInfo" to equalTo("true"),
+            "extraInfo" to equalTo("false"),
+            "csraSummary" to equalTo("false")
+          )
+        )
+        .willReturn(
+          aResponse()
+            .withHeader("Content-Type", "application/json")
+            .withStatus(200)
+            .withBody(
+              """
+                {
+                  "offenderNo": "$offenderNo",
+                  "bookingId": 1234567,
+                  "ignoredField": "ignored",
+                  "inOutStatus": "${inOutStatus.name}"
                 }
               """.trimIndent()
             )
