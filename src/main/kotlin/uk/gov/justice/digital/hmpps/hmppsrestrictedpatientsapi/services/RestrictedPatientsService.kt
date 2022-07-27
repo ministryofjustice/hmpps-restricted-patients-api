@@ -95,7 +95,6 @@ class RestrictedPatientsService(
     if ("REL" != latestMovement.movementType) {
       throw IllegalStateException("Prisoner ($offenderNo) was not released")
     }
-    latestMovement.fromAgency ?: throw IllegalStateException("Prisoner ($offenderNo) does not have an agency id associated with the last movement")
 
     return latestMovement
   }
