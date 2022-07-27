@@ -41,7 +41,7 @@ class RestrictedPatientsService(
 
     prisonApiGateway.getOffenderBooking(dischargeToHospital.offenderNo)
       ?.takeIf { it.inOutStatus == InOutStatus.IN }
-      ?: throw NoResultsReturnedException("No prisoner search results returned for ${dischargeToHospital.offenderNo}")
+      ?: throw NoResultsReturnedException("No prisoner with status IN found for ${dischargeToHospital.offenderNo}")
 
     val dischargeToHospitalWithDefaultSupportingPrison = dischargeToHospital.copy(
       supportingPrisonId = dischargeToHospital.supportingPrisonId ?: dischargeToHospital.fromLocationId
