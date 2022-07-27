@@ -4,6 +4,7 @@ import com.github.tomakehurst.wiremock.client.WireMock
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.test.context.ActiveProfiles
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.InOutStatus
 
 @ActiveProfiles("test")
 class SpringOauthIntegrationTest : IntegrationTestBase() {
@@ -13,10 +14,10 @@ class SpringOauthIntegrationTest : IntegrationTestBase() {
     prisonApiMockServer.stubAgencyLocationForPrisons()
     prisonApiMockServer.stubAgencyLocationForHospitals()
     prisonApiMockServer.stubDischargeToPrison(OFFENDER_ONE)
-    prisonerSearchApiMockServer.stubSearchByPrisonNumber(OFFENDER_ONE)
+    prisonApiMockServer.stubOffenderBooking(OFFENDER_ONE, InOutStatus.IN)
 
     prisonApiMockServer.stubDischargeToPrison(OFFENDER_TWO)
-    prisonerSearchApiMockServer.stubSearchByPrisonNumber(OFFENDER_TWO)
+    prisonApiMockServer.stubOffenderBooking(OFFENDER_TWO, InOutStatus.IN)
   }
 
   @Test
