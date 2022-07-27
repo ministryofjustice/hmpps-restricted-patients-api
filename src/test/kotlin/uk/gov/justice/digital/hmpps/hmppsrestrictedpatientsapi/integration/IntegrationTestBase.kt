@@ -14,6 +14,7 @@ import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.JwtAuthHelper
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.integration.wiremock.OAuthMockServer
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.integration.wiremock.PrisonApiMockServer
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.integration.wiremock.PrisonerSearchApiMockServer
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.InOutStatus
 
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 abstract class IntegrationTestBase {
@@ -79,15 +80,15 @@ abstract class IntegrationTestBase {
 
   fun dischargePrisonerWebClient(
     prisonerNumber: String,
-    commentText: String = "Prisoner was released on bail",
+    commentText: String = "Prisoner was released to hospital",
     fromLocationId: String = "MDI",
     hospitalLocationCode: String = "HAZLWD",
     supportingPrisonId: String = "MDI"
   ): WebTestClient.RequestHeadersSpec<*> {
     prisonApiMockServer.stubAgencyLocationForPrisons()
     prisonApiMockServer.stubAgencyLocationForHospitals()
+    prisonApiMockServer.stubOffenderBooking(prisonerNumber, InOutStatus.IN)
     prisonApiMockServer.stubDischargeToPrison(prisonerNumber)
-    prisonerSearchApiMockServer.stubSearchByPrisonNumber(prisonerNumber)
 
     return webTestClient
       .post()

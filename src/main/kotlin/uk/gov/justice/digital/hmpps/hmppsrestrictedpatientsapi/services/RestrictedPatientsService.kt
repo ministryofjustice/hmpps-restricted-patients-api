@@ -10,6 +10,7 @@ import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.request.Cre
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.request.DischargeToHospitalRequest
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.request.MigrateInRequest
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.Agency
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.InOutStatus
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.MovementResponse
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.RestrictedPatientDto
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.repositories.RestrictedPatientsRepository
@@ -38,11 +39,8 @@ class RestrictedPatientsService(
   fun dischargeToHospital(dischargeToHospital: DischargeToHospitalRequest): RestrictedPatientDto {
     checkNotExistingPatient(dischargeToHospital.offenderNo)
 
-    // TODO instead of checking prisoner search check prison-api in a similar way as is
-    // done in the migration function
-    val prisonerSearchResponse = prisonerSearchApiGateway.searchByPrisonNumber(dischargeToHospital.offenderNo)
-
-    prisonerSearchResponse.firstOrNull()
+    prisonApiGateway.getOffenderBooking(dischargeToHospital.offenderNo)
+      ?.takeIf { it.inOutStatus == InOutStatus.IN }
       ?: throw NoResultsReturnedException("No prisoner search results returned for ${dischargeToHospital.offenderNo}")
 
     val dischargeToHospitalWithDefaultSupportingPrison = dischargeToHospital.copy(

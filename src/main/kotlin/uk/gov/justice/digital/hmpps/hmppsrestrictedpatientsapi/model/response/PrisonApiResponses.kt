@@ -21,4 +21,8 @@ data class RestrictivePatient(
   val dischargeDetails: String? = null
 )
 
-data class OffenderBookingResponse(val bookingId: Long, val offenderNo: String)
+data class OffenderBookingResponse(val bookingId: Long, val offenderNo: String, val inOutStatus: InOutStatus)
+
+enum class InOutStatus {
+  IN, OUT
+}
