@@ -38,6 +38,8 @@ class RestrictedPatientsService(
   fun dischargeToHospital(dischargeToHospital: DischargeToHospitalRequest): RestrictedPatientDto {
     checkNotExistingPatient(dischargeToHospital.offenderNo)
 
+    // TODO instead of checking prisoner search check prison-api in a similar way as is
+    // done in the migration function
     val prisonerSearchResponse = prisonerSearchApiGateway.searchByPrisonNumber(dischargeToHospital.offenderNo)
 
     prisonerSearchResponse.firstOrNull()
@@ -61,10 +63,11 @@ class RestrictedPatientsService(
   fun migrateInPatient(migrateIn: MigrateInRequest): RestrictedPatientDto {
     checkNotExistingPatient(migrateIn.offenderNo)
 
-    val latestMovements = prisonApiGateway.getLatestMovements(migrateIn.offenderNo)
-    val dischargeData = getExistingRestrictedPatientDischargeData(latestMovements, migrateIn.offenderNo)
+    val dischargeData = getLatestMovement(migrateIn.offenderNo)
+      .also { checkLatestMovementOkForDischarge(it, migrateIn.offenderNo) }
+      .let { getExistingRestrictedPatientDischargeData(it, migrateIn.offenderNo) }
 
-    val restrictedPatientsToAdd = RestrictedPatient(
+    return RestrictedPatient(
       prisonerNumber = migrateIn.offenderNo,
       fromLocationId = dischargeData.fromLocationId,
       hospitalLocationCode = migrateIn.hospitalLocationCode,
@@ -72,12 +75,8 @@ class RestrictedPatientsService(
       dischargeTime = dischargeData.dischargeTime,
       commentText = dischargeData.comment
     )
-    // Call Prison API as well as DB to ensure the data is consistent with discharges,
-    // e.g. the movement reason is correct
-    val addedPatient = addRestrictedPatient(restrictedPatientsToAdd)
-
-    prisonerSearchApiGateway.refreshPrisonerIndex(migrateIn.offenderNo)
-    return addedPatient
+      .let { addRestrictedPatient(it) }
+      .also { prisonerSearchApiGateway.refreshPrisonerIndex(migrateIn.offenderNo) }
   }
 
   private fun checkNotExistingPatient(offenderNo: String) =
@@ -85,23 +84,36 @@ class RestrictedPatientsService(
       throw IllegalStateException("Prisoner ($offenderNo) is already a restricted patient")
     }
 
-  private fun getExistingRestrictedPatientDischargeData(latestMovements: List<MovementResponse>, offenderNo: String): ExistingDischargeData {
-    // These checks ensure the Prison API discharge call will just update the latest movement
-    if (latestMovements.isEmpty()) {
+  private fun getLatestMovement(offenderNo: String): MovementResponse {
+    val movements = prisonApiGateway.getLatestMovements(offenderNo)
+
+    if (movements.isEmpty()) {
       throw IllegalStateException("Prisoner ($offenderNo) does not have the correct latest movements to migrate")
     }
-    if (latestMovements.size > 1) {
+    if (movements.size > 1) {
       throw RuntimeException("Prisoner ($offenderNo) has multiple latest movements")
     }
-    val latestMovement = latestMovements[0]
+    val latestMovement = movements[0]
     if ("REL" != latestMovement.movementType) {
       throw IllegalStateException("Prisoner ($offenderNo) was not released")
     }
-    val fromAgencyId = latestMovement.fromAgency ?: throw IllegalStateException("Prisoner ($offenderNo) does not have an agency id associated with the last movement")
+    latestMovement.fromAgency ?: throw IllegalStateException("Prisoner ($offenderNo) does not have an agency id associated with the last movement")
+
+    return latestMovement
+  }
+
+  private fun checkLatestMovementOkForDischarge(latestMovement: MovementResponse, offenderNo: String) {
+    if ("REL" != latestMovement.movementType) {
+      throw IllegalStateException("Prisoner ($offenderNo) was not released")
+    }
+    latestMovement.fromAgency ?: throw IllegalStateException("Prisoner ($offenderNo) does not have an agency id associated with the last movement")
+  }
+
+  private fun getExistingRestrictedPatientDischargeData(latestMovement: MovementResponse, offenderNo: String): ExistingDischargeData {
     val dischargeDateTime = calculateDischargeDateTime(offenderNo, latestMovement.movementDate, latestMovement.movementTime)
     return ExistingDischargeData(
       dischargeTime = dischargeDateTime,
-      fromLocationId = fromAgencyId,
+      fromLocationId = latestMovement.fromAgency!!,
       comment = latestMovement.commentText,
     )
   }
@@ -110,8 +122,8 @@ class RestrictedPatientsService(
     try {
       return LocalDateTime.parse("${movementDate}T$movementTime")
     } catch (e: Exception) {
+      throw IllegalStateException("Prisoner ($offenderNo) does not have a valid movement date/time")
     }
-    throw IllegalStateException("Prisoner ($offenderNo) does not have a valid movement date/time")
   }
 
   private fun addRestrictedPatient(restrictedPatient: RestrictedPatient): RestrictedPatientDto {
