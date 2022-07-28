@@ -21,7 +21,7 @@ dependencies {
   implementation("org.springdoc:springdoc-openapi-data-rest:1.6.8")
   implementation("org.springframework:spring-jms")
   implementation("com.google.code.gson:gson:2.9.0")
-  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:1.0.6")
+  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:1.1.7-beta-2")
 
   runtimeOnly("com.h2database:h2:2.1.210")
   runtimeOnly("org.flywaydb:flyway-core:8.5.1")
