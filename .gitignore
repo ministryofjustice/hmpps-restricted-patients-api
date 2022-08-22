@@ -66,3 +66,7 @@ dist
 ecr.repo
 /dps-gradle-spring-boot-suppressions.xml
 .editorconfig
+
+#Helm
+**/Chart.lock
+helm_deploy/hmpps-restricted-patients-api/charts

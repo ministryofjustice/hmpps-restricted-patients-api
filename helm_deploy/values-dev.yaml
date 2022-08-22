@@ -16,10 +16,8 @@ generic-service:
 
   allowlist: null
 
-# CloudPlatform AlertManager receiver to route promethues alerts to slack
+# CloudPlatform AlertManager receiver to route prometheus alerts to slack
 generic-prometheus-alerts:
   alertSeverity: digital-prison-service-dev
-
-
 
 environment: dev
