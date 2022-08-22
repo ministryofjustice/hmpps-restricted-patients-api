@@ -39,7 +39,7 @@ class RestrictedPatientsService(
     checkNotExistingPatient(dischargeToHospital.offenderNo)
 
     prisonApiGateway.getOffenderBooking(dischargeToHospital.offenderNo)
-      ?.takeIf { it.active }
+      ?.takeIf { it.activeFlag }
       ?: throw NoResultsReturnedException("No prisoner with activeFlag 'Y' found for ${dischargeToHospital.offenderNo}")
 
     val dischargeToHospitalWithDefaultSupportingPrison = dischargeToHospital.copy(
