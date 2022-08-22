@@ -8,7 +8,6 @@ import com.github.tomakehurst.wiremock.client.WireMock.post
 import com.github.tomakehurst.wiremock.client.WireMock.put
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 import com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo
-import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.ActiveFlag
 
 class PrisonApiMockServer : WireMockServer(8989) {
   fun stubHealth() {
@@ -250,7 +249,7 @@ class PrisonApiMockServer : WireMockServer(8989) {
     )
   }
 
-  fun stubOffenderBooking(offenderNo: String, activeFlag: ActiveFlag) {
+  fun stubOffenderBooking(offenderNo: String, activeFlag: Boolean) {
     stubFor(
       get(urlPathEqualTo("/api/bookings/offenderNo/$offenderNo"))
         .withQueryParams(
@@ -270,7 +269,7 @@ class PrisonApiMockServer : WireMockServer(8989) {
                   "offenderNo": "$offenderNo",
                   "bookingId": 1234567,
                   "ignoredField": "ignored",
-                  "activeFlag": "${activeFlag.name}"
+                  "activeFlag": "$activeFlag"
                 }
               """.trimIndent()
             )

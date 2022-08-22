@@ -26,7 +26,6 @@ import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.Prisoner
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.entities.RestrictedPatient
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.exceptions.NoResultsReturnedException
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.request.CreateExternalMovement
-import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.ActiveFlag
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.Agency
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.OffenderBookingResponse
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.repositories.RestrictedPatientsRepository
@@ -232,7 +231,7 @@ class RestrictedPatientServiceTest {
       @Test
       fun `throws exception when offender is OUT`() {
         whenever(prisonApiGateway.getOffenderBooking(any())).thenReturn(
-          OffenderBookingResponse(1234567, "A1234AA", ActiveFlag.N)
+          OffenderBookingResponse(1234567, "A1234AA", false)
         )
 
         Assertions.assertThrows(NoResultsReturnedException::class.java) {
@@ -253,7 +252,7 @@ class RestrictedPatientServiceTest {
       fun `removes recently persisted restricted patient on prison api discharge error`() {
         whenever(restrictedPatientsRepository.saveAndFlush(any())).thenReturn(makeRestrictedPatient())
         whenever(prisonApiGateway.getOffenderBooking(any())).thenReturn(
-          OffenderBookingResponse(1234567, "A1234AA", ActiveFlag.Y)
+          OffenderBookingResponse(1234567, "A1234AA", true)
         )
         whenever(prisonApiGateway.dischargeToHospital(any())).thenThrow(WebClientResponseException::class.java)
 
@@ -279,7 +278,7 @@ class RestrictedPatientServiceTest {
       @BeforeEach
       fun beforeEach() {
         whenever(prisonApiGateway.getOffenderBooking(any())).thenReturn(
-          OffenderBookingResponse(1234567, "A1234AA", ActiveFlag.Y)
+          OffenderBookingResponse(1234567, "A1234AA", true)
         )
         whenever(restrictedPatientsRepository.saveAndFlush(any())).thenReturn(makeRestrictedPatient())
       }
