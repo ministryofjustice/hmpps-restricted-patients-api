@@ -21,8 +21,11 @@ data class RestrictivePatient(
   val dischargeDetails: String? = null
 )
 
-data class OffenderBookingResponse(val bookingId: Long, val offenderNo: String, val inOutStatus: InOutStatus)
+data class OffenderBookingResponse(val bookingId: Long, val offenderNo: String, val activeFlag: ActiveFlag) {
+  val active: Boolean
+    get() = activeFlag == ActiveFlag.Y
+}
 
-enum class InOutStatus {
-  IN, OUT
+enum class ActiveFlag {
+  Y, N
 }

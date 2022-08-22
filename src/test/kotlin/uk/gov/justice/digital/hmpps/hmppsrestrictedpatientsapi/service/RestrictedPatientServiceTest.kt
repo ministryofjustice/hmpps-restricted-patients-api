@@ -26,8 +26,8 @@ import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.Prisoner
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.entities.RestrictedPatient
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.exceptions.NoResultsReturnedException
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.request.CreateExternalMovement
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.ActiveFlag
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.Agency
-import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.InOutStatus
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.OffenderBookingResponse
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.repositories.RestrictedPatientsRepository
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services.DomainEventPublisher
@@ -232,7 +232,7 @@ class RestrictedPatientServiceTest {
       @Test
       fun `throws exception when offender is OUT`() {
         whenever(prisonApiGateway.getOffenderBooking(any())).thenReturn(
-          OffenderBookingResponse(1234567, "A1234AA", InOutStatus.OUT)
+          OffenderBookingResponse(1234567, "A1234AA", ActiveFlag.N)
         )
 
         Assertions.assertThrows(NoResultsReturnedException::class.java) {
@@ -253,7 +253,7 @@ class RestrictedPatientServiceTest {
       fun `removes recently persisted restricted patient on prison api discharge error`() {
         whenever(restrictedPatientsRepository.saveAndFlush(any())).thenReturn(makeRestrictedPatient())
         whenever(prisonApiGateway.getOffenderBooking(any())).thenReturn(
-          OffenderBookingResponse(1234567, "A1234AA", InOutStatus.IN)
+          OffenderBookingResponse(1234567, "A1234AA", ActiveFlag.Y)
         )
         whenever(prisonApiGateway.dischargeToHospital(any())).thenThrow(WebClientResponseException::class.java)
 
@@ -279,7 +279,7 @@ class RestrictedPatientServiceTest {
       @BeforeEach
       fun beforeEach() {
         whenever(prisonApiGateway.getOffenderBooking(any())).thenReturn(
-          OffenderBookingResponse(1234567, "A1234AA", InOutStatus.IN)
+          OffenderBookingResponse(1234567, "A1234AA", ActiveFlag.Y)
         )
         whenever(restrictedPatientsRepository.saveAndFlush(any())).thenReturn(makeRestrictedPatient())
       }

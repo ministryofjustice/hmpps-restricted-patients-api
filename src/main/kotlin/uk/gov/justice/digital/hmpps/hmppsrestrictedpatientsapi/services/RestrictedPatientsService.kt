@@ -10,7 +10,6 @@ import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.request.Cre
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.request.DischargeToHospitalRequest
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.request.MigrateInRequest
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.Agency
-import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.InOutStatus
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.MovementResponse
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.RestrictedPatientDto
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.repositories.RestrictedPatientsRepository
@@ -40,8 +39,8 @@ class RestrictedPatientsService(
     checkNotExistingPatient(dischargeToHospital.offenderNo)
 
     prisonApiGateway.getOffenderBooking(dischargeToHospital.offenderNo)
-      ?.takeIf { it.inOutStatus == InOutStatus.IN }
-      ?: throw NoResultsReturnedException("No prisoner with status IN found for ${dischargeToHospital.offenderNo}")
+      ?.takeIf { it.active }
+      ?: throw NoResultsReturnedException("No prisoner with activeFlag 'Y' found for ${dischargeToHospital.offenderNo}")
 
     val dischargeToHospitalWithDefaultSupportingPrison = dischargeToHospital.copy(
       supportingPrisonId = dischargeToHospital.supportingPrisonId ?: dischargeToHospital.fromLocationId
