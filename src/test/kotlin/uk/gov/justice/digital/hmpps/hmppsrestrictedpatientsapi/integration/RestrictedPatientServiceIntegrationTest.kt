@@ -14,7 +14,7 @@ import org.springframework.test.context.ActiveProfiles
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.dataBuilders.makeDischargeRequest
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.dataBuilders.makeRestrictedPatient
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.PrisonApiGateway
-import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.InOutStatus
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.ActiveFlag
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.OffenderBookingResponse
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.repositories.RestrictedPatientsRepository
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services.RestrictedPatientsService
@@ -39,7 +39,7 @@ class RestrictedPatientServiceIntegrationTest : IntegrationTestBase() {
 
     @BeforeEach
     fun beforeEach() {
-      whenever(prisonApiGateway.getOffenderBooking("F12345")).thenReturn(OffenderBookingResponse(1235467, "F12345", InOutStatus.IN))
+      whenever(prisonApiGateway.getOffenderBooking("F12345")).thenReturn(OffenderBookingResponse(1235467, "F12345", ActiveFlag.Y))
     }
 
     @Test
