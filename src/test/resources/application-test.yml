@@ -14,18 +14,17 @@ spring:
     url: jdbc:postgresql://localhost:5432/restricted-patients-api-db
     username: test
     password: test
-    continueOnError: true
 
 hmpps.sqs:
   provider: localstack
   queues:
     domainevents:
-      queueName: rp_api_queue
-      dlqName: rp_api_dlq
+      queueName: ${random.uuid}
+      dlqName: ${random.uuid}
       subscribeTopicId: domaineventsqueue
     offenderevents:
-      queueName: rp_oe_api_queue
-      dlqName: rp_oe_api_dlq
+      queueName: ${random.uuid}
+      dlqName: ${random.uuid}
       subscribeTopicId: offendereventsqueue
   topics:
     domaineventsqueue:
