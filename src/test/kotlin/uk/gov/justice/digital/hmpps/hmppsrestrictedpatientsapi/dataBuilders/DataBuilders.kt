@@ -105,6 +105,22 @@ fun makePrisonerReceiveEvent(prisonerNumber: String) =
     }
   """.trimIndent()
 
+fun makeOffenderMovementReceptionEvent(prisonerNumber: String) =
+  """
+    {
+        "Type": "Notification",
+        "MessageId": "5b90ee7d-67bc-5959-a4d8-b7d420180853",
+        "Message": "{\"eventType\":\"OFFENDER_MOVEMENT-RECEPTION\",\"offenderIdDisplay\":\"$prisonerNumber\",\"version\":1,\"occurredAt\":\"2021-09-01T10:16:57.435579+01:00\",\"publishedAt\":\"2021-09-01T10:18:28.69751046+01:00\"}",
+        "Timestamp": "2021-09-01T09:18:28.725Z",
+        "MessageAttributes": {
+            "eventType": {
+                "Type": "String",
+                "Value": "OFFENDER_MOVEMENT-RECEPTION"
+            }
+        }
+    }
+  """.trimIndent()
+
 fun makeLatestMovementReturn(
   fromAgency: String? = "MDI",
   movementDate: String? = "2022-05-01",
