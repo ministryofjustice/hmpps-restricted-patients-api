@@ -29,13 +29,12 @@ class DomainEventSubscriber(
     val event = gson.fromJson(requestJson, Event::class.java)
     val prisonerReceivedEvent = gson.fromJson(event.Message, PrisonerReceivedEvent::class.java)
 
-    log.info("Domain event received: {}", prisonerReceivedEvent.eventType)
-
     when (prisonerReceivedEvent.eventType) {
       "prison-offender-events.prisoner.received" ->
         restrictedPatientCleanup.deleteRestrictedPatientOnExternalMovementIntoPrison(
           prisonerReceivedEvent.additionalInformation.nomsNumber
         )
+      else -> log.warn("Unexpected domain event received: {}", prisonerReceivedEvent.eventType)
     }
   }
 

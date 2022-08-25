@@ -173,7 +173,6 @@ class HmppsRestrictedPatientsApiExceptionHandler {
 
   @ExceptionHandler(EntityNotFoundException::class)
   fun handleEntityNotFoundException(e: Exception): ResponseEntity<ErrorResponse> {
-    log.debug("Not found (404) returned with message {}", e.message)
     return ResponseEntity
       .status(HttpStatus.NOT_FOUND)
       .body(
