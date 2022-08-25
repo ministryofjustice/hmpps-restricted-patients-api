@@ -27,13 +27,12 @@ class OffenderEventSubscriber(
     val event = gson.fromJson(requestJson, Event::class.java)
     val offenderMovementReception = gson.fromJson(event.Message, OffenderMovementReception::class.java)
 
-    log.info("Offender event received: {}", offenderMovementReception.eventType)
-
     when (offenderMovementReception.eventType) {
       "OFFENDER_MOVEMENT-RECEPTION" ->
         restrictedPatientCleanup.deleteRestrictedPatientOnExternalMovementIntoPrison(
           offenderMovementReception.offenderIdDisplay
         )
+      else -> log.warn("Unexpected offender event received: {}", offenderMovementReception.eventType)
     }
   }
 

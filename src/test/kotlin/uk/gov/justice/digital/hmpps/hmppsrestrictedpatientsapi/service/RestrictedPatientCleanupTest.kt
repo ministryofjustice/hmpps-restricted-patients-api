@@ -82,7 +82,7 @@ class RestrictedPatientCleanupTest {
       restrictedPatientCleanup.deleteRestrictedPatientOnExternalMovementIntoPrison("A12345")
 
       verify(telemetryClient).trackEvent(
-        "restricted-patient-removed-on-prison-offender-events.prisoner.receive",
+        "restricted-patient-removed-cleanup",
         mapOf(
           "prisonerNumber" to "A12345",
         ),

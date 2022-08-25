@@ -4,26 +4,26 @@
 [![API docs](https://img.shields.io/badge/API_docs_-view-85EA2D.svg?logo=swagger)](https://restricted-patients-api-dev.hmpps.service.justice.gov.uk/swagger-ui/?configUrl=/v3/api-docs)
 
 # Features
-* Discharge  a prisoner to hospital 
+* Discharge a prisoner to hospital 
 * Surface a restricted patients details
 * Remove restricted patients from the service 
 
 The frontend can be found here: <https://github.com/ministryofjustice/hmpps-restricted-patients>
 
 # Instructions
-###Tests
+## Tests
 Before running the tests:
  - `docker-compose -f docker-compose-test.yml up` needs to be running and to have finished loading 
 before you start running the tests. Once done you can run the tests by running `./gradlew build`.
 
-###Running locally 
+## Running locally 
 `./gradlew bootRun --args='--spring.profiles.active=dev,stdout,localstack'`
 
-## Domain events
-This service publishes the  `restricted-patients.patient.removed` domain event whenever a restricted patient 
+## HMPPS domain events
+This service publishes a `restricted-patients.patient.removed` domain event whenever a restricted patient 
 is removed from the service. 
 
-###Publish -> restricted-patients.patient.removed
+### Publish -> restricted-patients.patient.removed
 The message is published via amazon sns. The payload is defined below. 
 ```javascript
 {
@@ -36,11 +36,10 @@ The message is published via amazon sns. The payload is defined below.
 }
 ```
 
-This service subscribes to two types of events:
-* prison-offender-events.prisoner.received
-* restricted-patients.patient.removed 
+This service subscribes to a `prison-offender-events.prisoner.received`, which indicates that a prisoner has been
+received into prison.  We check to see if the prisoner was a restricted patient and remove them if necessary.
 
-Restricted patients are removed automatically when a `prison-offender-events.prisoner.received` domain event has been received.
+## Prisoner offender events
 
-When the service receives a `restricted-patients.patient.removed ` the event will logged and then ignored. This is for ease of testing.
-
+This service subscribes to a `OFFENDER_MOVEMENT-RECEPTION`, which indicates that a prisoner has been
+received into prison.  We check to see if the prisoner was a restricted patient and remove them if necessary.
