@@ -1,6 +1,7 @@
 package uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services
 
 import com.microsoft.applicationinsights.TelemetryClient
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.repositories.RestrictedPatientsRepository
 import javax.transaction.Transactional
@@ -14,7 +15,7 @@ class RestrictedPatientCleanup(
 
   @Transactional
   fun deleteRestrictedPatientOnExternalMovementIntoPrison(prisonerNumber: String) {
-    val restrictedPatient = restrictedPatientsRepository.findById(prisonerNumber).orElse(null) ?: return
+    val restrictedPatient = restrictedPatientsRepository.findByIdOrNull(prisonerNumber) ?: return
 
     restrictedPatientsRepository.delete(restrictedPatient)
 

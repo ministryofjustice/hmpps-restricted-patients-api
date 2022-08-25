@@ -6,35 +6,33 @@ import org.slf4j.LoggerFactory
 import org.springframework.jms.annotation.JmsListener
 import org.springframework.stereotype.Service
 
-data class PrisonerReceivedEvent(
+data class OffenderMovementReception(
   val eventType: String,
-  val additionalInformation: AdditionalInformation
+  val offenderIdDisplay: String,
 )
 
-data class AdditionalInformation(
-  val nomsNumber: String
-)
+data class Event(val Message: String)
 
 @Service
-class DomainEventSubscriber(
+class OffenderEventSubscriber(
   private val gson: Gson,
   private val restrictedPatientCleanup: RestrictedPatientCleanup
 ) {
 
   @JmsListener(
-    destination = "domainevents",
+    destination = "offenderevents",
     containerFactory = "hmppsQueueContainerFactoryProxy"
   )
   fun handleEvents(requestJson: String?) {
     val event = gson.fromJson(requestJson, Event::class.java)
-    val prisonerReceivedEvent = gson.fromJson(event.Message, PrisonerReceivedEvent::class.java)
+    val offenderMovementReception = gson.fromJson(event.Message, OffenderMovementReception::class.java)
 
-    log.info("Domain event received: {}", prisonerReceivedEvent.eventType)
+    log.info("Offender event received: {}", offenderMovementReception.eventType)
 
-    when (prisonerReceivedEvent.eventType) {
-      "prison-offender-events.prisoner.received" ->
+    when (offenderMovementReception.eventType) {
+      "OFFENDER_MOVEMENT-RECEPTION" ->
         restrictedPatientCleanup.deleteRestrictedPatientOnExternalMovementIntoPrison(
-          prisonerReceivedEvent.additionalInformation.nomsNumber
+          offenderMovementReception.offenderIdDisplay
         )
     }
   }
