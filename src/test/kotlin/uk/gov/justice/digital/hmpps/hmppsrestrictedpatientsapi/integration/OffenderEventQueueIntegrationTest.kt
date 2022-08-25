@@ -3,7 +3,6 @@ package uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.integration
 import org.awaitility.kotlin.await
 import org.awaitility.kotlin.matches
 import org.awaitility.kotlin.untilCallTo
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.ActiveProfiles
@@ -17,7 +16,6 @@ class OffenderEventQueueIntegrationTest : IntegrationTestBase() {
   lateinit var hmppsQueueService: HmppsQueueService
 
   @Test
-  @Disabled
   fun `will remove restricted patient from the system`() {
     dischargePrisonerWebClient(prisonerNumber = "A12346")
       .exchange()

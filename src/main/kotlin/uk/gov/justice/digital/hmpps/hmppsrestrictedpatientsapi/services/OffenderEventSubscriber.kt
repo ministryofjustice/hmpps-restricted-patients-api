@@ -29,12 +29,12 @@ class OffenderEventSubscriber(
 
     log.info("Offender event received: {}", offenderMovementReception.eventType)
 
-    // when (offenderMovementReception.eventType) {
-    //   "OFFENDER_MOVEMENT-RECEPTION" ->
-    //     restrictedPatientCleanup.deleteRestrictedPatientOnExternalMovementIntoPrison(
-    //       offenderMovementReception.offenderIdDisplay
-    //     )
-    // }
+    when (offenderMovementReception.eventType) {
+      "OFFENDER_MOVEMENT-RECEPTION" ->
+        restrictedPatientCleanup.deleteRestrictedPatientOnExternalMovementIntoPrison(
+          offenderMovementReception.offenderIdDisplay
+        )
+    }
   }
 
   private companion object {
