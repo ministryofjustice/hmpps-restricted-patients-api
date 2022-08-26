@@ -7,6 +7,7 @@ import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.Ag
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.MovementResponse
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.PrisonerResult
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.RestrictedPatientDto
+import java.time.LocalDate
 import java.time.LocalDateTime
 
 val PRISON =
@@ -86,8 +87,15 @@ fun makeRestrictedPatient(
 
 fun makePrisonerResult(
   prisonerNumber: String = "A12345",
-  bookingId: Long = 1L
-): PrisonerResult = PrisonerResult(prisonerNumber = prisonerNumber, bookingId = bookingId)
+  bookingId: Long = 1L,
+  conditionalReleaseDate: LocalDate? = null,
+  indeterminateSentence: Boolean? = null,
+): PrisonerResult = PrisonerResult(
+  prisonerNumber = prisonerNumber,
+  bookingId = bookingId,
+  conditionalReleaseDate = conditionalReleaseDate,
+  indeterminateSentence = indeterminateSentence,
+)
 
 fun makePrisonerReceiveEvent(prisonerNumber: String) =
   """
