@@ -24,7 +24,7 @@ class ResourceServerConfiguration : WebSecurityConfigurerAdapter() {
           "/v3/api-docs/**", "/api/swagger.json", "/swagger-ui/**",
           "/v3/api-docs", "/swagger-ui.html",
           "/swagger-resources", "/swagger-resources/configuration/ui", "/swagger-resources/configuration/security",
-          "/queue-admin/retry-all-dlqs",
+          "/queue-admin/retry-all-dlqs", "/process-past-date-restricted-patients",
         ).permitAll()
           .anyRequest()
           .authenticated()

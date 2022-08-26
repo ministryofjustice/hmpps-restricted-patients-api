@@ -9,13 +9,13 @@ import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.Pr
 @Component
 class PrisonerSearchApiGateway(@Qualifier("prisonerSearchClientCreds") private val prisonerSearchClientCreds: WebClient) {
 
-  fun searchByPrisonNumber(prisonNumber: String): List<PrisonerResult> = prisonerSearchClientCreds
+  fun searchByPrisonNumber(prisonNumber: String): List<PrisonerResult> = findByPrisonNumbers(listOf(prisonNumber))
+
+  fun findByPrisonNumbers(prisonNumbers: List<String>): List<PrisonerResult> = prisonerSearchClientCreds
     .post()
     .uri("/prisoner-search/prisoner-numbers")
     .bodyValue(
-      mapOf(
-        "prisonerNumbers" to listOf(prisonNumber),
-      )
+      mapOf("prisonerNumbers" to prisonNumbers)
     )
     .retrieve()
     .bodyToMono(object : ParameterizedTypeReference<List<PrisonerResult>>() {})
