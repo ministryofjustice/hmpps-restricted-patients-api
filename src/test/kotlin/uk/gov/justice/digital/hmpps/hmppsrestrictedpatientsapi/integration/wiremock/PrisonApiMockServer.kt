@@ -1,6 +1,7 @@
 package uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.integration.wiremock
 
 import com.github.tomakehurst.wiremock.WireMockServer
+import com.github.tomakehurst.wiremock.client.MappingBuilder
 import com.github.tomakehurst.wiremock.client.WireMock.aResponse
 import com.github.tomakehurst.wiremock.client.WireMock.equalTo
 import com.github.tomakehurst.wiremock.client.WireMock.get
@@ -9,6 +10,7 @@ import com.github.tomakehurst.wiremock.client.WireMock.put
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 import com.github.tomakehurst.wiremock.client.WireMock.urlMatching
 import com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo
+import com.github.tomakehurst.wiremock.matching.UrlPattern
 
 class PrisonApiMockServer : WireMockServer(8989) {
   fun stubHealth() {
@@ -238,9 +240,9 @@ class PrisonApiMockServer : WireMockServer(8989) {
     )
   }
 
-  fun stubServerError() {
+  fun stubServerError(method: (urlPattern: UrlPattern) -> MappingBuilder) {
     stubFor(
-      get(urlMatching("/api/.*"))
+      method(urlMatching("/api/.*"))
         .willReturn(
           aResponse()
             .withHeader("Content-Type", "application/json")

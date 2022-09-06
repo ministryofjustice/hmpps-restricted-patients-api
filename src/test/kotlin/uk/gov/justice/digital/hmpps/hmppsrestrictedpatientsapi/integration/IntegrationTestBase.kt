@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.integration
 
+import com.github.tomakehurst.wiremock.client.WireMock
 import org.flywaydb.core.Flyway
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
@@ -137,7 +138,7 @@ abstract class IntegrationTestBase {
     hospitalLocationCode: String = "HAZLWD",
     supportingPrisonId: String = "MDI",
   ): WebTestClient.RequestHeadersSpec<*> {
-    prisonApiMockServer.stubServerError()
+    prisonApiMockServer.stubServerError(WireMock::get)
 
     return webTestClient
       .post()

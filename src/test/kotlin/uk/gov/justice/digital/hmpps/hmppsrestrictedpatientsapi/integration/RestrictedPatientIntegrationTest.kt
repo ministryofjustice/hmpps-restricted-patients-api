@@ -8,6 +8,7 @@ import com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor
 import com.github.tomakehurst.wiremock.client.WireMock.putRequestedFor
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 import com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Nested
@@ -50,7 +51,7 @@ class RestrictedPatientIntegrationTest : IntegrationTestBase() {
   inner class DischargeToHospitalErrors {
     @Test
     fun `should error if offender is not in prison`() {
-      dischargePrisonerWebClient(prisonerNumber = "NOT_FND", activeFlag = false)
+      dischargePrisonerWebClient(prisonerNumber = "A12345", activeFlag = false)
         .exchange()
         .expectStatus().isNotFound
         .expectBody()
@@ -59,8 +60,8 @@ class RestrictedPatientIntegrationTest : IntegrationTestBase() {
 
     @Test
     fun `should error if offender is already a restricted patient`() {
-      saveRestrictedPatient(prisonerNumber = "IN_RP")
-      dischargePrisonerWebClient(prisonerNumber = "IN_RP")
+      saveRestrictedPatient(prisonerNumber = "A12345")
+      dischargePrisonerWebClient(prisonerNumber = "A12345")
         .exchange()
         .expectStatus().isBadRequest
         .expectBody()
@@ -70,12 +71,14 @@ class RestrictedPatientIntegrationTest : IntegrationTestBase() {
 
     @Test
     fun `should error if prison-api errors`() {
-      dischargePrisonerWebClientErrors("ANY")
+      dischargePrisonerWebClientErrors("A12345")
         .exchange()
         .expectStatus().is5xxServerError
         .expectBody()
         .jsonPath("$.status").isEqualTo(500)
         .jsonPath("$.errorCode").isEqualTo("UPSTREAM_ERROR")
+
+      assertThat(restrictedPatientRepository.findById("A12345")).isEmpty
     }
   }
 
@@ -156,5 +159,32 @@ class RestrictedPatientIntegrationTest : IntegrationTestBase() {
     getRestrictedPatient(prisonerNumber = "A12345")
       .exchange()
       .expectStatus().isNotFound
+  }
+
+  @Nested
+  inner class RemovePatientErrors {
+    @Test
+    fun `should error if not a restricted patient`() {
+      webTestClient.delete().uri("/restricted-patient/prison-number/A12345")
+        .headers(setHeaders())
+        .exchange()
+        .expectStatus().isNotFound
+    }
+
+    @Test
+    fun `should error if prison-api errors`() {
+      saveRestrictedPatient(prisonerNumber = "A12345")
+      prisonApiMockServer.stubServerError(WireMock::post)
+
+      webTestClient.delete().uri("/restricted-patient/prison-number/A12345")
+        .headers(setHeaders())
+        .exchange()
+        .expectStatus().is5xxServerError
+        .expectBody()
+        .jsonPath("$.status").isEqualTo(500)
+        .jsonPath("$.errorCode").isEqualTo("UPSTREAM_ERROR")
+
+      assertThat(restrictedPatientRepository.findById("A12345")).isNotEmpty
+    }
   }
 }
