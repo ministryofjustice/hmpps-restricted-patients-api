@@ -10,36 +10,12 @@ import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 import com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.whenever
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.test.context.ActiveProfiles
-import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.repositories.RestrictedPatientsRepository
-import java.time.Clock
-import java.time.LocalDate
-import java.time.ZoneId
 
 @ActiveProfiles("test")
 class RestrictedPatientIntegrationTest : IntegrationTestBase() {
-
-  @MockBean
-  lateinit var clock: Clock
-
-  @Autowired
-  lateinit var restrictedPatientRepository: RestrictedPatientsRepository
-
-  @BeforeEach
-  fun beforeEach() {
-    val fixedClock =
-      Clock.fixed(
-        LocalDate.parse("2020-10-10").atStartOfDay(ZoneId.systemDefault()).toInstant(),
-        ZoneId.systemDefault()
-      )
-    whenever(clock.instant()).thenReturn(fixedClock.instant())
-    whenever(clock.getZone()).thenReturn(fixedClock.getZone())
-  }
 
   @Test
   fun `discharge a prisoner to hospital`() {
@@ -68,6 +44,39 @@ class RestrictedPatientIntegrationTest : IntegrationTestBase() {
         .withQueryParam("csraSummary", equalTo("false"))
         .withHeader("Authorization", WireMock.containing("Bearer"))
     )
+  }
+
+  @Nested
+  inner class DischargeToHospitalErrors {
+    @Test
+    fun `should error if offender is not in prison`() {
+      dischargePrisonerWebClient(prisonerNumber = "NOT_FND", activeFlag = false)
+        .exchange()
+        .expectStatus().isNotFound
+        .expectBody()
+        .jsonPath("$.status").isEqualTo(404)
+    }
+
+    @Test
+    fun `should error if offender is already a restricted patient`() {
+      saveRestrictedPatient(prisonerNumber = "IN_RP")
+      dischargePrisonerWebClient(prisonerNumber = "IN_RP")
+        .exchange()
+        .expectStatus().isBadRequest
+        .expectBody()
+        .jsonPath("$.status").isEqualTo(400)
+        .jsonPath("$.errorCode").isEqualTo("EXISTING_PATIENT")
+    }
+
+    @Test
+    fun `should error if prison-api errors`() {
+      dischargePrisonerWebClientErrors("ANY")
+        .exchange()
+        .expectStatus().is5xxServerError
+        .expectBody()
+        .jsonPath("$.status").isEqualTo(500)
+        .jsonPath("$.errorCode").isEqualTo("UPSTREAM_ERROR")
+    }
   }
 
   @Test

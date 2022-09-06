@@ -14,6 +14,7 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.web.reactive.function.client.WebClientResponseException
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.config.BadRequestException
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.dataBuilders.HOSPITAL
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.dataBuilders.PRISON
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.dataBuilders.makeDischargeRequest
@@ -24,7 +25,6 @@ import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.dataBuilders.make
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.PrisonApiGateway
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.PrisonerSearchApiGateway
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.entities.RestrictedPatient
-import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.exceptions.NoResultsReturnedException
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.request.CreateExternalMovement
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.Agency
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.OffenderBookingResponse
@@ -119,7 +119,7 @@ class RestrictedPatientServiceTest {
       )
       whenever(prisonerSearchApiGateway.searchByPrisonNumber(anyString())).thenReturn(emptyList())
 
-      val exception = Assertions.assertThrows(NoResultsReturnedException::class.java) {
+      val exception = Assertions.assertThrows(EntityNotFoundException::class.java) {
         service.removeRestrictedPatient("A12345")
       }
 
@@ -223,7 +223,7 @@ class RestrictedPatientServiceTest {
       fun `throws exception when offender not found`() {
         whenever(prisonApiGateway.getOffenderBooking(any())).thenReturn(null)
 
-        Assertions.assertThrows(NoResultsReturnedException::class.java) {
+        Assertions.assertThrows(EntityNotFoundException::class.java) {
           service.dischargeToHospital(makeDischargeRequest())
         }
       }
@@ -234,7 +234,7 @@ class RestrictedPatientServiceTest {
           OffenderBookingResponse(1234567, "A1234AA", false)
         )
 
-        Assertions.assertThrows(NoResultsReturnedException::class.java) {
+        Assertions.assertThrows(EntityNotFoundException::class.java) {
           service.dischargeToHospital(makeDischargeRequest())
         }
       }
@@ -243,7 +243,7 @@ class RestrictedPatientServiceTest {
       fun `throws exception when the offender is already a restricted patient`() {
         whenever(restrictedPatientsRepository.findById(anyString())).thenReturn(Optional.of(makeRestrictedPatient()))
 
-        Assertions.assertThrows(IllegalStateException::class.java) {
+        Assertions.assertThrows(BadRequestException::class.java) {
           service.dischargeToHospital(makeDischargeRequest())
         }
       }
@@ -387,7 +387,7 @@ class RestrictedPatientServiceTest {
       fun `throws exception when the offender is already a restricted patient`() {
         whenever(restrictedPatientsRepository.findById(anyString())).thenReturn(Optional.of(makeRestrictedPatient()))
 
-        Assertions.assertThrows(IllegalStateException::class.java) {
+        Assertions.assertThrows(BadRequestException::class.java) {
           service.migrateInPatient(makeMigrateInRequest())
         }
       }
@@ -396,7 +396,7 @@ class RestrictedPatientServiceTest {
       fun `throws exception when the offender has not got any previous movements`() {
         whenever(prisonApiGateway.getLatestMovements(any())).thenReturn(emptyList())
 
-        Assertions.assertThrows(IllegalStateException::class.java) {
+        Assertions.assertThrows(BadRequestException::class.java) {
           service.migrateInPatient(makeMigrateInRequest())
         }
       }
@@ -417,7 +417,7 @@ class RestrictedPatientServiceTest {
         )
         whenever(prisonApiGateway.getLatestMovements(any())).thenReturn(listOf(nonRelMovement))
 
-        Assertions.assertThrows(IllegalStateException::class.java) {
+        Assertions.assertThrows(BadRequestException::class.java) {
           service.migrateInPatient(makeMigrateInRequest())
         }
       }
@@ -429,7 +429,7 @@ class RestrictedPatientServiceTest {
         )
         whenever(prisonApiGateway.getLatestMovements(any())).thenReturn(listOf(movementWithoutFromAgency))
 
-        Assertions.assertThrows(IllegalStateException::class.java) {
+        Assertions.assertThrows(BadRequestException::class.java) {
           service.migrateInPatient(makeMigrateInRequest())
         }
       }
@@ -441,7 +441,7 @@ class RestrictedPatientServiceTest {
         )
         whenever(prisonApiGateway.getLatestMovements(any())).thenReturn(listOf(movementWithInvalidDate))
 
-        Assertions.assertThrows(IllegalStateException::class.java) {
+        Assertions.assertThrows(BadRequestException::class.java) {
           service.migrateInPatient(makeMigrateInRequest())
         }
       }
@@ -453,7 +453,7 @@ class RestrictedPatientServiceTest {
         )
         whenever(prisonApiGateway.getLatestMovements(any())).thenReturn(listOf(movementWithInvalidTime))
 
-        Assertions.assertThrows(IllegalStateException::class.java) {
+        Assertions.assertThrows(BadRequestException::class.java) {
           service.migrateInPatient(makeMigrateInRequest())
         }
       }

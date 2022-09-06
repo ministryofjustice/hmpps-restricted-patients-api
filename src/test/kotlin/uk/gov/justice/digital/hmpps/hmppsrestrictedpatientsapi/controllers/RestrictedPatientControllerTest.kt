@@ -13,7 +13,6 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.dataBuilders.makeDischargeRequest
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.dataBuilders.makeRestrictedPatientDto
-import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.exceptions.NoResultsReturnedException
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services.RestrictedPatientsService
 import javax.persistence.EntityNotFoundException
 
@@ -82,7 +81,7 @@ class RestrictedPatientControllerTest : ControllerTestBase() {
     @Test
     @WithMockUser(username = "ITAG_USER")
     fun `handle no results found exceptions`() {
-      whenever(restrictedPatientsService.dischargeToHospital(any())).thenThrow(NoResultsReturnedException::class.java)
+      whenever(restrictedPatientsService.dischargeToHospital(any())).thenThrow(EntityNotFoundException::class.java)
 
       mockMvc
         .perform(

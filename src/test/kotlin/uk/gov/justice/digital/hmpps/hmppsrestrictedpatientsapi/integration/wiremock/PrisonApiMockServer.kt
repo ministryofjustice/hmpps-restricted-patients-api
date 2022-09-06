@@ -7,6 +7,7 @@ import com.github.tomakehurst.wiremock.client.WireMock.get
 import com.github.tomakehurst.wiremock.client.WireMock.post
 import com.github.tomakehurst.wiremock.client.WireMock.put
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
+import com.github.tomakehurst.wiremock.client.WireMock.urlMatching
 import com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo
 
 class PrisonApiMockServer : WireMockServer(8989) {
@@ -209,46 +210,6 @@ class PrisonApiMockServer : WireMockServer(8989) {
     )
   }
 
-  fun stubGetOffenderBooking(bookingId: Long, prisonerNumber: String) {
-    stubFor(
-      get(urlEqualTo("/api/bookings/$bookingId"))
-        .willReturn(
-          aResponse()
-            .withHeader("Content-Type", "application/json")
-            .withStatus(200)
-            .withBody(
-              """
-              {
-                "bookingId": $bookingId,
-                "offenderNo": "$prisonerNumber"
-              }              
-              """.trimIndent()
-            )
-        )
-    )
-  }
-
-  fun stubGetAgency(agencyId: String, agencyType: String, description: String) {
-    stubFor(
-      get(urlEqualTo("/api/agencies/$agencyId"))
-        .willReturn(
-          aResponse()
-            .withHeader("Content-Type", "application/json")
-            .withStatus(200)
-            .withBody(
-              """
-              {
-                  "agencyId": "$agencyId",
-                  "description": "$description",
-                  "agencyType": "$agencyType",
-                  "active": true
-                }
-              """.trimIndent()
-            )
-        )
-    )
-  }
-
   fun stubOffenderBooking(offenderNo: String, activeFlag: Boolean) {
     stubFor(
       get(urlPathEqualTo("/api/bookings/offenderNo/$offenderNo"))
@@ -273,6 +234,17 @@ class PrisonApiMockServer : WireMockServer(8989) {
                 }
               """.trimIndent()
             )
+        )
+    )
+  }
+
+  fun stubServerError() {
+    stubFor(
+      get(urlMatching("/api/.*"))
+        .willReturn(
+          aResponse()
+            .withHeader("Content-Type", "application/json")
+            .withStatus(503)
         )
     )
   }

@@ -4,9 +4,12 @@ import org.flywaydb.core.Flyway
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.BeforeEach
+import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT
+import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.test.web.reactive.server.WebTestClient
@@ -14,11 +17,16 @@ import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.JwtAuthHelper
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.integration.wiremock.OAuthMockServer
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.integration.wiremock.PrisonApiMockServer
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.integration.wiremock.PrisonerSearchApiMockServer
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.entities.RestrictedPatient
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.repositories.RestrictedPatientsRepository
+import java.time.Clock
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.ZoneId
 
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 abstract class IntegrationTestBase {
 
-  @Suppress("SpringJavaInjectionPointsAutowiringInspection")
   @Autowired
   lateinit var webTestClient: WebTestClient
 
@@ -27,6 +35,12 @@ abstract class IntegrationTestBase {
 
   @Autowired
   lateinit var jwtAuthHelper: JwtAuthHelper
+
+  @Autowired
+  lateinit var restrictedPatientRepository: RestrictedPatientsRepository
+
+  @MockBean
+  lateinit var clock: Clock
 
   companion object {
     @JvmField
@@ -57,6 +71,17 @@ abstract class IntegrationTestBase {
     }
   }
 
+  @BeforeEach
+  fun mockClock() {
+    val fixedClock =
+      Clock.fixed(
+        LocalDate.parse("2020-10-10").atStartOfDay(ZoneId.systemDefault()).toInstant(),
+        ZoneId.systemDefault()
+      )
+    whenever(clock.instant()).thenReturn(fixedClock.instant())
+    whenever(clock.getZone()).thenReturn(fixedClock.getZone())
+  }
+
   @AfterEach
   fun resetDb() {
     flyway.clean()
@@ -82,12 +107,37 @@ abstract class IntegrationTestBase {
     commentText: String = "Prisoner was released to hospital",
     fromLocationId: String = "MDI",
     hospitalLocationCode: String = "HAZLWD",
-    supportingPrisonId: String = "MDI"
+    supportingPrisonId: String = "MDI",
+    activeFlag: Boolean = true,
   ): WebTestClient.RequestHeadersSpec<*> {
     prisonApiMockServer.stubAgencyLocationForPrisons()
     prisonApiMockServer.stubAgencyLocationForHospitals()
-    prisonApiMockServer.stubOffenderBooking(prisonerNumber, true)
+    prisonApiMockServer.stubOffenderBooking(prisonerNumber, activeFlag)
     prisonApiMockServer.stubDischargeToPrison(prisonerNumber)
+
+    return webTestClient
+      .post()
+      .uri("/discharge-to-hospital")
+      .headers(setHeaders())
+      .bodyValue(
+        mapOf(
+          "offenderNo" to prisonerNumber,
+          "commentText" to commentText,
+          "fromLocationId" to fromLocationId,
+          "hospitalLocationCode" to hospitalLocationCode,
+          "supportingPrisonId" to supportingPrisonId
+        )
+      )
+  }
+
+  fun dischargePrisonerWebClientErrors(
+    prisonerNumber: String,
+    commentText: String = "Prisoner was released to hospital",
+    fromLocationId: String = "MDI",
+    hospitalLocationCode: String = "HAZLWD",
+    supportingPrisonId: String = "MDI",
+  ): WebTestClient.RequestHeadersSpec<*> {
+    prisonApiMockServer.stubServerError()
 
     return webTestClient
       .post()
@@ -122,5 +172,16 @@ abstract class IntegrationTestBase {
           "hospitalLocationCode" to hospitalLocationCode,
         )
       )
+  }
+
+  fun saveRestrictedPatient(
+    prisonerNumber: String = "A1234BC",
+    fromLocationId: String = "MDI",
+    hospitalLocationCode: String = "HAZLWD",
+    supportingPrisonId: String = "MDI",
+    dischargeTime: LocalDateTime = LocalDateTime.now(clock).minusDays(1),
+    commentText: String? = null
+  ) {
+    restrictedPatientRepository.save(RestrictedPatient(prisonerNumber, fromLocationId, hospitalLocationCode, supportingPrisonId, dischargeTime, commentText))
   }
 }
