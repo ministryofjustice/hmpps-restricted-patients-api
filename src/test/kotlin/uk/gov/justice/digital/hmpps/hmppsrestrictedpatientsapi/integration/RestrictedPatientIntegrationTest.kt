@@ -113,6 +113,44 @@ class RestrictedPatientIntegrationTest : IntegrationTestBase() {
     assertTrue(rpEntry.isPresent)
   }
 
+  @Nested
+  inner class MigrateInPatientErrors {
+
+    @Test
+    fun `should error if offender is already a restricted patient`() {
+      saveRestrictedPatient(prisonerNumber = "A12345")
+      migrateInRestrictedPatientWebClient(prisonerNumber = "A12345")
+        .exchange()
+        .expectStatus().isBadRequest
+        .expectBody()
+        .jsonPath("$.status").isEqualTo(400)
+        .jsonPath("$.errorCode").isEqualTo("EXISTING_PATIENT")
+    }
+    @Test
+    fun `should error if offender is not released`() {
+      migrateInRestrictedPatientWebClientNotReleased(prisonerNumber = "A12345")
+        .exchange()
+        .expectStatus().isBadRequest
+        .expectBody()
+        .jsonPath("$.status").isEqualTo(400)
+        .jsonPath("$.errorCode").isEqualTo("LAST_MOVE_NOT_REL")
+
+      assertThat(restrictedPatientRepository.findById("A12345")).isEmpty
+    }
+
+    @Test
+    fun `should error if prison-api errors`() {
+      migrateInRestrictedPatientWebClientError("A12345")
+        .exchange()
+        .expectStatus().is5xxServerError
+        .expectBody()
+        .jsonPath("$.status").isEqualTo(500)
+        .jsonPath("$.errorCode").isEqualTo("UPSTREAM_ERROR")
+
+      assertThat(restrictedPatientRepository.findById("A12345")).isEmpty
+    }
+  }
+
   @Test
   fun `returns restricted patient by prisoner number`() {
     dischargePrisonerWebClient(prisonerNumber = "A16345")

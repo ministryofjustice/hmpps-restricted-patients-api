@@ -82,7 +82,7 @@ class PrisonApiMockServer : WireMockServer(8989) {
     )
   }
 
-  fun stubGetLatestMovements(prisonerNumber: String, hospitalLocationCode: String) {
+  fun stubGetLatestMovementsReleased(prisonerNumber: String, hospitalLocationCode: String) {
     stubFor(
       post(urlEqualTo("/api/movements/offenders?latestOnly=true&allBookings=false"))
         .willReturn(
@@ -108,6 +108,36 @@ class PrisonApiMockServer : WireMockServer(8989) {
                  "movementTime": "14:36:13",
                  "movementReason": "Final Discharge To Hospital-Psychiatric",
                  "commentText": "Psychiatric Hospital Discharge to Avesbury House, Care UK"
+                }
+              ]
+              """.trimIndent()
+            )
+        )
+    )
+  }
+
+  fun stubGetLatestMovementsAdmitted(prisonerNumber: String) {
+    stubFor(
+      post(urlEqualTo("/api/movements/offenders?latestOnly=true&allBookings=false"))
+        .willReturn(
+          aResponse()
+            .withHeader("Content-Type", "application/json")
+            .withStatus(200)
+            .withBody(
+              """
+              [
+               {
+                 "offenderNo": "$prisonerNumber",
+                 "createDateTime": "2022-05-20T14:36:13.980583319",
+                 "fromAgency": "CRT",
+                 "fromAgencyDescription": "Some court",
+                 "toAgency": "MDI",
+                 "toAgencyDescription": "Moorland (HMP)",
+                 "movementType": "ADM",
+                 "movementTypeDescription": "Admission",
+                 "directionCode": "IN",
+                 "movementDate": "2022-05-20",
+                 "movementTime": "14:36:13"
                 }
               ]
               """.trimIndent()

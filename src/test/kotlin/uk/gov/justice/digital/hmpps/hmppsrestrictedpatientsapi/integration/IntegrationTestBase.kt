@@ -159,9 +159,45 @@ abstract class IntegrationTestBase {
     prisonerNumber: String,
     hospitalLocationCode: String = "HAZLWD",
   ): WebTestClient.RequestHeadersSpec<*> {
-    prisonApiMockServer.stubGetLatestMovements(prisonerNumber, hospitalLocationCode)
+    prisonApiMockServer.stubGetLatestMovementsReleased(prisonerNumber, hospitalLocationCode)
     prisonApiMockServer.stubDischargeToPrison(prisonerNumber)
     prisonerSearchApiMockServer.stubRefreshIndex(prisonerNumber)
+
+    return webTestClient
+      .post()
+      .uri("/migrate-in-restricted-patient")
+      .headers(setHeaders())
+      .bodyValue(
+        mapOf(
+          "offenderNo" to prisonerNumber,
+          "hospitalLocationCode" to hospitalLocationCode,
+        )
+      )
+  }
+
+  fun migrateInRestrictedPatientWebClientNotReleased(
+    prisonerNumber: String,
+    hospitalLocationCode: String = "HAZLWD",
+  ): WebTestClient.RequestHeadersSpec<*> {
+    prisonApiMockServer.stubGetLatestMovementsAdmitted(prisonerNumber)
+
+    return webTestClient
+      .post()
+      .uri("/migrate-in-restricted-patient")
+      .headers(setHeaders())
+      .bodyValue(
+        mapOf(
+          "offenderNo" to prisonerNumber,
+          "hospitalLocationCode" to hospitalLocationCode,
+        )
+      )
+  }
+
+  fun migrateInRestrictedPatientWebClientError(
+    prisonerNumber: String,
+    hospitalLocationCode: String = "HAZLWD",
+  ): WebTestClient.RequestHeadersSpec<*> {
+    prisonApiMockServer.stubServerError(WireMock::post)
 
     return webTestClient
       .post()
