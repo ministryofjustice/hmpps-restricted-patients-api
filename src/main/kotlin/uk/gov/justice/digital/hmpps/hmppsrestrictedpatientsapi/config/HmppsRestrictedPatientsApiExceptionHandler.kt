@@ -15,7 +15,7 @@ import org.springframework.web.client.RestClientException
 import org.springframework.web.client.RestClientResponseException
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException
 import org.springframework.web.reactive.function.client.WebClientResponseException
-import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.exceptions.NoResultsReturnedException
+import java.lang.RuntimeException
 import javax.persistence.EntityNotFoundException
 import javax.validation.ValidationException
 
@@ -31,6 +31,21 @@ class HmppsRestrictedPatientsApiExceptionHandler {
           status = BAD_REQUEST,
           userMessage = "Validation failure: ${e.message}",
           developerMessage = e.message
+        )
+      )
+  }
+
+  @ExceptionHandler(BadRequestException::class)
+  fun handleValidationException(e: BadRequestException): ResponseEntity<ErrorResponse> {
+    log.info("Bad Request exception: {}, {}", e.errorCode, e.message)
+    return ResponseEntity
+      .status(BAD_REQUEST)
+      .body(
+        ErrorResponse(
+          status = BAD_REQUEST,
+          errorCode = e.errorCode,
+          developerMessage = "Validation failure: ${e.message}",
+          userMessage = e.message
         )
       )
   }
@@ -78,6 +93,7 @@ class HmppsRestrictedPatientsApiExceptionHandler {
       .body(
         ErrorResponse(
           status = INTERNAL_SERVER_ERROR.value(),
+          errorCode = "UPSTREAM_ERROR",
           developerMessage = e.message
         )
       )
@@ -158,19 +174,6 @@ class HmppsRestrictedPatientsApiExceptionHandler {
       )
   }
 
-  @ExceptionHandler(NoResultsReturnedException::class)
-  fun handleNotFoundException(e: Exception): ResponseEntity<ErrorResponse> {
-    log.debug("Not found (404) returned with message {}", e.message)
-    return ResponseEntity
-      .status(HttpStatus.NOT_FOUND)
-      .body(
-        ErrorResponse(
-          status = HttpStatus.NOT_FOUND.value(),
-          developerMessage = e.message
-        )
-      )
-  }
-
   @ExceptionHandler(EntityNotFoundException::class)
   fun handleEntityNotFoundException(e: Exception): ResponseEntity<ErrorResponse> {
     return ResponseEntity
@@ -190,17 +193,19 @@ class HmppsRestrictedPatientsApiExceptionHandler {
 
 data class ErrorResponse(
   val status: Int,
-  val errorCode: Int? = null,
+  val errorCode: String? = null,
   val userMessage: String? = null,
   val developerMessage: String? = null,
   val moreInfo: String? = null
 ) {
   constructor(
     status: HttpStatus,
-    errorCode: Int? = null,
+    errorCode: String? = null,
     userMessage: String? = null,
     developerMessage: String? = null,
     moreInfo: String? = null
   ) :
     this(status.value(), errorCode, userMessage, developerMessage, moreInfo)
 }
+
+class BadRequestException(val errorCode: String, override val message: String) : RuntimeException(message)

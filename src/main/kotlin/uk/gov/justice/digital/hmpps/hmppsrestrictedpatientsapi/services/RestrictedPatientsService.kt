@@ -2,10 +2,10 @@ package uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services
 
 import com.microsoft.applicationinsights.TelemetryClient
 import org.springframework.stereotype.Service
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.config.BadRequestException
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.PrisonApiGateway
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.PrisonerSearchApiGateway
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.entities.RestrictedPatient
-import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.exceptions.NoResultsReturnedException
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.request.CreateExternalMovement
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.request.DischargeToHospitalRequest
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.request.MigrateInRequest
@@ -40,7 +40,7 @@ class RestrictedPatientsService(
 
     prisonApiGateway.getOffenderBooking(dischargeToHospital.offenderNo)
       ?.takeIf { it.activeFlag }
-      ?: throw NoResultsReturnedException("No prisoner with activeFlag 'Y' found for ${dischargeToHospital.offenderNo}")
+      ?: throw EntityNotFoundException("No prisoner with activeFlag 'Y' found for ${dischargeToHospital.offenderNo}")
 
     val dischargeToHospitalWithDefaultSupportingPrison = dischargeToHospital.copy(
       supportingPrisonId = dischargeToHospital.supportingPrisonId ?: dischargeToHospital.fromLocationId
@@ -78,31 +78,26 @@ class RestrictedPatientsService(
 
   private fun checkNotExistingPatient(offenderNo: String) =
     restrictedPatientsRepository.findById(offenderNo).map {
-      throw IllegalStateException("Prisoner ($offenderNo) is already a restricted patient")
+      throw BadRequestException(errorCode = "EXISTING_PATIENT", message = "Prisoner ($offenderNo) is already a restricted patient")
     }
 
   private fun getLatestMovement(offenderNo: String): MovementResponse {
     val movements = prisonApiGateway.getLatestMovements(offenderNo)
 
     if (movements.isEmpty()) {
-      throw IllegalStateException("Prisoner ($offenderNo) does not have the correct latest movements to migrate")
+      throw BadRequestException(errorCode = "NO_MOVEMENTS", message = "Prisoner ($offenderNo) does not have the correct latest movements to migrate")
     }
     if (movements.size > 1) {
-      throw RuntimeException("Prisoner ($offenderNo) has multiple latest movements")
+      throw BadRequestException(errorCode = "MULTIPLE_MOVEMENTS", message = "Prisoner ($offenderNo) has multiple latest movements")
     }
-    val latestMovement = movements[0]
-    if ("REL" != latestMovement.movementType) {
-      throw IllegalStateException("Prisoner ($offenderNo) was not released")
-    }
-
-    return latestMovement
+    return movements[0]
   }
 
   private fun checkLatestMovementOkForDischarge(latestMovement: MovementResponse, offenderNo: String) {
     if ("REL" != latestMovement.movementType) {
-      throw IllegalStateException("Prisoner ($offenderNo) was not released")
+      throw BadRequestException(errorCode = "LAST_MOVE_NOT_REL", message = "Prisoner ($offenderNo) was not released")
     }
-    latestMovement.fromAgency ?: throw IllegalStateException("Prisoner ($offenderNo) does not have an agency id associated with the last movement")
+    latestMovement.fromAgency ?: throw BadRequestException(errorCode = "LAST_MOVE_NO_FROM_AGENCY", message = "Prisoner ($offenderNo) does not have an agency id associated with the last movement")
   }
 
   private fun getExistingRestrictedPatientDischargeData(latestMovement: MovementResponse, offenderNo: String): ExistingDischargeData {
@@ -118,7 +113,7 @@ class RestrictedPatientsService(
     try {
       return LocalDateTime.parse("${movementDate}T$movementTime")
     } catch (e: Exception) {
-      throw IllegalStateException("Prisoner ($offenderNo) does not have a valid movement date/time")
+      throw BadRequestException(errorCode = "DISCHARGE_TIME_INVALID", message = "Prisoner ($offenderNo) does not have a valid movement date/time")
     }
   }
 
@@ -171,7 +166,7 @@ class RestrictedPatientsService(
     val prisonerSearchResponse = prisonerSearchApiGateway.searchByPrisonNumber(prisonerNumber)
 
     val prisonerResult = prisonerSearchResponse.firstOrNull()
-      ?: throw NoResultsReturnedException("No prisoner search results returned for $prisonerNumber")
+      ?: throw EntityNotFoundException("No prisoner search results returned for $prisonerNumber")
 
     restrictedPatientsRepository.delete(restrictedPatient)
 

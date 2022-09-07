@@ -8,38 +8,15 @@ import com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor
 import com.github.tomakehurst.wiremock.client.WireMock.putRequestedFor
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 import com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.whenever
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.test.context.ActiveProfiles
-import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.repositories.RestrictedPatientsRepository
-import java.time.Clock
-import java.time.LocalDate
-import java.time.ZoneId
 
 @ActiveProfiles("test")
 class RestrictedPatientIntegrationTest : IntegrationTestBase() {
-
-  @MockBean
-  lateinit var clock: Clock
-
-  @Autowired
-  lateinit var restrictedPatientRepository: RestrictedPatientsRepository
-
-  @BeforeEach
-  fun beforeEach() {
-    val fixedClock =
-      Clock.fixed(
-        LocalDate.parse("2020-10-10").atStartOfDay(ZoneId.systemDefault()).toInstant(),
-        ZoneId.systemDefault()
-      )
-    whenever(clock.instant()).thenReturn(fixedClock.instant())
-    whenever(clock.getZone()).thenReturn(fixedClock.getZone())
-  }
 
   @Test
   fun `discharge a prisoner to hospital`() {
@@ -68,6 +45,41 @@ class RestrictedPatientIntegrationTest : IntegrationTestBase() {
         .withQueryParam("csraSummary", equalTo("false"))
         .withHeader("Authorization", WireMock.containing("Bearer"))
     )
+  }
+
+  @Nested
+  inner class DischargeToHospitalErrors {
+    @Test
+    fun `should error if offender is not in prison`() {
+      dischargePrisonerWebClient(prisonerNumber = "A12345", activeFlag = false)
+        .exchange()
+        .expectStatus().isNotFound
+        .expectBody()
+        .jsonPath("$.status").isEqualTo(404)
+    }
+
+    @Test
+    fun `should error if offender is already a restricted patient`() {
+      saveRestrictedPatient(prisonerNumber = "A12345")
+      dischargePrisonerWebClient(prisonerNumber = "A12345")
+        .exchange()
+        .expectStatus().isBadRequest
+        .expectBody()
+        .jsonPath("$.status").isEqualTo(400)
+        .jsonPath("$.errorCode").isEqualTo("EXISTING_PATIENT")
+    }
+
+    @Test
+    fun `should error if prison-api errors`() {
+      dischargePrisonerWebClientErrors("A12345")
+        .exchange()
+        .expectStatus().is5xxServerError
+        .expectBody()
+        .jsonPath("$.status").isEqualTo(500)
+        .jsonPath("$.errorCode").isEqualTo("UPSTREAM_ERROR")
+
+      assertThat(restrictedPatientRepository.findById("A12345")).isEmpty
+    }
   }
 
   @Test
@@ -99,6 +111,44 @@ class RestrictedPatientIntegrationTest : IntegrationTestBase() {
 
     val rpEntry = restrictedPatientRepository.findById("A12345")
     assertTrue(rpEntry.isPresent)
+  }
+
+  @Nested
+  inner class MigrateInPatientErrors {
+
+    @Test
+    fun `should error if offender is already a restricted patient`() {
+      saveRestrictedPatient(prisonerNumber = "A12345")
+      migrateInRestrictedPatientWebClient(prisonerNumber = "A12345")
+        .exchange()
+        .expectStatus().isBadRequest
+        .expectBody()
+        .jsonPath("$.status").isEqualTo(400)
+        .jsonPath("$.errorCode").isEqualTo("EXISTING_PATIENT")
+    }
+    @Test
+    fun `should error if offender is not released`() {
+      migrateInRestrictedPatientWebClientNotReleased(prisonerNumber = "A12345")
+        .exchange()
+        .expectStatus().isBadRequest
+        .expectBody()
+        .jsonPath("$.status").isEqualTo(400)
+        .jsonPath("$.errorCode").isEqualTo("LAST_MOVE_NOT_REL")
+
+      assertThat(restrictedPatientRepository.findById("A12345")).isEmpty
+    }
+
+    @Test
+    fun `should error if prison-api errors`() {
+      migrateInRestrictedPatientWebClientError("A12345")
+        .exchange()
+        .expectStatus().is5xxServerError
+        .expectBody()
+        .jsonPath("$.status").isEqualTo(500)
+        .jsonPath("$.errorCode").isEqualTo("UPSTREAM_ERROR")
+
+      assertThat(restrictedPatientRepository.findById("A12345")).isEmpty
+    }
   }
 
   @Test
@@ -147,5 +197,32 @@ class RestrictedPatientIntegrationTest : IntegrationTestBase() {
     getRestrictedPatient(prisonerNumber = "A12345")
       .exchange()
       .expectStatus().isNotFound
+  }
+
+  @Nested
+  inner class RemovePatientErrors {
+    @Test
+    fun `should error if not a restricted patient`() {
+      webTestClient.delete().uri("/restricted-patient/prison-number/A12345")
+        .headers(setHeaders())
+        .exchange()
+        .expectStatus().isNotFound
+    }
+
+    @Test
+    fun `should error if prison-api errors`() {
+      saveRestrictedPatient(prisonerNumber = "A12345")
+      prisonApiMockServer.stubServerError(WireMock::post)
+
+      webTestClient.delete().uri("/restricted-patient/prison-number/A12345")
+        .headers(setHeaders())
+        .exchange()
+        .expectStatus().is5xxServerError
+        .expectBody()
+        .jsonPath("$.status").isEqualTo(500)
+        .jsonPath("$.errorCode").isEqualTo("UPSTREAM_ERROR")
+
+      assertThat(restrictedPatientRepository.findById("A12345")).isNotEmpty
+    }
   }
 }
