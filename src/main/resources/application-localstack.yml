@@ -1,12 +1,12 @@
 hmpps.sqs:
   provider: localstack
   queues:
-    domainevents:
+    offenderevents:
       queueName: rp_api_queue
       dlqName: rp_api_dlq
-      subscribeTopicId: domaineventsqueue
+      subscribeTopicId: offendereventsqueue
   topics:
-    domaineventsqueue:
-      arn: arn:aws:sns:eu-west-2:000000000000:domain_events_queue
+    offendereventsqueue:
+      arn: arn:aws:sns:eu-west-2:000000000000:offender_events_queue
     domaineventsoutbound:
       arn: arn:aws:sns:eu-west-2:000000000000:domain_events_outbound
