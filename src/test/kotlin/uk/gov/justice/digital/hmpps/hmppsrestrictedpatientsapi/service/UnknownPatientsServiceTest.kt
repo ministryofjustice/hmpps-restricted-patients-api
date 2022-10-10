@@ -16,11 +16,11 @@ class UnknownPatientsServiceTest {
 
   private val testFile = listOf(
     """FILE_REFERENCE,FAMILY_NAME,FIRST_NAMES,Gender,DOB,Date of Sentence,Court sentenced at,Reason for reception,Prison received into,Under 21 at point of sentence?,Sentence type,Offence (list all current),CJA/Code,Sentence length,Offence to attach to sentence (most serious),AUTHORITY_FOR_DETENTION_DESCRIPTION,CURRENT_ESTABLISHMENT_DESCRIPTION,DATE_OF_HOSPITAL_ORDER""",
-    """3/6170,O'Brien,Steven John M,M,11/02/1965,12/9/2009,Sheffield Crown Court,Imprisonment,HMP High Down,no,Discretionary life,Attempted murder,,Tariff - 15 years,Attempted murder ,S45A - MHA 1983 - Hospital & Limitation Direction,Broadmoor Hospital,01 Dec 2014 00:00""",
-    """,O'Brien,Steven John M,M,11/02/1965,12/9/2009,Sheffield Crown Court,Imprisonment,HMP High Down,no,Discretionary life,Attempted murder,,Tariff - 15 years,Attempted murder ,S45A - MHA 1983 - Hospital & Limitation Direction,Broadmoor Hospital,01 Dec 2014 00:00""",
-    """3/6170,O'Brien,Steven John M,M,33/02/1965,12/9/2009,Sheffield Crown Court,Imprisonment,HMP High Down,no,Discretionary life,Attempted murder,,Tariff - 15 years,Attempted murder ,S45A - MHA 1983 - Hospital & Limitation Direction,Broadmoor Hospital,01 Dec 2014 00:00""",
-    """3/6170,O'Brien,Steven John M,M,11/02/1965,12/9/2009,Sheffield Crown Court,Imprisonment,HMP High Down,no,Discretionary life,Attempted murder,,Tariff - 15 years,Attempted murder ,S45A - MHA 1983 - Hospital & Limitation Direction,Broadmoor Hospital,33 Dec 2014 00:00""",
-    """3/6170,O'Brien,Steven John M,Y,11/02/1965,12/9/2009,Sheffield Crown Court,Imprisonment,HMP High Down,no,Discretionary life,Attempted murder,,Tariff - 15 years,Attempted murder ,S45A - MHA 1983 - Hospital & Limitation Direction,Broadmoor Hospital,01 Dec 2014 00:00""",
+    """3/6170,O'Brien,Steven John M,M,11/02/1965,12/9/2009,Sheffield Crown Court,Imprisonment,HMP High Down,no,Discretionary life,Attempted murder,,Tariff - 15 years,Attempted murder ,S45A - MHA 1983 - Hospital & Limitation Direction,Broadmoor Hospital,01 Sep 2011 00:00""",
+    """,O'Brien,Steven John M,M,11/02/1965,12/9/2009,Sheffield Crown Court,Imprisonment,HMP High Down,no,Discretionary life,Attempted murder,,Tariff - 15 years,Attempted murder ,S45A - MHA 1983 - Hospital & Limitation Direction,Broadmoor Hospital,01 Sept 2011 00:00""",
+    """3/6170,O'Brien,Steven John M,M,33/02/1965,12/9/2009,Sheffield Crown Court,Imprisonment,HMP High Down,no,Discretionary life,Attempted murder,,Tariff - 15 years,Attempted murder ,S45A - MHA 1983 - Hospital & Limitation Direction,Broadmoor Hospital,01 Sep 2011 00:00""",
+    """3/6170,O'Brien,Steven John M,M,11/02/1965,12/9/2009,Sheffield Crown Court,Imprisonment,HMP High Down,no,Discretionary life,Attempted murder,,Tariff - 15 years,Attempted murder ,S45A - MHA 1983 - Hospital & Limitation Direction,Broadmoor Hospital,33 Sep 2011 00:00""",
+    """3/6170,O'Brien,Steven John M,Y,11/02/1965,12/9/2009,Sheffield Crown Court,Imprisonment,HMP High Down,no,Discretionary life,Attempted murder,,Tariff - 15 years,Attempted murder ,S45A - MHA 1983 - Hospital & Limitation Direction,Broadmoor Hospital,01 Sep 2011 00:00""",
   )
 
   @Nested
@@ -38,7 +38,7 @@ class UnknownPatientsServiceTest {
         { assertThat(patient.dateOfBirth).isEqualTo(LocalDate.of(1965, 2, 11)) },
         { assertThat(patient.prisonCode).isEqualTo("HMP High Down") },
         { assertThat(patient.hospitalCode).isEqualTo("Broadmoor Hospital") },
-        { assertThat(patient.hospitalOrderDate).isEqualTo(LocalDate.of(2014, 12, 1)) },
+        { assertThat(patient.hospitalOrderDate).isEqualTo(LocalDate.of(2011, 9, 1)) },
       )
     }
 

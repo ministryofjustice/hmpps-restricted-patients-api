@@ -54,7 +54,7 @@ class UnknownPatientService {
   private fun CSVRecord.dateOfBirth() = runCatching { LocalDate.parse(this[4], DateTimeFormatter.ofPattern("dd/MM/yyyy")) }.getOrElse { throw MigrateUnknownPatientException(this[0], "Date of birth ${this[4]} invalid") }
   private fun CSVRecord.prisonName() = this[8]
   private fun CSVRecord.hospitalName() = this[16]
-  private fun CSVRecord.hospitalMoveDate() = kotlin.runCatching { LocalDate.parse(this[17], DateTimeFormatter.ofPattern("dd MMM yyyy hh:mm")) }.getOrElse { throw MigrateUnknownPatientException(this[0], "Date of hospital order ${this[17]} invalid") }
+  private fun CSVRecord.hospitalMoveDate() = kotlin.runCatching { LocalDate.parse(this[17].replace("Sep", "Sept"), DateTimeFormatter.ofPattern("dd MMM yyyy hh:mm")) }.getOrElse { throw MigrateUnknownPatientException(this[0], "Date of hospital order ${this[17]} invalid") }
 }
 
 data class UnknownPatient(
