@@ -22,6 +22,7 @@ dependencies {
   implementation("org.springframework:spring-jms")
   implementation("com.google.code.gson:gson:2.9.1")
   implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:1.1.11")
+  implementation("org.apache.commons:commons-csv:1.9.0")
 
   runtimeOnly("com.h2database:h2:2.1.214")
   runtimeOnly("org.flywaydb:flyway-core")
