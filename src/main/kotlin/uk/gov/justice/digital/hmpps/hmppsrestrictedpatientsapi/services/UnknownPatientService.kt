@@ -8,7 +8,7 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 @Service
-class UnknownPatientService {
+class UnknownPatientService(private val agencyFinder: AgencyFinder) {
 
   fun migrateInUnknownPatients(patients: List<String>): List<UnknownPatientResult> =
     patients.drop(1)
