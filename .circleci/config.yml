@@ -21,6 +21,7 @@ executors:
       - image: cimg/openjdk:18.0
         environment:
           - TZ=Europe/London
+        run: apt update && apt install tzdata -y
       - image: localstack/localstack:0.14.0
         environment:
           - DEBUG=${DEBUG- }
@@ -43,7 +44,6 @@ jobs:
   validate:
     executor: integration-tests
     steps:
-      - run: apt update && apt install tzdata -y
       - run:
           command: |
             while true; do
