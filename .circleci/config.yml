@@ -36,7 +36,6 @@ executors:
       _JAVA_OPTIONS: -Xmx256m -XX:ParallelGCThreads=2 -XX:ConcGCThreads=2 -XX:ParallelGCThreads=2 -Djava.util.concurrent.ForkJoinPool.common.parallelism=2 -Dorg.gradle.daemon=false -Dorg.gradle.jvmargs=-XX:+UseContainerSupport -Dkotlin.compiler.execution.strategy=in-process -Dorg.gradle.workers.max=2
     working_directory: ~/app
 
-
 jobs:
   validate:
     executor: integration-tests
