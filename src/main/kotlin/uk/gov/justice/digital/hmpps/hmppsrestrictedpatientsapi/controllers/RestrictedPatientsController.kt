@@ -15,7 +15,7 @@ import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.Re
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services.RestrictedPatientsService
 
 @RestController
-class RestrictedPatentsController(private val restrictedPatientsService: RestrictedPatientsService) {
+class RestrictedPatientsController(private val restrictedPatientsService: RestrictedPatientsService) {
   @PostMapping(
     value = ["/discharge-to-hospital"], consumes = [MediaType.APPLICATION_JSON_VALUE]
   )
