@@ -4,11 +4,12 @@ import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVParser
 import org.apache.commons.csv.CSVRecord
 import org.springframework.stereotype.Service
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.PrisonApiGateway
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 @Service
-class UnknownPatientService(private val agencyFinder: AgencyFinder) {
+class UnknownPatientService(private val agencyFinder: AgencyFinder, private val prisonApiGateway: PrisonApiGateway) {
 
   fun migrateInUnknownPatients(patients: List<String>): List<UnknownPatientResult> =
     patients.drop(1)
@@ -40,11 +41,15 @@ class UnknownPatientService(private val agencyFinder: AgencyFinder) {
     }
 
   private fun migrateInPatient(unknownPatient: UnknownPatient): UnknownPatientResult =
-    UnknownPatientResult(
-      mhcsReference = unknownPatient.mhcsReference,
-      offenderNumber = "TODO",
-      success = true
-    )
+    unknownPatient.createPrisoner()
+      // TODO SDI-357 discharge-to-hospital and migrate-in-restricted-patient
+      .let { offenderNumber ->
+        UnknownPatientResult(mhcsReference = unknownPatient.mhcsReference, offenderNumber = offenderNumber, success = true)
+      }
+
+  private fun UnknownPatient.createPrisoner() =
+    runCatching { prisonApiGateway.createPrisoner(surname, firstName, middleNames, gender, dateOfBirth) }
+      .getOrElse { throw MigrateUnknownPatientException(mhcsReference, "Create prisoner failed due to: ${it.message}") }
 
   private fun CSVRecord.mhcsReference() = this[0].ifEmpty { throw IllegalArgumentException("MHCS Reference must not be blank") }
   private fun CSVRecord.surname() = this[1]
@@ -71,7 +76,7 @@ data class UnknownPatient(
 
 data class UnknownPatientResult(
   val mhcsReference: String?,
-  val offenderNumber: String?,
+  val offenderNumber: String? = null,
   val success: Boolean,
   val errorMessage: String? = null
 )

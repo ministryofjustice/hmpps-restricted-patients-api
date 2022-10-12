@@ -12,6 +12,7 @@ import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.request.Cre
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.Agency
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.MovementResponse
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.OffenderBookingResponse
+import java.time.LocalDate
 
 @Service
 class PrisonApiGateway(private val prisonApiClientCreds: WebClient) {
@@ -79,4 +80,31 @@ class PrisonApiGateway(private val prisonApiClientCreds: WebClient) {
 
   private fun <T> emptyWhenNotFound(exception: WebClientResponseException): Mono<T> =
     if (exception.rawStatusCode == NOT_FOUND.value()) Mono.empty() else Mono.error(exception)
+
+  fun createPrisoner(
+    surname: String,
+    firstName: String,
+    middleNames: String?,
+    gender: String,
+    dateOfBirth: LocalDate
+  ): String =
+    prisonApiClientCreds
+      .post()
+      .uri("/offenders")
+      .bodyValue(
+        mapOf(
+          "lastName" to surname,
+          "firstName" to firstName,
+          "middleName1" to middleNames?.split(" ")?.firstOrNull(),
+          "middleName2" to middleNames?.split(" ")?.drop(1)?.joinToString(" "),
+          "gender" to gender,
+          "dateOfBirth" to dateOfBirth.toString(),
+        )
+      )
+      .retrieve()
+      .bodyToMono<InmateDetail>()
+      .block()!!
+      .offenderNo
 }
+
+private class InmateDetail(val offenderNo: String)
