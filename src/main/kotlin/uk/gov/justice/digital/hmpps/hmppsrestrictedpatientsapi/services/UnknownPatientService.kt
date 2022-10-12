@@ -8,7 +8,7 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 @Service
-class UnknownPatientService {
+class UnknownPatientService(private val agencyFinder: AgencyFinder) {
 
   fun migrateInUnknownPatients(patients: List<String>): List<UnknownPatientResult> =
     patients.drop(1)
@@ -52,8 +52,8 @@ class UnknownPatientService {
   private fun CSVRecord.middleNames() = this[2].split(" ").drop(1).joinToString(" ")
   private fun CSVRecord.gender() = this[3].takeIf { listOf("M", "F").contains(it) } ?: throw MigrateUnknownPatientException(this[0], "Gender of ${this[3]} should be M or F")
   private fun CSVRecord.dateOfBirth() = runCatching { LocalDate.parse(this[4], DateTimeFormatter.ISO_DATE) }.getOrElse { throw MigrateUnknownPatientException(this[0], "Date of birth ${this[4]} invalid") }
-  private fun CSVRecord.prisonName() = this[8]
-  private fun CSVRecord.hospitalName() = this[16]
+  private fun CSVRecord.prisonName() = agencyFinder.findPrisonCode(this[8]) ?: throw MigrateUnknownPatientException(this[0], "Could not find prison ${this[8]}")
+  private fun CSVRecord.hospitalName() = agencyFinder.findHospitalCode(this[16]) ?: throw MigrateUnknownPatientException(this[0], "Could not find hospital ${this[16]}")
   private fun CSVRecord.hospitalMoveDate() = kotlin.runCatching { LocalDate.parse(this[17], DateTimeFormatter.ISO_DATE) }.getOrElse { throw MigrateUnknownPatientException(this[0], "Date of hospital order ${this[17]} invalid") }
 }
 
