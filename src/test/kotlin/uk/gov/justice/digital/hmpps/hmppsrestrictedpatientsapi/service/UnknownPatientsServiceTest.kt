@@ -150,7 +150,7 @@ class UnknownPatientsServiceTest {
     @Test
     fun `will report on errors from create prisoner`() {
       whenever(prisonApiGateway.createPrisoner(anyString(), anyString(), anyString(), anyString(), any()))
-        .thenThrow(WebClientResponseException.create(500, "some error", HttpHeaders.EMPTY, ByteArray(0), Charset.defaultCharset()))
+        .thenThrow(webClientException(500, "some error"))
 
       val results = service.migrateInUnknownPatients(listOf(testRecord("header"), testRecord("valid")))
 
@@ -158,5 +158,8 @@ class UnknownPatientsServiceTest {
         UnknownPatientResult("3/6170", null, false, "Create prisoner failed due to: 500 some error")
       )
     }
+
+    private fun webClientException(statusCode: Int, statusText: String) =
+      WebClientResponseException.create(statusCode, statusText, HttpHeaders.EMPTY, ByteArray(0), Charset.defaultCharset())
   }
 }

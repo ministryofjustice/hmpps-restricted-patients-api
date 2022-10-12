@@ -41,22 +41,15 @@ class UnknownPatientService(private val agencyFinder: AgencyFinder, private val 
     }
 
   private fun migrateInPatient(unknownPatient: UnknownPatient): UnknownPatientResult =
-    with(unknownPatient) {
-      val offenderNumber =
-        runCatching { prisonApiGateway.createPrisoner(surname, firstName, middleNames, gender, dateOfBirth) }
-          .getOrElse {
-            return UnknownPatientResult(
-              mhcsReference = mhcsReference,
-              success = false,
-              errorMessage = "Create prisoner failed due to: ${it.message}",
-            )
-          }
-      return UnknownPatientResult(
-        mhcsReference = mhcsReference,
-        offenderNumber = offenderNumber,
-        success = true,
-      )
-    }
+    unknownPatient.createPrisoner()
+      // TODO SDI-357 discharge-to-hospital and migrate-in-restricted-patient
+      .let { offenderNumber ->
+        UnknownPatientResult(mhcsReference = unknownPatient.mhcsReference, offenderNumber = offenderNumber, success = true)
+      }
+
+  private fun UnknownPatient.createPrisoner() =
+    runCatching { prisonApiGateway.createPrisoner(surname, firstName, middleNames, gender, dateOfBirth) }
+      .getOrElse { throw MigrateUnknownPatientException(mhcsReference, "Create prisoner failed due to: ${it.message}") }
 
   private fun CSVRecord.mhcsReference() = this[0].ifEmpty { throw IllegalArgumentException("MHCS Reference must not be blank") }
   private fun CSVRecord.surname() = this[1]
