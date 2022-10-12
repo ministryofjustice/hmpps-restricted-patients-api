@@ -16,7 +16,7 @@ import java.time.LocalDate
 
 @Service
 class PrisonApiGateway(private val prisonApiClientCreds: WebClient) {
-  fun dischargeToHospital(newRestrictedPatient: RestrictedPatient) =
+  fun dischargeToHospital(newRestrictedPatient: RestrictedPatient): InmateDetail =
     prisonApiClientCreds
       .put()
       .uri("/offenders/${newRestrictedPatient.prisonerNumber}/discharge-to-hospital")
@@ -30,8 +30,8 @@ class PrisonApiGateway(private val prisonApiClientCreds: WebClient) {
         )
       )
       .retrieve()
-      .bodyToMono(String::class.java)
-      .block()
+      .bodyToMono<InmateDetail>()
+      .block()!!
 
   fun getLatestMovements(offenderNo: String): List<MovementResponse> =
     prisonApiClientCreds
@@ -87,7 +87,7 @@ class PrisonApiGateway(private val prisonApiClientCreds: WebClient) {
     middleNames: String?,
     gender: String,
     dateOfBirth: LocalDate
-  ): String =
+  ): InmateDetail =
     prisonApiClientCreds
       .post()
       .uri("/offenders")
@@ -104,7 +104,6 @@ class PrisonApiGateway(private val prisonApiClientCreds: WebClient) {
       .retrieve()
       .bodyToMono<InmateDetail>()
       .block()!!
-      .offenderNo
 }
 
-private class InmateDetail(val offenderNo: String)
+class InmateDetail(val offenderNo: String)

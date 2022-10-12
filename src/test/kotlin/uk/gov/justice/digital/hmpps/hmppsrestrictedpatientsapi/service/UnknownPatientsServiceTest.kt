@@ -13,7 +13,9 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.http.HttpHeaders
 import org.springframework.web.reactive.function.client.WebClientResponseException
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.InmateDetail
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.PrisonApiGateway
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.entities.RestrictedPatient
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services.AgencyFinder
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services.MigrateUnknownPatientException
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services.UnknownPatientResult
@@ -125,7 +127,9 @@ class UnknownPatientsServiceTest {
     @BeforeEach
     fun setUp() {
       whenever(prisonApiGateway.createPrisoner(anyString(), anyString(), anyString(), anyString(), any()))
-        .thenReturn("A1234AA")
+        .thenReturn(InmateDetail("A1234AA"))
+      whenever(prisonApiGateway.dischargeToHospital(any()))
+        .thenReturn(InmateDetail("A1234AA"))
     }
 
     @Test
@@ -145,6 +149,9 @@ class UnknownPatientsServiceTest {
         UnknownPatientResult("3/6170", null, false, "Gender of Y should be M or F"),
       )
       verify(prisonApiGateway).createPrisoner("O'Brien", "Steven", "John M", "M", LocalDate.of(1965, 2, 11))
+      verify(prisonApiGateway).dischargeToHospital(
+        RestrictedPatient("A1234AA", "HOI", "BROADM", "HOI", LocalDate.of(2011, 9, 1).atStartOfDay(), "Historical hospital release added to NOMIS for addition to Restricted Patients")
+      )
     }
 
     @Test
@@ -156,6 +163,17 @@ class UnknownPatientsServiceTest {
 
       assertThat(results).containsExactly(
         UnknownPatientResult("3/6170", null, false, "Create prisoner failed due to: 500 some error")
+      )
+    }
+
+    @Test
+    fun `will report on errors from discharge to hospital`() {
+      whenever(prisonApiGateway.dischargeToHospital(any())).thenThrow(webClientException(400, "some client error"))
+
+      val results = service.migrateInUnknownPatients(listOf(testRecord("header"), testRecord("valid")))
+
+      assertThat(results).containsExactly(
+        UnknownPatientResult("3/6170", "A1234AA", false, "Discharge to hospital failed due to: 400 some client error")
       )
     }
 

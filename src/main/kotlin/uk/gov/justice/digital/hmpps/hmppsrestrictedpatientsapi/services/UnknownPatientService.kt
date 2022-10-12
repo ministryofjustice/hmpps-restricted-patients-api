@@ -5,6 +5,7 @@ import org.apache.commons.csv.CSVParser
 import org.apache.commons.csv.CSVRecord
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.PrisonApiGateway
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.entities.RestrictedPatient
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -20,7 +21,7 @@ class UnknownPatientService(private val agencyFinder: AgencyFinder, private val 
       migrateInPatient(parsePatient(rawPatient))
     }.getOrElse { ex ->
       when (ex) {
-        is MigrateUnknownPatientException -> UnknownPatientResult(ex.mhcsReference, null, false, ex.message)
+        is MigrateUnknownPatientException -> UnknownPatientResult(ex.mhcsReference, ex.offenderNumber, false, ex.message)
         else -> UnknownPatientResult(rawPatient, null, false, ex.message)
       }
     }
@@ -41,8 +42,9 @@ class UnknownPatientService(private val agencyFinder: AgencyFinder, private val 
     }
 
   private fun migrateInPatient(unknownPatient: UnknownPatient): UnknownPatientResult =
-    unknownPatient.createPrisoner()
-      // TODO SDI-357 discharge-to-hospital and migrate-in-restricted-patient
+    unknownPatient.createPrisoner().offenderNo
+      .also { offenderNumber -> unknownPatient.dischargeToHospital(offenderNumber) }
+      // TODO SDI-357 migrate-in-restricted-patient
       .let { offenderNumber ->
         UnknownPatientResult(mhcsReference = unknownPatient.mhcsReference, offenderNumber = offenderNumber, success = true)
       }
@@ -50,6 +52,13 @@ class UnknownPatientService(private val agencyFinder: AgencyFinder, private val 
   private fun UnknownPatient.createPrisoner() =
     runCatching { prisonApiGateway.createPrisoner(surname, firstName, middleNames, gender, dateOfBirth) }
       .getOrElse { throw MigrateUnknownPatientException(mhcsReference, "Create prisoner failed due to: ${it.message}") }
+
+  private fun UnknownPatient.dischargeToHospital(offenderNumber: String) =
+    runCatching {
+      RestrictedPatient(offenderNumber, prisonCode, hospitalCode, prisonCode, hospitalOrderDate.atStartOfDay(), "Historical hospital release added to NOMIS for addition to Restricted Patients")
+        .let { prisonApiGateway.dischargeToHospital(it) }
+    }
+      .getOrElse { throw MigrateUnknownPatientException(mhcsReference, "Discharge to hospital failed due to: ${it.message}", offenderNumber) }
 
   private fun CSVRecord.mhcsReference() = this[0].ifEmpty { throw IllegalArgumentException("MHCS Reference must not be blank") }
   private fun CSVRecord.surname() = this[1]
@@ -81,4 +90,4 @@ data class UnknownPatientResult(
   val errorMessage: String? = null
 )
 
-class MigrateUnknownPatientException(val mhcsReference: String, errorMessage: String) : RuntimeException(errorMessage)
+class MigrateUnknownPatientException(val mhcsReference: String, errorMessage: String, val offenderNumber: String? = null) : RuntimeException(errorMessage)
