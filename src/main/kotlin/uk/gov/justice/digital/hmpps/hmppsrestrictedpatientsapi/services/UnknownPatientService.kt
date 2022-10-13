@@ -23,9 +23,13 @@ class UnknownPatientService(
   private fun migrateInUnknownPatient(rawPatient: String, dryRun: Boolean): UnknownPatientResult =
     runCatching {
       parsePatient(rawPatient)
-        .takeIf { dryRun }
-        ?.let { UnknownPatientResult(it.mhcsReference, null, true) }
-        ?: let { migrateInPatient(parsePatient(rawPatient)) }
+        .let {
+          if (!dryRun) {
+            migrateInPatient(it)
+          } else {
+            UnknownPatientResult(it.mhcsReference, null, true)
+          }
+        }
     }.getOrElse { ex ->
       when (ex) {
         is MigrateUnknownPatientException -> UnknownPatientResult(ex.mhcsReference, ex.offenderNumber, false, ex.message)
