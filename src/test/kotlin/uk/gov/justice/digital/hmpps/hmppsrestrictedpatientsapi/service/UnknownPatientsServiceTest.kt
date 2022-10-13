@@ -15,9 +15,10 @@ import org.springframework.http.HttpHeaders
 import org.springframework.web.reactive.function.client.WebClientResponseException
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.InmateDetail
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.PrisonApiGateway
-import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.entities.RestrictedPatient
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.request.DischargeToHospitalRequest
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services.AgencyFinder
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services.MigrateUnknownPatientException
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services.RestrictedPatientsService
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services.UnknownPatientResult
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services.UnknownPatientService
 import java.nio.charset.Charset
@@ -27,7 +28,8 @@ class UnknownPatientsServiceTest {
 
   private val agencyFinder = mock<AgencyFinder>()
   private val prisonApiGateway = mock<PrisonApiGateway>()
-  private val service = UnknownPatientService(agencyFinder, prisonApiGateway)
+  private val restrictedPatientService = mock<RestrictedPatientsService>()
+  private val service = UnknownPatientService(agencyFinder, prisonApiGateway, restrictedPatientService)
 
   private val testFile = mapOf(
     "header" to """FILE_REFERENCE,FAMILY_NAME,FIRST_NAMES,Gender,DOB,Date of Sentence,Court sentenced at,Reason for reception,Prison received into,Under 21 at point of sentence?,Sentence type,Offence (list all current),CJA/Code,Sentence length,Offence to attach to sentence (most serious),AUTHORITY_FOR_DETENTION_DESCRIPTION,CURRENT_ESTABLISHMENT_DESCRIPTION,DATE_OF_HOSPITAL_ORDER""",
@@ -149,8 +151,15 @@ class UnknownPatientsServiceTest {
         UnknownPatientResult("3/6170", null, false, "Gender of Y should be M or F"),
       )
       verify(prisonApiGateway).createPrisoner("O'Brien", "Steven", "John M", "M", LocalDate.of(1965, 2, 11))
-      verify(prisonApiGateway).dischargeToHospital(
-        RestrictedPatient("A1234AA", "HOI", "BROADM", "HOI", LocalDate.of(2011, 9, 1).atStartOfDay(), "Historical hospital release added to NOMIS for addition to Restricted Patients")
+      verify(restrictedPatientService).dischargeToHospital(
+        DischargeToHospitalRequest(
+          "A1234AA",
+          "Historical hospital release added to NOMIS for addition to Restricted Patients",
+          "HOI",
+          "BROADM",
+          "HOI",
+          LocalDate.of(2011, 9, 1).atStartOfDay()
+        )
       )
     }
 
@@ -168,7 +177,7 @@ class UnknownPatientsServiceTest {
 
     @Test
     fun `will report on errors from discharge to hospital`() {
-      whenever(prisonApiGateway.dischargeToHospital(any())).thenThrow(webClientException(400, "some client error"))
+      whenever(restrictedPatientService.dischargeToHospital(any())).thenThrow(webClientException(400, "some client error"))
 
       val results = service.migrateInUnknownPatients(listOf(testRecord("header"), testRecord("valid")))
 

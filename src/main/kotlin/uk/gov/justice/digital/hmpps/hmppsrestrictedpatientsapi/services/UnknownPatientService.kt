@@ -5,12 +5,16 @@ import org.apache.commons.csv.CSVParser
 import org.apache.commons.csv.CSVRecord
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.PrisonApiGateway
-import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.entities.RestrictedPatient
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.request.DischargeToHospitalRequest
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 @Service
-class UnknownPatientService(private val agencyFinder: AgencyFinder, private val prisonApiGateway: PrisonApiGateway) {
+class UnknownPatientService(
+  private val agencyFinder: AgencyFinder,
+  private val prisonApiGateway: PrisonApiGateway,
+  private val restrictedPatientsService: RestrictedPatientsService
+) {
 
   fun migrateInUnknownPatients(patients: List<String>): List<UnknownPatientResult> =
     patients.drop(1)
@@ -44,7 +48,6 @@ class UnknownPatientService(private val agencyFinder: AgencyFinder, private val 
   private fun migrateInPatient(unknownPatient: UnknownPatient): UnknownPatientResult =
     unknownPatient.createPrisoner().offenderNo
       .also { offenderNumber -> unknownPatient.dischargeToHospital(offenderNumber) }
-      // TODO SDI-357 migrate-in-restricted-patient
       .let { offenderNumber ->
         UnknownPatientResult(mhcsReference = unknownPatient.mhcsReference, offenderNumber = offenderNumber, success = true)
       }
@@ -55,8 +58,15 @@ class UnknownPatientService(private val agencyFinder: AgencyFinder, private val 
 
   private fun UnknownPatient.dischargeToHospital(offenderNumber: String) =
     runCatching {
-      RestrictedPatient(offenderNumber, prisonCode, hospitalCode, prisonCode, hospitalOrderDate.atStartOfDay(), "Historical hospital release added to NOMIS for addition to Restricted Patients")
-        .let { prisonApiGateway.dischargeToHospital(it) }
+      DischargeToHospitalRequest(
+        offenderNumber,
+        "Historical hospital release added to NOMIS for addition to Restricted Patients",
+        prisonCode,
+        hospitalCode,
+        prisonCode,
+        hospitalOrderDate.atStartOfDay(),
+      )
+        .let { restrictedPatientsService.dischargeToHospital(it) }
     }
       .getOrElse { throw MigrateUnknownPatientException(mhcsReference, "Discharge to hospital failed due to: ${it.message}", offenderNumber) }
 

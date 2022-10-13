@@ -50,7 +50,7 @@ class RestrictedPatientsService(
       fromLocationId = dischargeToHospitalWithDefaultSupportingPrison.fromLocationId,
       hospitalLocationCode = dischargeToHospitalWithDefaultSupportingPrison.hospitalLocationCode,
       supportingPrisonId = dischargeToHospitalWithDefaultSupportingPrison.supportingPrisonId!!,
-      dischargeTime = LocalDateTime.now(clock),
+      dischargeTime = dischargeToHospital.dischargeTime ?: LocalDateTime.now(clock),
       commentText = dischargeToHospitalWithDefaultSupportingPrison.commentText
     )
     return addRestrictedPatient(restrictedPatient)

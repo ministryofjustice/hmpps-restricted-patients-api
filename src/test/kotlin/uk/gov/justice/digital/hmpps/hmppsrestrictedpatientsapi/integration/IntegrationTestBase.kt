@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.integration
 
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.tomakehurst.wiremock.client.WireMock
 import org.flywaydb.core.Flyway
 import org.junit.jupiter.api.AfterAll
@@ -11,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT
 import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.test.web.reactive.server.WebTestClient
@@ -20,6 +22,7 @@ import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.integration.wirem
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.integration.wiremock.PrisonerSearchApiMockServer
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.entities.RestrictedPatient
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.repositories.RestrictedPatientsRepository
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services.UnknownPatientService
 import java.time.Clock
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -42,6 +45,9 @@ abstract class IntegrationTestBase {
 
   @MockBean
   lateinit var clock: Clock
+
+  @SpyBean
+  lateinit var unknownPatientsService: UnknownPatientService
 
   companion object {
     @JvmField
@@ -89,8 +95,8 @@ abstract class IntegrationTestBase {
     flyway.migrate()
   }
 
-  fun setHeaders(contentType: MediaType = MediaType.APPLICATION_JSON, username: String? = "ITAG_USER"): (HttpHeaders) -> Unit = {
-    it.setBearerAuth(jwtAuthHelper.createJwt(subject = username))
+  fun setHeaders(contentType: MediaType = MediaType.APPLICATION_JSON, username: String? = "ITAG_USER", roles: List<String> = listOf()): (HttpHeaders) -> Unit = {
+    it.setBearerAuth(jwtAuthHelper.createJwt(subject = username, roles = roles))
     it.contentType = contentType
   }
 
@@ -209,6 +215,17 @@ abstract class IntegrationTestBase {
           "hospitalLocationCode" to hospitalLocationCode,
         )
       )
+  }
+
+  fun processUnknownPatientsWebClient(
+    csvData: List<String> = listOf(),
+    headers: (HttpHeaders) -> Unit = {},
+  ): WebTestClient.RequestHeadersSpec<*> {
+    return webTestClient
+      .post()
+      .uri("/process-unknown-patients")
+      .headers(headers)
+      .bodyValue(jacksonObjectMapper().writeValueAsString(csvData))
   }
 
   fun saveRestrictedPatient(
