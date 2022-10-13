@@ -5,10 +5,10 @@ import com.github.tomakehurst.wiremock.client.WireMock
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.ArgumentMatchers.anyList
 import org.mockito.kotlin.any
-import org.mockito.kotlin.never
-import org.mockito.kotlin.times
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.http.MediaType
@@ -35,7 +35,7 @@ class ProcessUnknownPatientsIntTest : IntegrationTestBase() {
 
     @Test
     fun `should reject request with wrong role`() {
-      whenever(unknownPatientsService.migrateInUnknownPatients(anyList())).thenReturn(listOf())
+      whenever(unknownPatientsService.migrateInUnknownPatients(anyList(), anyBoolean())).thenReturn(listOf())
 
       processUnknownPatientsWebClient(headers = setHeaders(roles = listOf("ROLE_IS_WRONG")))
         .exchange()
@@ -44,7 +44,7 @@ class ProcessUnknownPatientsIntTest : IntegrationTestBase() {
 
     @Test
     fun `should process request with valid token`() {
-      whenever(unknownPatientsService.migrateInUnknownPatients(anyList())).thenReturn(listOf())
+      whenever(unknownPatientsService.migrateInUnknownPatients(anyList(), anyBoolean())).thenReturn(listOf())
 
       processUnknownPatientsWebClient(headers = setHeaders(roles = listOf("ROLE_RESTRICTED_PATIENT_MIGRATION")))
         .exchange()
@@ -56,8 +56,7 @@ class ProcessUnknownPatientsIntTest : IntegrationTestBase() {
   inner class DryRun {
     @Test
     fun `should default to a dry run`() {
-      whenever(unknownPatientsService.migrateInUnknownPatients(anyList())).thenReturn(listOf())
-      whenever(unknownPatientsService.migrateInUnknownPatientsDryRun(anyList())).thenReturn(listOf())
+      whenever(unknownPatientsService.migrateInUnknownPatients(anyList(), anyBoolean())).thenReturn(listOf())
 
       webTestClient
         .post()
@@ -69,14 +68,12 @@ class ProcessUnknownPatientsIntTest : IntegrationTestBase() {
         .exchange()
         .expectStatus().isOk
 
-      verify(unknownPatientsService, times(1)).migrateInUnknownPatientsDryRun(any())
-      verify(unknownPatientsService, never()).migrateInUnknownPatients(any())
+      verify(unknownPatientsService).migrateInUnknownPatients(any(), eq(true))
     }
 
     @Test
     fun `should not perform a dry run if query parm set`() {
-      whenever(unknownPatientsService.migrateInUnknownPatients(anyList())).thenReturn(listOf())
-      whenever(unknownPatientsService.migrateInUnknownPatientsDryRun(anyList())).thenReturn(listOf())
+      whenever(unknownPatientsService.migrateInUnknownPatients(anyList(), anyBoolean())).thenReturn(listOf())
 
       webTestClient
         .post()
@@ -88,8 +85,7 @@ class ProcessUnknownPatientsIntTest : IntegrationTestBase() {
         .exchange()
         .expectStatus().isOk
 
-      verify(unknownPatientsService, never()).migrateInUnknownPatientsDryRun(any())
-      verify(unknownPatientsService, times(1)).migrateInUnknownPatients(any())
+      verify(unknownPatientsService).migrateInUnknownPatients(any(), eq(false))
     }
   }
 

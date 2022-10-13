@@ -32,7 +32,5 @@ class RestrictedPatientsBatchController(
    * Internal endpoint to migrate unknown patients into Nomis and add them to Restricted Patients
    */
   fun processUnknownPatients(@RequestBody patients: List<String>, @RequestParam(required = false, defaultValue = "true") dryRun: Boolean): List<UnknownPatientResult> =
-    dryRun.takeIf { it }
-      ?.let { unknownPatientService.migrateInUnknownPatientsDryRun(patients) }
-      ?: let { unknownPatientService.migrateInUnknownPatients(patients) }
+    unknownPatientService.migrateInUnknownPatients(patients, dryRun)
 }

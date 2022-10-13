@@ -143,7 +143,8 @@ class UnknownPatientsServiceTest {
           testRecord("valid"),
           testRecord("invalid_dob"),
           testRecord("invalid_gender")
-        )
+        ),
+        dryRun = false
       )
 
       assertThat(results).containsExactly(
@@ -169,7 +170,7 @@ class UnknownPatientsServiceTest {
       whenever(prisonApiGateway.createPrisoner(anyString(), anyString(), anyString(), anyString(), any()))
         .thenThrow(webClientException(500, "some error"))
 
-      val results = service.migrateInUnknownPatients(listOf(testRecord("header"), testRecord("valid")))
+      val results = service.migrateInUnknownPatients(listOf(testRecord("header"), testRecord("valid")), dryRun = false)
 
       assertThat(results).containsExactly(
         UnknownPatientResult("3/6170", null, false, "Create prisoner failed due to: 500 some error")
@@ -180,7 +181,7 @@ class UnknownPatientsServiceTest {
     fun `will report on errors from discharge to hospital`() {
       whenever(restrictedPatientService.dischargeToHospital(any())).thenThrow(webClientException(400, "some client error"))
 
-      val results = service.migrateInUnknownPatients(listOf(testRecord("header"), testRecord("valid")))
+      val results = service.migrateInUnknownPatients(listOf(testRecord("header"), testRecord("valid")), dryRun = false)
 
       assertThat(results).containsExactly(
         UnknownPatientResult("3/6170", "A1234AA", false, "Discharge to hospital failed due to: 400 some client error")
@@ -196,12 +197,13 @@ class UnknownPatientsServiceTest {
 
     @Test
     fun `performs csv parsing and validation without doing anything else`() {
-      val results = service.migrateInUnknownPatientsDryRun(
+      val results = service.migrateInUnknownPatients(
         listOf(
           testRecord("header"),
           testRecord("valid"),
           testRecord("invalid_dob"),
-        )
+        ),
+        true
       )
 
       assertThat(results).containsExactly(

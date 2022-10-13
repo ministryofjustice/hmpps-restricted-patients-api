@@ -16,29 +16,16 @@ class UnknownPatientService(
   private val restrictedPatientsService: RestrictedPatientsService
 ) {
 
-  fun migrateInUnknownPatients(patients: List<String>): List<UnknownPatientResult> =
+  fun migrateInUnknownPatients(patients: List<String>, dryRun: Boolean): List<UnknownPatientResult> =
     patients.drop(1)
-      .map { rawPatient -> migrateInUnknownPatient(rawPatient) }
+      .map { rawPatient -> migrateInUnknownPatient(rawPatient, dryRun) }
 
-  private fun migrateInUnknownPatient(rawPatient: String): UnknownPatientResult =
-    runCatching {
-      migrateInPatient(parsePatient(rawPatient))
-    }.getOrElse { ex ->
-      when (ex) {
-
-        is MigrateUnknownPatientException -> UnknownPatientResult(ex.mhcsReference, ex.offenderNumber, false, ex.message)
-        else -> UnknownPatientResult(rawPatient, null, false, ex.message)
-      }
-    }
-
-  fun migrateInUnknownPatientsDryRun(patients: List<String>): List<UnknownPatientResult> =
-    patients.drop(1)
-      .map { rawPatient -> migrateInUnknownPatientDryRun(rawPatient) }
-
-  private fun migrateInUnknownPatientDryRun(rawPatient: String): UnknownPatientResult =
+  private fun migrateInUnknownPatient(rawPatient: String, dryRun: Boolean): UnknownPatientResult =
     runCatching {
       parsePatient(rawPatient)
-        .let { UnknownPatientResult(it.mhcsReference, null, true) }
+        .takeIf { dryRun }
+        ?.let { UnknownPatientResult(it.mhcsReference, null, true) }
+        ?: let { migrateInPatient(parsePatient(rawPatient)) }
     }.getOrElse { ex ->
       when (ex) {
         is MigrateUnknownPatientException -> UnknownPatientResult(ex.mhcsReference, ex.offenderNumber, false, ex.message)
