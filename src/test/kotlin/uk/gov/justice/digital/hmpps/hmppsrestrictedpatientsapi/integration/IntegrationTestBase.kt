@@ -15,6 +15,7 @@ import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
+import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.test.web.reactive.server.WebTestClient
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.JwtAuthHelper
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.integration.wiremock.OAuthMockServer
@@ -117,10 +118,7 @@ abstract class IntegrationTestBase {
     supportingPrisonId: String = "MDI",
     activeFlag: Boolean = true,
   ): WebTestClient.RequestHeadersSpec<*> {
-    prisonApiMockServer.stubAgencyLocationForPrisons()
-    prisonApiMockServer.stubAgencyLocationForHospitals()
-    prisonApiMockServer.stubOffenderBooking(prisonerNumber, activeFlag)
-    prisonApiMockServer.stubDischargeToPrison(prisonerNumber)
+    stubDischargePrisoner(prisonerNumber, activeFlag)
 
     return webTestClient
       .post()
@@ -135,6 +133,13 @@ abstract class IntegrationTestBase {
           "supportingPrisonId" to supportingPrisonId
         )
       )
+  }
+
+  fun stubDischargePrisoner(prisonerNumber: String, activeFlag: Boolean = true) {
+    prisonApiMockServer.stubAgencyLocationForPrisons()
+    prisonApiMockServer.stubAgencyLocationForHospitals()
+    prisonApiMockServer.stubOffenderBooking(prisonerNumber, activeFlag)
+    prisonApiMockServer.stubDischargeToPrison(prisonerNumber)
   }
 
   fun dischargePrisonerWebClientErrors(
@@ -224,6 +229,8 @@ abstract class IntegrationTestBase {
     return webTestClient
       .post()
       .uri("/process-unknown-patients")
+      .contentType(APPLICATION_JSON)
+      .accept(APPLICATION_JSON)
       .headers(headers)
       .bodyValue(jacksonObjectMapper().writeValueAsString(csvData))
   }

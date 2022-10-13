@@ -82,6 +82,25 @@ class PrisonApiMockServer : WireMockServer(8989) {
     )
   }
 
+  fun stubDischargeToPrisonError(offenderNo: String) {
+    stubFor(
+      put(urlEqualTo("/api/offenders/$offenderNo/discharge-to-hospital"))
+        .willReturn(
+          aResponse()
+            .withHeader("Content-Type", "application/json")
+            .withStatus(400)
+            .withBody(
+              """
+              {
+                  "status": 400,
+                  "userMessage": "some error",
+              }
+              """.trimIndent()
+            )
+        )
+    )
+  }
+
   fun stubGetLatestMovementsReleased(prisonerNumber: String, hospitalLocationCode: String) {
     stubFor(
       post(urlEqualTo("/api/movements/offenders?latestOnly=true&allBookings=false"))
@@ -270,9 +289,21 @@ class PrisonApiMockServer : WireMockServer(8989) {
     )
   }
 
-  fun stubServerError(method: (urlPattern: UrlPattern) -> MappingBuilder) {
+  fun stubCreatePrisoner(offenderNo: String) {
     stubFor(
-      method(urlMatching("/api/.*"))
+      post(urlPathEqualTo("/api/offenders"))
+        .willReturn(
+          aResponse()
+            .withHeader("Content-Type", "application/json")
+            .withStatus(200)
+            .withBody(""" { "offenderNo": "$offenderNo" } """)
+        )
+    )
+  }
+
+  fun stubServerError(method: (urlPattern: UrlPattern) -> MappingBuilder, urlMatch: String = "/api/.*") {
+    stubFor(
+      method(urlMatching(urlMatch))
         .willReturn(
           aResponse()
             .withHeader("Content-Type", "application/json")
