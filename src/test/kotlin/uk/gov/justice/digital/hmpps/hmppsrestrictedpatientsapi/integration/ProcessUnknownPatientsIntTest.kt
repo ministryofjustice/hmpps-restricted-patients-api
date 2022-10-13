@@ -1,11 +1,17 @@
 package uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.integration
 
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.tomakehurst.wiremock.client.WireMock
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.mockito.ArgumentMatchers.anyList
+import org.mockito.kotlin.any
+import org.mockito.kotlin.never
+import org.mockito.kotlin.times
+import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
 
 @ActiveProfiles("test")
@@ -43,6 +49,47 @@ class ProcessUnknownPatientsIntTest : IntegrationTestBase() {
       processUnknownPatientsWebClient(headers = setHeaders(roles = listOf("ROLE_RESTRICTED_PATIENT_MIGRATION")))
         .exchange()
         .expectStatus().isOk
+    }
+  }
+
+  @Nested
+  inner class DryRun {
+    @Test
+    fun `should default to a dry run`() {
+      whenever(unknownPatientsService.migrateInUnknownPatients(anyList())).thenReturn(listOf())
+      whenever(unknownPatientsService.migrateInUnknownPatientsDryRun(anyList())).thenReturn(listOf())
+
+      webTestClient
+        .post()
+        .uri("/process-unknown-patients")
+        .contentType(MediaType.APPLICATION_JSON)
+        .accept(MediaType.APPLICATION_JSON)
+        .headers(setHeaders(roles = listOf("ROLE_RESTRICTED_PATIENT_MIGRATION")))
+        .bodyValue(jacksonObjectMapper().writeValueAsString(listOf<String>()))
+        .exchange()
+        .expectStatus().isOk
+
+      verify(unknownPatientsService, times(1)).migrateInUnknownPatientsDryRun(any())
+      verify(unknownPatientsService, never()).migrateInUnknownPatients(any())
+    }
+
+    @Test
+    fun `should not perform a dry run if query parm set`() {
+      whenever(unknownPatientsService.migrateInUnknownPatients(anyList())).thenReturn(listOf())
+      whenever(unknownPatientsService.migrateInUnknownPatientsDryRun(anyList())).thenReturn(listOf())
+
+      webTestClient
+        .post()
+        .uri("/process-unknown-patients?dryRun=false")
+        .contentType(MediaType.APPLICATION_JSON)
+        .accept(MediaType.APPLICATION_JSON)
+        .headers(setHeaders(roles = listOf("ROLE_RESTRICTED_PATIENT_MIGRATION")))
+        .bodyValue(jacksonObjectMapper().writeValueAsString(listOf<String>()))
+        .exchange()
+        .expectStatus().isOk
+
+      verify(unknownPatientsService, never()).migrateInUnknownPatientsDryRun(any())
+      verify(unknownPatientsService, times(1)).migrateInUnknownPatients(any())
     }
   }
 

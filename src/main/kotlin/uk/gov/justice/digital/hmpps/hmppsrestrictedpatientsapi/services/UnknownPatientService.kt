@@ -25,6 +25,22 @@ class UnknownPatientService(
       migrateInPatient(parsePatient(rawPatient))
     }.getOrElse { ex ->
       when (ex) {
+
+        is MigrateUnknownPatientException -> UnknownPatientResult(ex.mhcsReference, ex.offenderNumber, false, ex.message)
+        else -> UnknownPatientResult(rawPatient, null, false, ex.message)
+      }
+    }
+
+  fun migrateInUnknownPatientsDryRun(patients: List<String>): List<UnknownPatientResult> =
+    patients.drop(1)
+      .map { rawPatient -> migrateInUnknownPatientDryRun(rawPatient) }
+
+  private fun migrateInUnknownPatientDryRun(rawPatient: String): UnknownPatientResult =
+    runCatching {
+      parsePatient(rawPatient)
+        .let { UnknownPatientResult(it.mhcsReference, null, true) }
+    }.getOrElse { ex ->
+      when (ex) {
         is MigrateUnknownPatientException -> UnknownPatientResult(ex.mhcsReference, ex.offenderNumber, false, ex.message)
         else -> UnknownPatientResult(rawPatient, null, false, ex.message)
       }
