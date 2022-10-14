@@ -25,7 +25,8 @@ import org.springframework.web.reactive.function.client.WebClient
 @Configuration
 class WebClientConfig(
   @Value("\${prison.api.endpoint.url}") private val prisonApiUrl: String,
-  @Value("\${prisoner.search.api.endpoint.url}") private val prisonerSearchApiUrl: String
+  @Value("\${prisoner.search.api.endpoint.url}") private val prisonerSearchApiUrl: String,
+  @Value("\${community.api.endpoint.url}") private val communityApiUrl: String,
 ) {
 
   @Bean
@@ -61,6 +62,17 @@ class WebClientConfig(
   )
 
   @Bean
+  @RequestScope
+  @Profile("!app-scope")
+  fun communityApiClientCreds(
+    clientRegistrationRepository: ClientRegistrationRepository,
+    authorizedClientRepository: OAuth2AuthorizedClientRepository,
+  ): WebClient? = getClientCredsWebClient(
+    "$communityApiUrl/secure",
+    authorizedClientManagerRequestScope(clientRegistrationRepository, authorizedClientRepository)
+  )
+
+  @Bean
   @Qualifier("prisonApiClientCreds")
   @Profile("app-scope")
   fun prisonApiClientCredsAppScope(
@@ -80,6 +92,17 @@ class WebClientConfig(
   ): WebClient? = getClientCredsWebClient(
     prisonerSearchApiUrl,
     authorizedClientManagerAppScope(clientRegistrationRepository, oAuth2AuthorizedClientService)
+  )
+
+  @Bean
+  @Qualifier("communityApiClientCreds")
+  @Profile("app-scope")
+  fun communityApiClientCredsAppScope(
+    clientRegistrationRepository: ClientRegistrationRepository,
+    authorizedClientRepository: OAuth2AuthorizedClientRepository,
+  ): WebClient? = getClientCredsWebClient(
+    "$communityApiUrl/secure",
+    authorizedClientManagerRequestScope(clientRegistrationRepository, authorizedClientRepository)
   )
 
   private fun getClientCredsWebClient(

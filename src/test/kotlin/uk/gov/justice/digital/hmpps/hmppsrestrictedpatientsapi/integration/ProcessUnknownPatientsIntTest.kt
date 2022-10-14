@@ -3,6 +3,7 @@ package uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.integration
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.tomakehurst.wiremock.client.WireMock
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.mockito.ArgumentMatchers.anyBoolean
@@ -81,10 +82,15 @@ class ProcessUnknownPatientsIntTest : IntegrationTestBase() {
     )
     private fun testRecord(test: String) = testFile[test] ?: throw IllegalStateException("Cannot find test data $test")
 
-    @Test
-    fun `should process valid records`() {
+    @BeforeEach
+    fun setUp() {
       prisonApiMockServer.stubCreatePrisoner("A1234AA")
       stubDischargePrisoner("A1234AA")
+      communityApiMockServer.stubUpdateNomsNumber("crn", "cro", "pnc")
+    }
+
+    @Test
+    fun `should process valid records`() {
       val testData = listOf(testRecord("header"), testRecord("valid"))
 
       processUnknownPatientsWebClient(csvData = testData, headers = setHeaders(roles = listOf("ROLE_RESTRICTED_PATIENT_MIGRATION")))
@@ -128,8 +134,6 @@ class ProcessUnknownPatientsIntTest : IntegrationTestBase() {
 
     @Test
     fun `should handle discharge to hospital server errors`() {
-      prisonApiMockServer.stubCreatePrisoner("A1234AA")
-      stubDischargePrisoner("A1234AA")
       prisonApiMockServer.stubDischargeToPrisonError("A1234AA")
       val testData = listOf(testRecord("header"), testRecord("valid"))
 
@@ -144,9 +148,22 @@ class ProcessUnknownPatientsIntTest : IntegrationTestBase() {
     }
 
     @Test
+    fun `should handle update NOMS number errors`() {
+      communityApiMockServer.stubUpdateNomsNumberError("crn")
+      val testData = listOf(testRecord("header"), testRecord("valid"))
+
+      processUnknownPatientsWebClient(csvData = testData, headers = setHeaders(roles = listOf("ROLE_RESTRICTED_PATIENT_MIGRATION")))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody()
+        .jsonPath("$[0].mhcsReference").isEqualTo("3/6170")
+        .jsonPath("$[0].offenderNumber").isEqualTo("A1234AA")
+        .jsonPath("$[0].success").isEqualTo("false")
+        .jsonPath("$[0].errorMessage").value<String> { assertThat(it).contains("Update community NOMS number failed due to: 400") }
+    }
+
+    @Test
     fun `should process multiple records`() {
-      prisonApiMockServer.stubCreatePrisoner("A1234AA")
-      stubDischargePrisoner("A1234AA")
       val testData = listOf(testRecord("header"), testRecord("valid"), testRecord("invalid_dob"))
 
       processUnknownPatientsWebClient(csvData = testData, headers = setHeaders(roles = listOf("ROLE_RESTRICTED_PATIENT_MIGRATION")))
