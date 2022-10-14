@@ -98,11 +98,11 @@ class WebClientConfig(
   @Qualifier("communityApiClientCreds")
   @Profile("app-scope")
   fun communityApiClientCredsAppScope(
-    clientRegistrationRepository: ClientRegistrationRepository,
-    authorizedClientRepository: OAuth2AuthorizedClientRepository,
+    clientRegistrationRepository: ClientRegistrationRepository?,
+    oAuth2AuthorizedClientService: OAuth2AuthorizedClientService?
   ): WebClient? = getClientCredsWebClient(
     "$communityApiUrl/secure",
-    authorizedClientManagerRequestScope(clientRegistrationRepository, authorizedClientRepository)
+    authorizedClientManagerAppScope(clientRegistrationRepository, oAuth2AuthorizedClientService)
   )
 
   private fun getClientCredsWebClient(
