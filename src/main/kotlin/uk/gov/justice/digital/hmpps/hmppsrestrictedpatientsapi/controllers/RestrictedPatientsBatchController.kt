@@ -29,8 +29,16 @@ class RestrictedPatientsBatchController(
   @PreAuthorize("hasRole('RESTRICTED_PATIENT_MIGRATION')")
   /**
    * Internal endpoint to migrate unknown patients into Nomis and add them to Restricted Patients
-   * TODO SDI-357 This is still a WIP
    */
   fun processUnknownPatients(@RequestBody patients: List<String>): List<UnknownPatientResult> =
     unknownPatientService.migrateInUnknownPatients(patients)
+
+  @Hidden
+  @PostMapping(value = ["/dryrun-unknown-patients"])
+  @PreAuthorize("hasRole('RESTRICTED_PATIENT_MIGRATION')")
+  /**
+   * DRY RUN version - this will validate input only but perform no actions
+   */
+  fun dryRunProcessUnknownPatients(@RequestBody patients: List<String>): List<UnknownPatientResult> =
+    unknownPatientService.migrateInUnknownPatients(patients, dryRun = true)
 }

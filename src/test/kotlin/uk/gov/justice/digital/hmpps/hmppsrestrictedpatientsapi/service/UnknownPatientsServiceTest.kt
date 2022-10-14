@@ -9,6 +9,7 @@ import org.junit.jupiter.api.assertAll
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.http.HttpHeaders
@@ -141,8 +142,8 @@ class UnknownPatientsServiceTest {
           testRecord("header"),
           testRecord("valid"),
           testRecord("invalid_dob"),
-          testRecord("invalid_gender")
-        )
+          testRecord("invalid_gender"),
+        ),
       )
 
       assertThat(results).containsExactly(
@@ -188,5 +189,28 @@ class UnknownPatientsServiceTest {
 
     private fun webClientException(statusCode: Int, statusText: String) =
       WebClientResponseException.create(statusCode, statusText, HttpHeaders.EMPTY, ByteArray(0), Charset.defaultCharset())
+  }
+
+  @Nested
+  inner class MigrateInUnknownPatientsDryRun {
+
+    @Test
+    fun `performs csv parsing and validation without doing anything else`() {
+      val results = service.migrateInUnknownPatients(
+        listOf(
+          testRecord("header"),
+          testRecord("valid"),
+          testRecord("invalid_dob"),
+        ),
+        dryRun = true
+      )
+
+      assertThat(results).containsExactly(
+        UnknownPatientResult("3/6170", null, true, null),
+        UnknownPatientResult("3/6170", null, false, "Date of birth 1965-02-33 invalid"),
+      )
+      verify(prisonApiGateway, never()).createPrisoner(anyString(), anyString(), anyString(), anyString(), any())
+      verify(restrictedPatientService, never()).dischargeToHospital(any())
+    }
   }
 }

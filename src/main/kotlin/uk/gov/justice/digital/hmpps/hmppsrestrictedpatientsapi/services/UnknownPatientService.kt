@@ -16,13 +16,20 @@ class UnknownPatientService(
   private val restrictedPatientsService: RestrictedPatientsService
 ) {
 
-  fun migrateInUnknownPatients(patients: List<String>): List<UnknownPatientResult> =
+  fun migrateInUnknownPatients(patients: List<String>, dryRun: Boolean = false): List<UnknownPatientResult> =
     patients.drop(1)
-      .map { rawPatient -> migrateInUnknownPatient(rawPatient) }
+      .map { rawPatient -> migrateInUnknownPatient(rawPatient, dryRun) }
 
-  private fun migrateInUnknownPatient(rawPatient: String): UnknownPatientResult =
+  private fun migrateInUnknownPatient(rawPatient: String, dryRun: Boolean): UnknownPatientResult =
     runCatching {
-      migrateInPatient(parsePatient(rawPatient))
+      parsePatient(rawPatient)
+        .let {
+          if (!dryRun) {
+            migrateInPatient(it)
+          } else {
+            UnknownPatientResult(it.mhcsReference, null, true)
+          }
+        }
     }.getOrElse { ex ->
       when (ex) {
         is MigrateUnknownPatientException -> UnknownPatientResult(ex.mhcsReference, ex.offenderNumber, false, ex.message)
