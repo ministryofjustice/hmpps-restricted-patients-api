@@ -6,21 +6,13 @@ import com.github.tomakehurst.wiremock.client.WireMock.put
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 
 class CommunityApiMockServer : WireMockServer(8101) {
-  fun stubUpdateNomsNumber(crn: String, cro: String, pnc: String) {
+  fun stubUpdateNomsNumber(crn: String) {
     stubFor(
       put(urlEqualTo("/secure/offenders/crn/$crn/nomsNumber"))
         .willReturn(
           aResponse()
             .withHeader("Content-Type", "application/json")
             .withStatus(200)
-            .withBody(
-              """
-              {
-                  "croNumber": "$cro",
-                  "pncNumber": "$pnc"
-              }
-              """.trimIndent()
-            )
         )
     )
   }
