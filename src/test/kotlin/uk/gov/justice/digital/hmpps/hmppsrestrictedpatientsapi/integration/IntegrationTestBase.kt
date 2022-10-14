@@ -18,6 +18,7 @@ import org.springframework.http.MediaType
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.test.web.reactive.server.WebTestClient
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.JwtAuthHelper
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.integration.wiremock.CommunityApiMockServer
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.integration.wiremock.OAuthMockServer
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.integration.wiremock.PrisonApiMockServer
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.integration.wiremock.PrisonerSearchApiMockServer
@@ -58,6 +59,9 @@ abstract class IntegrationTestBase {
     internal val prisonerSearchApiMockServer = PrisonerSearchApiMockServer()
 
     @JvmField
+    internal val communityApiMockServer = CommunityApiMockServer()
+
+    @JvmField
     internal val oAuthMockServer = OAuthMockServer()
 
     @BeforeAll
@@ -68,6 +72,7 @@ abstract class IntegrationTestBase {
 
       prisonApiMockServer.start()
       prisonerSearchApiMockServer.start()
+      communityApiMockServer.start()
     }
 
     @AfterAll
@@ -75,6 +80,7 @@ abstract class IntegrationTestBase {
     fun stopMocks() {
       prisonApiMockServer.stop()
       prisonerSearchApiMockServer.stop()
+      communityApiMockServer.stop()
       oAuthMockServer.stop()
     }
   }

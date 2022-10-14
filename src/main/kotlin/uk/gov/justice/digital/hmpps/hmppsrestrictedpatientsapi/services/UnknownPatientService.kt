@@ -4,6 +4,8 @@ import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVParser
 import org.apache.commons.csv.CSVRecord
 import org.springframework.stereotype.Service
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.CommunityApiGateway
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.CommunityDetail
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.PrisonApiGateway
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.request.DischargeToHospitalRequest
 import java.time.LocalDate
@@ -13,7 +15,8 @@ import java.time.format.DateTimeFormatter
 class UnknownPatientService(
   private val agencyFinder: AgencyFinder,
   private val prisonApiGateway: PrisonApiGateway,
-  private val restrictedPatientsService: RestrictedPatientsService
+  private val restrictedPatientsService: RestrictedPatientsService,
+  private val communityApiGateway: CommunityApiGateway,
 ) {
 
   fun migrateInUnknownPatients(patients: List<String>, dryRun: Boolean = false): List<UnknownPatientResult> =
@@ -58,6 +61,7 @@ class UnknownPatientService(
   private fun migrateInPatient(unknownPatient: UnknownPatient): UnknownPatientResult =
     unknownPatient.createPrisoner().offenderNo
       .also { offenderNumber -> unknownPatient.dischargeToHospital(offenderNumber) }
+      .also { offenderNumber -> unknownPatient.updateNomsNumber(offenderNumber) }
       .let { offenderNumber ->
         UnknownPatientResult(mhcsReference = unknownPatient.mhcsReference, offenderNumber = offenderNumber, success = true)
       }
@@ -79,6 +83,31 @@ class UnknownPatientService(
         .let { restrictedPatientsService.dischargeToHospital(it) }
     }
       .getOrElse { throw MigrateUnknownPatientException(mhcsReference, "Discharge to hospital failed due to: ${it.message}", offenderNumber) }
+
+  private fun UnknownPatient.updateNomsNumber(offenderNumber: String): CommunityDetail? =
+    runCatching {
+      if (crn.isNullOrEmpty()) return null
+      communityApiGateway.updateNomsNumber(crn, offenderNumber)
+    }
+      .getOrElse { throw MigrateUnknownPatientException(mhcsReference, "Update community NOMS number failed due to: ${it.message}", offenderNumber) }
+      .also { communityDetail -> checkCommunityIdentifiers(offenderNumber, this, communityDetail) }
+
+  private fun checkCommunityIdentifiers(offenderNumber: String, unknownPatient: UnknownPatient, communityDetail: CommunityDetail) {
+    if (unknownPatient.croNumber != communityDetail.croNumber) {
+      throw MigrateUnknownPatientException(
+        unknownPatient.mhcsReference,
+        "Community API returned CRO number '${communityDetail.croNumber}' but we expected '${unknownPatient.croNumber}'",
+        offenderNumber,
+      )
+    }
+    if (unknownPatient.pncNumber != communityDetail.pncNumber) {
+      throw MigrateUnknownPatientException(
+        unknownPatient.mhcsReference,
+        "Community API returned PNC number '${communityDetail.pncNumber}' but we expected '${unknownPatient.pncNumber}'",
+        offenderNumber,
+      )
+    }
+  }
 
   private fun CSVRecord.mhcsReference() = this[0].ifEmpty { throw IllegalArgumentException("MHCS Reference must not be blank") }
   private fun CSVRecord.surname() = this[1]
