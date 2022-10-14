@@ -7,7 +7,7 @@ import org.springframework.web.reactive.function.client.bodyToMono
 
 @Service
 class CommunityApiGateway(@Qualifier("communityApiClientCreds") private val communityApiClientCreds: WebClient) {
-  fun updateNomsNumber(crn: String, nomsNumber: String) =
+  fun updateNomsNumber(crn: String, nomsNumber: String): Unit? =
     communityApiClientCreds
       .put()
       .uri("/offenders/crn/$crn/nomsNumber")
@@ -15,8 +15,6 @@ class CommunityApiGateway(@Qualifier("communityApiClientCreds") private val comm
         mapOf("nomsNumber" to nomsNumber)
       )
       .retrieve()
-      .bodyToMono<CommunityDetail>()
-      .block()!!
+      .bodyToMono<Unit>()
+      .block()
 }
-
-data class CommunityDetail(val croNumber: String, val pncNumber: String)

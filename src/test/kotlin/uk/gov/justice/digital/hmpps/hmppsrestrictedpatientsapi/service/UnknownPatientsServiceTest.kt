@@ -16,7 +16,6 @@ import org.mockito.kotlin.whenever
 import org.springframework.http.HttpHeaders
 import org.springframework.web.reactive.function.client.WebClientResponseException
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.CommunityApiGateway
-import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.CommunityDetail
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.InmateDetail
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.PrisonApiGateway
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.request.DischargeToHospitalRequest
@@ -56,7 +55,6 @@ class UnknownPatientsServiceTest {
     whenever(agencyFinder.findHospitalCode("Unknown")).thenReturn(null)
     whenever(agencyFinder.findPrisonCode("HMP High Down")).thenReturn("HOI")
     whenever(agencyFinder.findHospitalCode("Unknown")).thenReturn(null)
-    whenever(communityApiGateway.updateNomsNumber(anyString(), anyString())).thenReturn(CommunityDetail("cro", "pnc"))
   }
 
   @Nested
@@ -203,28 +201,6 @@ class UnknownPatientsServiceTest {
 
       assertThat(results).containsExactly(
         UnknownPatientResult("3/6170", "A1234AA", false, "Update community NOMS number failed due to: 404 CRN not found")
-      )
-    }
-
-    @Test
-    fun `will report if community CRO number is different`() {
-      whenever(communityApiGateway.updateNomsNumber(anyString(), anyString())).thenReturn(CommunityDetail("different_cro", "pnc"))
-
-      val results = service.migrateInUnknownPatients(listOf(testRecord("header"), testRecord("valid")))
-
-      assertThat(results).containsExactly(
-        UnknownPatientResult("3/6170", "A1234AA", false, "Community API returned CRO number 'different_cro' but we expected 'cro'")
-      )
-    }
-
-    @Test
-    fun `will report if community PNC number is different`() {
-      whenever(communityApiGateway.updateNomsNumber(anyString(), anyString())).thenReturn(CommunityDetail("cro", "different_pnc"))
-
-      val results = service.migrateInUnknownPatients(listOf(testRecord("header"), testRecord("valid")))
-
-      assertThat(results).containsExactly(
-        UnknownPatientResult("3/6170", "A1234AA", false, "Community API returned PNC number 'different_pnc' but we expected 'pnc'")
       )
     }
 
