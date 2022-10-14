@@ -228,7 +228,7 @@ abstract class IntegrationTestBase {
   ): WebTestClient.RequestHeadersSpec<*> {
     return webTestClient
       .post()
-      .uri("/process-unknown-patients?dryRun=false")
+      .uri("/process-unknown-patients")
       .contentType(APPLICATION_JSON)
       .accept(APPLICATION_JSON)
       .headers(headers)

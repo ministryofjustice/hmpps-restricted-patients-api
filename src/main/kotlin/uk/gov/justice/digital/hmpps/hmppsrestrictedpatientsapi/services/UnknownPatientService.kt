@@ -16,7 +16,7 @@ class UnknownPatientService(
   private val restrictedPatientsService: RestrictedPatientsService
 ) {
 
-  fun migrateInUnknownPatients(patients: List<String>, dryRun: Boolean): List<UnknownPatientResult> =
+  fun migrateInUnknownPatients(patients: List<String>, dryRun: Boolean = false): List<UnknownPatientResult> =
     patients.drop(1)
       .map { rawPatient -> migrateInUnknownPatient(rawPatient, dryRun) }
 

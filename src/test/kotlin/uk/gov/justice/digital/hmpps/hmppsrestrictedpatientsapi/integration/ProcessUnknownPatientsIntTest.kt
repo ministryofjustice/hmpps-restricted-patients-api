@@ -55,12 +55,12 @@ class ProcessUnknownPatientsIntTest : IntegrationTestBase() {
   @Nested
   inner class DryRun {
     @Test
-    fun `should default to a dry run`() {
+    fun `should call service for a dry run`() {
       whenever(unknownPatientsService.migrateInUnknownPatients(anyList(), anyBoolean())).thenReturn(listOf())
 
       webTestClient
         .post()
-        .uri("/process-unknown-patients")
+        .uri("/dryrun-unknown-patients")
         .contentType(MediaType.APPLICATION_JSON)
         .accept(MediaType.APPLICATION_JSON)
         .headers(setHeaders(roles = listOf("ROLE_RESTRICTED_PATIENT_MIGRATION")))
@@ -69,23 +69,6 @@ class ProcessUnknownPatientsIntTest : IntegrationTestBase() {
         .expectStatus().isOk
 
       verify(unknownPatientsService).migrateInUnknownPatients(any(), eq(true))
-    }
-
-    @Test
-    fun `should not perform a dry run if query parm set`() {
-      whenever(unknownPatientsService.migrateInUnknownPatients(anyList(), anyBoolean())).thenReturn(listOf())
-
-      webTestClient
-        .post()
-        .uri("/process-unknown-patients?dryRun=false")
-        .contentType(MediaType.APPLICATION_JSON)
-        .accept(MediaType.APPLICATION_JSON)
-        .headers(setHeaders(roles = listOf("ROLE_RESTRICTED_PATIENT_MIGRATION")))
-        .bodyValue(jacksonObjectMapper().writeValueAsString(listOf<String>()))
-        .exchange()
-        .expectStatus().isOk
-
-      verify(unknownPatientsService).migrateInUnknownPatients(any(), eq(false))
     }
   }
 
