@@ -49,6 +49,9 @@ class UnknownPatientService(
         prisonCode = it.prisonName(),
         hospitalCode = it.hospitalName(),
         hospitalOrderDate = it.hospitalMoveDate(),
+        croNumber = it.croNumber(),
+        pncNumber = it.pncNumber(),
+        crn = it.crn(),
       )
     }
 
@@ -60,7 +63,7 @@ class UnknownPatientService(
       }
 
   private fun UnknownPatient.createPrisoner() =
-    runCatching { prisonApiGateway.createPrisoner(surname, firstName, middleNames, gender, dateOfBirth) }
+    runCatching { prisonApiGateway.createPrisoner(surname, firstName, middleNames, gender, dateOfBirth, croNumber, pncNumber) }
       .getOrElse { throw MigrateUnknownPatientException(mhcsReference, "Create prisoner failed due to: ${it.message}") }
 
   private fun UnknownPatient.dischargeToHospital(offenderNumber: String) =
@@ -86,6 +89,9 @@ class UnknownPatientService(
   private fun CSVRecord.prisonName() = agencyFinder.findPrisonCode(this[8]) ?: throw MigrateUnknownPatientException(this[0], "Could not find prison ${this[8]}")
   private fun CSVRecord.hospitalName() = agencyFinder.findHospitalCode(this[16]) ?: throw MigrateUnknownPatientException(this[0], "Could not find hospital ${this[16]}")
   private fun CSVRecord.hospitalMoveDate() = kotlin.runCatching { LocalDate.parse(this[17], DateTimeFormatter.ISO_DATE) }.getOrElse { throw MigrateUnknownPatientException(this[0], "Date of hospital order ${this[17]} invalid") }
+  private fun CSVRecord.croNumber() = this[18].takeIf { it.isNotEmpty() }
+  private fun CSVRecord.pncNumber() = this[19].takeIf { it.isNotEmpty() }
+  private fun CSVRecord.crn() = this[20].takeIf { it.isNotEmpty() }
 }
 
 data class UnknownPatient(
@@ -97,7 +103,10 @@ data class UnknownPatient(
   val dateOfBirth: LocalDate,
   val prisonCode: String,
   val hospitalCode: String,
-  val hospitalOrderDate: LocalDate
+  val hospitalOrderDate: LocalDate,
+  val croNumber: String?,
+  val pncNumber: String?,
+  val crn: String?,
 )
 
 data class UnknownPatientResult(

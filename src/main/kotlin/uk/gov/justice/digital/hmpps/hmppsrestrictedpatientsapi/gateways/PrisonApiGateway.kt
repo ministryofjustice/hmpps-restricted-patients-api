@@ -86,7 +86,9 @@ class PrisonApiGateway(private val prisonApiClientCreds: WebClient) {
     firstName: String,
     middleNames: String?,
     gender: String,
-    dateOfBirth: LocalDate
+    dateOfBirth: LocalDate,
+    croNumber: String?,
+    pncNumber: String?,
   ): InmateDetail =
     prisonApiClientCreds
       .post()
@@ -99,6 +101,8 @@ class PrisonApiGateway(private val prisonApiClientCreds: WebClient) {
           "middleName2" to middleNames?.split(" ")?.drop(1)?.joinToString(" "),
           "gender" to gender,
           "dateOfBirth" to dateOfBirth.toString(),
+          "croNumber" to croNumber,
+          "pnvNumber" to pncNumber,
         )
       )
       .retrieve()
