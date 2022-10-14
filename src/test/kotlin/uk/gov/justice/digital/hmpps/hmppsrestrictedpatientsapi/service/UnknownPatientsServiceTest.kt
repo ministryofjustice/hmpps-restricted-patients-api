@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertAll
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
@@ -34,14 +35,14 @@ class UnknownPatientsServiceTest {
 
   private val testFile = mapOf(
     "header" to """FILE_REFERENCE,FAMILY_NAME,FIRST_NAMES,Gender,DOB,Date of Sentence,Court sentenced at,Reason for reception,Prison received into,Under 21 at point of sentence?,Sentence type,Offence (list all current),CJA/Code,Sentence length,Offence to attach to sentence (most serious),AUTHORITY_FOR_DETENTION_DESCRIPTION,CURRENT_ESTABLISHMENT_DESCRIPTION,DATE_OF_HOSPITAL_ORDER""",
-    "valid" to """3/6170,O'Brien,Steven John M,M,1965-02-11,12/9/2009,Sheffield Crown Court,Imprisonment,HMP High Down,no,Discretionary life,Attempted murder,,Tariff - 15 years,Attempted murder ,S45A - MHA 1983 - Hospital & Limitation Direction,Broadmoor Hospital,2011-09-01""",
-    "no_middle_name" to """3/6170,O'Brien,Steven,M,1965-02-11,12/9/2009,Sheffield Crown Court,Imprisonment,HMP High Down,no,Discretionary life,Attempted murder,,Tariff - 15 years,Attempted murder ,S45A - MHA 1983 - Hospital & Limitation Direction,Broadmoor Hospital,2011-09-01""",
-    "missing_mhcs_ref" to """,O'Brien,Steven John M,M,1965-02-11,12/9/2009,Sheffield Crown Court,Imprisonment,HMP High Down,no,Discretionary life,Attempted murder,,Tariff - 15 years,Attempted murder ,S45A - MHA 1983 - Hospital & Limitation Direction,Broadmoor Hospital,2011-09-01""",
-    "invalid_dob" to """3/6170,O'Brien,Steven John M,M,1965-02-33,12/9/2009,Sheffield Crown Court,Imprisonment,HMP High Down,no,Discretionary life,Attempted murder,,Tariff - 15 years,Attempted murder ,S45A - MHA 1983 - Hospital & Limitation Direction,Broadmoor Hospital,2011-09-01""",
-    "invalid_hospital_date" to """3/6170,O'Brien,Steven John M,M,1965-02-11,12/9/2009,Sheffield Crown Court,Imprisonment,HMP High Down,no,Discretionary life,Attempted murder,,Tariff - 15 years,Attempted murder ,S45A - MHA 1983 - Hospital & Limitation Direction,Broadmoor Hospital,2011-09-33""",
-    "invalid_gender" to """3/6170,O'Brien,Steven John M,Y,1965-02-11,12/9/2009,Sheffield Crown Court,Imprisonment,HMP High Down,no,Discretionary life,Attempted murder,,Tariff - 15 years,Attempted murder ,S45A - MHA 1983 - Hospital & Limitation Direction,Broadmoor Hospital,2011-09-01""",
-    "invalid_hospital" to """3/6170,O'Brien,Steven John M,M,1965-02-11,12/9/2009,Sheffield Crown Court,Imprisonment,HMP High Down,no,Discretionary life,Attempted murder,,Tariff - 15 years,Attempted murder ,S45A - MHA 1983 - Hospital & Limitation Direction,Unknown,2011-09-01""",
-    "invalid_prison" to """3/6170,O'Brien,Steven John M,M,1965-02-11,12/9/2009,Sheffield Crown Court,Imprisonment,Unknown,no,Discretionary life,Attempted murder,,Tariff - 15 years,Attempted murder ,S45A - MHA 1983 - Hospital & Limitation Direction,Broadmoor Hospital,2011-09-01""",
+    "valid" to """3/6170,O'Brien,Steven John M,M,1965-02-11,12/9/2009,Sheffield Crown Court,Imprisonment,HMP High Down,no,Discretionary life,Attempted murder,,Tariff - 15 years,Attempted murder ,S45A - MHA 1983 - Hospital & Limitation Direction,Broadmoor Hospital,2011-09-01,cro,pnc,crn""",
+    "no_middle_name" to """3/6170,O'Brien,Steven,M,1965-02-11,12/9/2009,Sheffield Crown Court,Imprisonment,HMP High Down,no,Discretionary life,Attempted murder,,Tariff - 15 years,Attempted murder ,S45A - MHA 1983 - Hospital & Limitation Direction,Broadmoor Hospital,2011-09-01,cro,pnc,crn""",
+    "missing_mhcs_ref" to """,O'Brien,Steven John M,M,1965-02-11,12/9/2009,Sheffield Crown Court,Imprisonment,HMP High Down,no,Discretionary life,Attempted murder,,Tariff - 15 years,Attempted murder ,S45A - MHA 1983 - Hospital & Limitation Direction,Broadmoor Hospital,2011-09-01,cro,pnc,crn""",
+    "invalid_dob" to """3/6170,O'Brien,Steven John M,M,1965-02-33,12/9/2009,Sheffield Crown Court,Imprisonment,HMP High Down,no,Discretionary life,Attempted murder,,Tariff - 15 years,Attempted murder ,S45A - MHA 1983 - Hospital & Limitation Direction,Broadmoor Hospital,2011-09-01,cro,pnc,crn""",
+    "invalid_hospital_date" to """3/6170,O'Brien,Steven John M,M,1965-02-11,12/9/2009,Sheffield Crown Court,Imprisonment,HMP High Down,no,Discretionary life,Attempted murder,,Tariff - 15 years,Attempted murder ,S45A - MHA 1983 - Hospital & Limitation Direction,Broadmoor Hospital,2011-09-33,cro,pnc,crn""",
+    "invalid_gender" to """3/6170,O'Brien,Steven John M,Y,1965-02-11,12/9/2009,Sheffield Crown Court,Imprisonment,HMP High Down,no,Discretionary life,Attempted murder,,Tariff - 15 years,Attempted murder ,S45A - MHA 1983 - Hospital & Limitation Direction,Broadmoor Hospital,2011-09-01,cro,pnc,crn""",
+    "invalid_hospital" to """3/6170,O'Brien,Steven John M,M,1965-02-11,12/9/2009,Sheffield Crown Court,Imprisonment,HMP High Down,no,Discretionary life,Attempted murder,,Tariff - 15 years,Attempted murder ,S45A - MHA 1983 - Hospital & Limitation Direction,Unknown,2011-09-01,cro,pnc,crn""",
+    "invalid_prison" to """3/6170,O'Brien,Steven John M,M,1965-02-11,12/9/2009,Sheffield Crown Court,Imprisonment,Unknown,no,Discretionary life,Attempted murder,,Tariff - 15 years,Attempted murder ,S45A - MHA 1983 - Hospital & Limitation Direction,Broadmoor Hospital,2011-09-01,cro,pnc,crn""",
   )
 
   private fun testRecord(test: String) = testFile[test] ?: throw IllegalStateException("Cannot find test data $test")
@@ -70,6 +71,9 @@ class UnknownPatientsServiceTest {
         { assertThat(patient.prisonCode).isEqualTo("HOI") },
         { assertThat(patient.hospitalCode).isEqualTo("BROADM") },
         { assertThat(patient.hospitalOrderDate).isEqualTo(LocalDate.of(2011, 9, 1)) },
+        { assertThat(patient.croNumber).isEqualTo("cro") },
+        { assertThat(patient.pncNumber).isEqualTo("pnc") },
+        { assertThat(patient.crn).isEqualTo("crn") },
       )
     }
 
@@ -129,7 +133,7 @@ class UnknownPatientsServiceTest {
 
     @BeforeEach
     fun setUp() {
-      whenever(prisonApiGateway.createPrisoner(anyString(), anyString(), anyString(), anyString(), any()))
+      whenever(prisonApiGateway.createPrisoner(anyString(), anyString(), anyString(), anyString(), any(), anyOrNull(), anyOrNull()))
         .thenReturn(InmateDetail("A1234AA"))
       whenever(prisonApiGateway.dischargeToHospital(any()))
         .thenReturn(InmateDetail("A1234AA"))
@@ -151,7 +155,7 @@ class UnknownPatientsServiceTest {
         UnknownPatientResult("3/6170", null, false, "Date of birth 1965-02-33 invalid"),
         UnknownPatientResult("3/6170", null, false, "Gender of Y should be M or F"),
       )
-      verify(prisonApiGateway).createPrisoner("O'Brien", "Steven", "John M", "M", LocalDate.of(1965, 2, 11))
+      verify(prisonApiGateway).createPrisoner("O'Brien", "Steven", "John M", "M", LocalDate.of(1965, 2, 11), "cro", "pnc")
       verify(restrictedPatientService).dischargeToHospital(
         DischargeToHospitalRequest(
           "A1234AA",
@@ -166,7 +170,7 @@ class UnknownPatientsServiceTest {
 
     @Test
     fun `will report on errors from create prisoner`() {
-      whenever(prisonApiGateway.createPrisoner(anyString(), anyString(), anyString(), anyString(), any()))
+      whenever(prisonApiGateway.createPrisoner(anyString(), anyString(), anyString(), anyString(), any(), anyOrNull(), anyOrNull()))
         .thenThrow(webClientException(500, "some error"))
 
       val results = service.migrateInUnknownPatients(listOf(testRecord("header"), testRecord("valid")))
@@ -209,7 +213,7 @@ class UnknownPatientsServiceTest {
         UnknownPatientResult("3/6170", null, true, null),
         UnknownPatientResult("3/6170", null, false, "Date of birth 1965-02-33 invalid"),
       )
-      verify(prisonApiGateway, never()).createPrisoner(anyString(), anyString(), anyString(), anyString(), any())
+      verify(prisonApiGateway, never()).createPrisoner(anyString(), anyString(), anyString(), anyString(), any(), anyString(), anyString())
       verify(restrictedPatientService, never()).dischargeToHospital(any())
     }
   }
