@@ -27,6 +27,7 @@ class WebClientConfig(
   @Value("\${prison.api.endpoint.url}") private val prisonApiUrl: String,
   @Value("\${prisoner.search.api.endpoint.url}") private val prisonerSearchApiUrl: String,
   @Value("\${community.api.endpoint.url}") private val communityApiUrl: String,
+  @Value("\${casenotes.api.endpoint.url}") private val caseNotesApiUrl: String,
 ) {
 
   @Bean
@@ -73,6 +74,17 @@ class WebClientConfig(
   )
 
   @Bean
+  @RequestScope
+  @Profile("!app-scope")
+  fun caseNotesApiClientCreds(
+    clientRegistrationRepository: ClientRegistrationRepository,
+    authorizedClientRepository: OAuth2AuthorizedClientRepository,
+  ): WebClient? = getClientCredsWebClient(
+    caseNotesApiUrl,
+    authorizedClientManagerRequestScope(clientRegistrationRepository, authorizedClientRepository)
+  )
+
+  @Bean
   @Qualifier("prisonApiClientCreds")
   @Profile("app-scope")
   fun prisonApiClientCredsAppScope(
@@ -102,6 +114,17 @@ class WebClientConfig(
     oAuth2AuthorizedClientService: OAuth2AuthorizedClientService?
   ): WebClient? = getClientCredsWebClient(
     "$communityApiUrl/secure",
+    authorizedClientManagerAppScope(clientRegistrationRepository, oAuth2AuthorizedClientService)
+  )
+
+  @Bean
+  @Qualifier("caseNotesApiClientCreds")
+  @Profile("app-scope")
+  fun caseNotesApiClientCredsAppScope(
+    clientRegistrationRepository: ClientRegistrationRepository?,
+    oAuth2AuthorizedClientService: OAuth2AuthorizedClientService?
+  ): WebClient? = getClientCredsWebClient(
+    caseNotesApiUrl,
     authorizedClientManagerAppScope(clientRegistrationRepository, oAuth2AuthorizedClientService)
   )
 

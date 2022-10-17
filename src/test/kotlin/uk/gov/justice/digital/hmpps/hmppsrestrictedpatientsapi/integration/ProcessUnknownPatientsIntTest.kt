@@ -87,6 +87,7 @@ class ProcessUnknownPatientsIntTest : IntegrationTestBase() {
       prisonApiMockServer.stubCreatePrisoner("A1234AA")
       stubDischargePrisoner("A1234AA")
       communityApiMockServer.stubUpdateNomsNumber("crn")
+      caseNotesApiMockServer.stubCreateCaseNote("A1234AA")
     }
 
     @Test
@@ -160,6 +161,21 @@ class ProcessUnknownPatientsIntTest : IntegrationTestBase() {
         .jsonPath("$[0].offenderNumber").isEqualTo("A1234AA")
         .jsonPath("$[0].success").isEqualTo("false")
         .jsonPath("$[0].errorMessage").value<String> { assertThat(it).contains("Update community NOMS number failed due to: 400") }
+    }
+
+    @Test
+    fun `should handle create case note errors`() {
+      caseNotesApiMockServer.stubCreateCaseNotesError("A1234AA")
+      val testData = listOf(testRecord("header"), testRecord("valid"))
+
+      processUnknownPatientsWebClient(csvData = testData, headers = setHeaders(roles = listOf("ROLE_RESTRICTED_PATIENT_MIGRATION")))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody()
+        .jsonPath("$[0].mhcsReference").isEqualTo("3/6170")
+        .jsonPath("$[0].offenderNumber").isEqualTo("A1234AA")
+        .jsonPath("$[0].success").isEqualTo("false")
+        .jsonPath("$[0].errorMessage").value<String> { assertThat(it).contains("Create case note failed due to: 400") }
     }
 
     @Test
