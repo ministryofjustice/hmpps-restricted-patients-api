@@ -53,7 +53,7 @@ class RestrictedPatientsService(
       dischargeTime = dischargeToHospital.dischargeTime ?: LocalDateTime.now(clock),
       commentText = dischargeToHospitalWithDefaultSupportingPrison.commentText
     )
-    return addRestrictedPatient(restrictedPatient, dischargeToHospital.noEventPropagation)
+    return addRestrictedPatient(restrictedPatient)
   }
 
   @Transactional(value = Transactional.TxType.NOT_SUPPORTED)
@@ -117,7 +117,7 @@ class RestrictedPatientsService(
     }
   }
 
-  private fun addRestrictedPatient(restrictedPatient: RestrictedPatient, noEventPropagation: Boolean = false): RestrictedPatientDto {
+  fun addRestrictedPatient(restrictedPatient: RestrictedPatient, noEventPropagation: Boolean = false): RestrictedPatientDto {
     val newRestrictedPatient = restrictedPatientsRepository.saveAndFlush(restrictedPatient)
 
     dischargeOrRollBackAndThrow(newRestrictedPatient, noEventPropagation)

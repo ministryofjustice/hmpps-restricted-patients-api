@@ -9,5 +9,4 @@ data class DischargeToHospitalRequest(
   val hospitalLocationCode: String,
   val supportingPrisonId: String? = null,
   val dischargeTime: LocalDateTime? = null,
-  val noEventPropagation: Boolean = false,
 )

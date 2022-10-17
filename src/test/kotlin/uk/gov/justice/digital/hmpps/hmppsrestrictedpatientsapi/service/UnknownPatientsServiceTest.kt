@@ -22,7 +22,7 @@ import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.Communit
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.InmateDetail
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.PrisonApiGateway
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.PrisonerSearchApiGateway
-import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.request.DischargeToHospitalRequest
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.entities.RestrictedPatient
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services.AgencyFinder
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services.MigrateUnknownPatientException
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services.RestrictedPatientsService
@@ -164,16 +164,16 @@ class UnknownPatientsServiceTest {
         UnknownPatientResult("3/6170", null, false, "Gender of Y should be M or F"),
       )
       verify(prisonApiGateway).createPrisoner("O'Brien", "Steven", "John M", "M", LocalDate.of(1965, 2, 11), "cro", "pnc")
-      verify(restrictedPatientService).dischargeToHospital(
-        DischargeToHospitalRequest(
+      verify(restrictedPatientService).addRestrictedPatient(
+        RestrictedPatient(
           "A1234AA",
-          "Historical hospital release added to NOMIS for addition to Restricted Patients",
           "HOI",
           "BROADM",
           "HOI",
           LocalDate.of(2011, 9, 1).atStartOfDay(),
-          noEventPropagation = true,
-        )
+          "Historical hospital release added to NOMIS for addition to Restricted Patients",
+        ),
+        noEventPropagation = true,
       )
       verify(communityApiGateway).updateNomsNumber("crn", "A1234AA")
       verify(caseNotesApiGateway).createCaseNote(
@@ -198,7 +198,7 @@ class UnknownPatientsServiceTest {
 
     @Test
     fun `will report on errors from discharge to hospital`() {
-      whenever(restrictedPatientService.dischargeToHospital(any())).thenThrow(webClientException(400, "some client error"))
+      whenever(restrictedPatientService.addRestrictedPatient(any(), anyBoolean())).thenThrow(webClientException(400, "some client error"))
 
       val results = service.migrateInUnknownPatients(listOf(testRecord("header"), testRecord("valid")))
 

@@ -9,7 +9,7 @@ import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.CaseNote
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.CommunityApiGateway
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.PrisonApiGateway
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.PrisonerSearchApiGateway
-import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.request.DischargeToHospitalRequest
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.entities.RestrictedPatient
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -82,16 +82,15 @@ class UnknownPatientService(
 
   private fun UnknownPatient.dischargeToHospital(offenderNumber: String) =
     runCatching {
-      DischargeToHospitalRequest(
+      RestrictedPatient(
         offenderNumber,
-        "Historical hospital release added to NOMIS for addition to Restricted Patients",
         prisonCode,
         hospitalCode,
         prisonCode,
         hospitalOrderDate.atStartOfDay(),
-        noEventPropagation = true,
+        "Historical hospital release added to NOMIS for addition to Restricted Patients"
       )
-        .let { restrictedPatientsService.dischargeToHospital(it) }
+        .let { restrictedPatientsService.addRestrictedPatient(it, noEventPropagation = true) }
         .also { prisonerSearchApiGateway.refreshPrisonerIndex(offenderNumber) }
     }
       .getOrElse { throw MigrateUnknownPatientException(mhcsReference, "Discharge to hospital failed due to: ${it.message}", offenderNumber) }
