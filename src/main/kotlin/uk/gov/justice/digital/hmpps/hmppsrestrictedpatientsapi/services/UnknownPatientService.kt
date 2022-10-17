@@ -104,8 +104,8 @@ class UnknownPatientService(
       caseNotesApiGateway.createCaseNote(
         CaseNoteRequest(
           offenderNumber = offenderNumber,
-          type = "COMMS",
-          subType = "OTHER",
+          type = "MIGRATION",
+          subType = "OBS_GEN",
           locationId = prisonCode,
           occurrenceDateTime = LocalDateTime.now(),
           text = "Automatic admission and release to psychiatric hospital for Restricted Patients",
