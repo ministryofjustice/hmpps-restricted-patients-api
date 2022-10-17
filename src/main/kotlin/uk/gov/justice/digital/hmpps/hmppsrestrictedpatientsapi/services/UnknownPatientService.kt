@@ -8,6 +8,7 @@ import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.CaseNote
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.CaseNoteRequest
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.CommunityApiGateway
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.PrisonApiGateway
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.PrisonerSearchApiGateway
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.request.DischargeToHospitalRequest
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -20,6 +21,7 @@ class UnknownPatientService(
   private val restrictedPatientsService: RestrictedPatientsService,
   private val communityApiGateway: CommunityApiGateway,
   private val caseNotesApiGateway: CaseNoteApiGateway,
+  private val prisonerSearchApiGateway: PrisonerSearchApiGateway,
 ) {
 
   fun migrateInUnknownPatients(patients: List<String>, dryRun: Boolean = false): List<UnknownPatientResult> =
@@ -87,8 +89,10 @@ class UnknownPatientService(
         hospitalCode,
         prisonCode,
         hospitalOrderDate.atStartOfDay(),
+        noEventPropagation = true,
       )
         .let { restrictedPatientsService.dischargeToHospital(it) }
+        .also { prisonerSearchApiGateway.refreshPrisonerIndex(offenderNumber) }
     }
       .getOrElse { throw MigrateUnknownPatientException(mhcsReference, "Discharge to hospital failed due to: ${it.message}", offenderNumber) }
 

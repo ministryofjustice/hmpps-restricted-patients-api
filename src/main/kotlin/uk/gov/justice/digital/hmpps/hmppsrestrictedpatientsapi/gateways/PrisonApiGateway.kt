@@ -16,10 +16,11 @@ import java.time.LocalDate
 
 @Service
 class PrisonApiGateway(private val prisonApiClientCreds: WebClient) {
-  fun dischargeToHospital(newRestrictedPatient: RestrictedPatient): InmateDetail =
+  fun dischargeToHospital(newRestrictedPatient: RestrictedPatient, noEventPropagation: Boolean = false): InmateDetail =
     prisonApiClientCreds
       .put()
       .uri("/offenders/${newRestrictedPatient.prisonerNumber}/discharge-to-hospital")
+      .header("no-event-propagation", noEventPropagation.toString())
       .bodyValue(
         mapOf(
           "commentText" to newRestrictedPatient.commentText,
