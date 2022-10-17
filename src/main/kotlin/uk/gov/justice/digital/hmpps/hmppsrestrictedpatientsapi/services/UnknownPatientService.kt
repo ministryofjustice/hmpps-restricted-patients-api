@@ -6,6 +6,7 @@ import org.apache.commons.csv.CSVRecord
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.CommunityApiGateway
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.PrisonApiGateway
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.PrisonerSearchApiGateway
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.request.DischargeToHospitalRequest
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -16,6 +17,7 @@ class UnknownPatientService(
   private val prisonApiGateway: PrisonApiGateway,
   private val restrictedPatientsService: RestrictedPatientsService,
   private val communityApiGateway: CommunityApiGateway,
+  private val prisonerSearchApiGateway: PrisonerSearchApiGateway,
 ) {
 
   fun migrateInUnknownPatients(patients: List<String>, dryRun: Boolean = false): List<UnknownPatientResult> =
@@ -78,8 +80,10 @@ class UnknownPatientService(
         hospitalCode,
         prisonCode,
         hospitalOrderDate.atStartOfDay(),
+        noEventPropagation = true,
       )
         .let { restrictedPatientsService.dischargeToHospital(it) }
+        .also { prisonerSearchApiGateway.refreshPrisonerIndex(offenderNumber) }
     }
       .getOrElse { throw MigrateUnknownPatientException(mhcsReference, "Discharge to hospital failed due to: ${it.message}", offenderNumber) }
 

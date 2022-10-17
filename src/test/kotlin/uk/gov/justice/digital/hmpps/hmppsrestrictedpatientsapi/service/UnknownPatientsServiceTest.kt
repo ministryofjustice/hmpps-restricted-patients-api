@@ -6,6 +6,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertAll
+import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
@@ -18,6 +19,7 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.CommunityApiGateway
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.InmateDetail
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.PrisonApiGateway
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.PrisonerSearchApiGateway
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.request.DischargeToHospitalRequest
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services.AgencyFinder
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services.MigrateUnknownPatientException
@@ -33,7 +35,8 @@ class UnknownPatientsServiceTest {
   private val prisonApiGateway = mock<PrisonApiGateway>()
   private val restrictedPatientService = mock<RestrictedPatientsService>()
   private val communityApiGateway = mock<CommunityApiGateway>()
-  private val service = UnknownPatientService(agencyFinder, prisonApiGateway, restrictedPatientService, communityApiGateway)
+  private val prisonerSearchApiGateway = mock<PrisonerSearchApiGateway>()
+  private val service = UnknownPatientService(agencyFinder, prisonApiGateway, restrictedPatientService, communityApiGateway, prisonerSearchApiGateway)
 
   private val testFile = mapOf(
     "header" to """FILE_REFERENCE,FAMILY_NAME,FIRST_NAMES,Gender,DOB,Date of Sentence,Court sentenced at,Reason for reception,Prison received into,Under 21 at point of sentence?,Sentence type,Offence (list all current),CJA/Code,Sentence length,Offence to attach to sentence (most serious),AUTHORITY_FOR_DETENTION_DESCRIPTION,CURRENT_ESTABLISHMENT_DESCRIPTION,DATE_OF_HOSPITAL_ORDER""",
@@ -137,7 +140,7 @@ class UnknownPatientsServiceTest {
     fun setUp() {
       whenever(prisonApiGateway.createPrisoner(anyString(), anyString(), anyString(), anyString(), any(), anyOrNull(), anyOrNull()))
         .thenReturn(InmateDetail("A1234AA"))
-      whenever(prisonApiGateway.dischargeToHospital(any()))
+      whenever(prisonApiGateway.dischargeToHospital(any(), anyBoolean()))
         .thenReturn(InmateDetail("A1234AA"))
     }
 
@@ -165,9 +168,11 @@ class UnknownPatientsServiceTest {
           "HOI",
           "BROADM",
           "HOI",
-          LocalDate.of(2011, 9, 1).atStartOfDay()
+          LocalDate.of(2011, 9, 1).atStartOfDay(),
+          noEventPropagation = true,
         )
       )
+      verify(prisonerSearchApiGateway).refreshPrisonerIndex("A1234AA")
     }
 
     @Test

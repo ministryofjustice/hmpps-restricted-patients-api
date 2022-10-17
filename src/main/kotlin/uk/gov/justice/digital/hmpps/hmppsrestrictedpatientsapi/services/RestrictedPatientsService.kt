@@ -53,7 +53,7 @@ class RestrictedPatientsService(
       dischargeTime = dischargeToHospital.dischargeTime ?: LocalDateTime.now(clock),
       commentText = dischargeToHospitalWithDefaultSupportingPrison.commentText
     )
-    return addRestrictedPatient(restrictedPatient)
+    return addRestrictedPatient(restrictedPatient, dischargeToHospital.noEventPropagation)
   }
 
   @Transactional(value = Transactional.TxType.NOT_SUPPORTED)
@@ -117,10 +117,10 @@ class RestrictedPatientsService(
     }
   }
 
-  private fun addRestrictedPatient(restrictedPatient: RestrictedPatient): RestrictedPatientDto {
+  private fun addRestrictedPatient(restrictedPatient: RestrictedPatient, noEventPropagation: Boolean = false): RestrictedPatientDto {
     val newRestrictedPatient = restrictedPatientsRepository.saveAndFlush(restrictedPatient)
 
-    dischargeOrRollBackAndThrow(newRestrictedPatient)
+    dischargeOrRollBackAndThrow(newRestrictedPatient, noEventPropagation)
 
     return transform(
       newRestrictedPatient,
@@ -131,10 +131,11 @@ class RestrictedPatientsService(
   }
 
   private fun dischargeOrRollBackAndThrow(
-    newRestrictedPatient: RestrictedPatient
+    newRestrictedPatient: RestrictedPatient,
+    noEventPropagation: Boolean = false,
   ) {
     try {
-      prisonApiGateway.dischargeToHospital(newRestrictedPatient)
+      prisonApiGateway.dischargeToHospital(newRestrictedPatient, noEventPropagation)
     } catch (e: Exception) {
       // We manually roll back because the Prisoner Offender Search
       // will call the API to get RP information before the transaction completes
