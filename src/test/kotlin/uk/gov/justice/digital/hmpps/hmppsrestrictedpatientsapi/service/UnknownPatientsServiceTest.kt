@@ -10,12 +10,14 @@ import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
+import org.mockito.kotlin.check
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.http.HttpHeaders
 import org.springframework.web.reactive.function.client.WebClientResponseException
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.CaseNoteApiGateway
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.CommunityApiGateway
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.InmateDetail
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.PrisonApiGateway
@@ -35,8 +37,9 @@ class UnknownPatientsServiceTest {
   private val prisonApiGateway = mock<PrisonApiGateway>()
   private val restrictedPatientService = mock<RestrictedPatientsService>()
   private val communityApiGateway = mock<CommunityApiGateway>()
+  private val caseNotesApiGateway = mock<CaseNoteApiGateway>()
   private val prisonerSearchApiGateway = mock<PrisonerSearchApiGateway>()
-  private val service = UnknownPatientService(agencyFinder, prisonApiGateway, restrictedPatientService, communityApiGateway, prisonerSearchApiGateway)
+  private val service = UnknownPatientService(agencyFinder, prisonApiGateway, restrictedPatientService, communityApiGateway, caseNotesApiGateway, prisonerSearchApiGateway)
 
   private val testFile = mapOf(
     "header" to """FILE_REFERENCE,FAMILY_NAME,FIRST_NAMES,Gender,DOB,Date of Sentence,Court sentenced at,Reason for reception,Prison received into,Under 21 at point of sentence?,Sentence type,Offence (list all current),CJA/Code,Sentence length,Offence to attach to sentence (most serious),AUTHORITY_FOR_DETENTION_DESCRIPTION,CURRENT_ESTABLISHMENT_DESCRIPTION,DATE_OF_HOSPITAL_ORDER""",
@@ -172,6 +175,12 @@ class UnknownPatientsServiceTest {
           noEventPropagation = true,
         )
       )
+      verify(communityApiGateway).updateNomsNumber("crn", "A1234AA")
+      verify(caseNotesApiGateway).createCaseNote(
+        check {
+          assertThat(it.offenderNumber).isEqualTo("A1234AA")
+        }
+      )
       verify(prisonerSearchApiGateway).refreshPrisonerIndex("A1234AA")
     }
 
@@ -206,6 +215,17 @@ class UnknownPatientsServiceTest {
 
       assertThat(results).containsExactly(
         UnknownPatientResult("3/6170", "A1234AA", false, "Update community NOMS number failed due to: 404 CRN not found")
+      )
+    }
+
+    @Test
+    fun `will report on errors from create case note`() {
+      whenever(caseNotesApiGateway.createCaseNote(any())).thenThrow(webClientException(503, "Service unavailable"))
+
+      val results = service.migrateInUnknownPatients(listOf(testRecord("header"), testRecord("valid")))
+
+      assertThat(results).containsExactly(
+        UnknownPatientResult("3/6170", "A1234AA", false, "Create case note failed due to: 503 Service unavailable")
       )
     }
 

@@ -12,6 +12,7 @@ generic-service:
     PRISON_API_ENDPOINT_URL: https://api.prison.service.justice.gov.uk
     PRISONER_SEARCH_API_ENDPOINT_URL: https://prisoner-offender-search.prison.service.justice.gov.uk
     COMMUNITY_API_ENDPOINT_URL: https://community-api.probation.service.justice.gov.uk
+    CASENOTES_API_ENDPOINT_URL: https://offender-case-notes.service.justice.gov.uk/health
     OAUTH_ENDPOINT_URL: https://sign-in.hmpps.service.justice.gov.uk/auth
     SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: https://sign-in.hmpps.service.justice.gov.uk/auth/.well-known/jwks.json
 

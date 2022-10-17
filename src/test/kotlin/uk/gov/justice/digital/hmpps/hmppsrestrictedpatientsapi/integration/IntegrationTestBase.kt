@@ -18,6 +18,7 @@ import org.springframework.http.MediaType
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.test.web.reactive.server.WebTestClient
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.JwtAuthHelper
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.integration.wiremock.CaseNotesApiMockServer
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.integration.wiremock.CommunityApiMockServer
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.integration.wiremock.OAuthMockServer
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.integration.wiremock.PrisonApiMockServer
@@ -62,6 +63,9 @@ abstract class IntegrationTestBase {
     internal val communityApiMockServer = CommunityApiMockServer()
 
     @JvmField
+    internal val caseNotesApiMockServer = CaseNotesApiMockServer()
+
+    @JvmField
     internal val oAuthMockServer = OAuthMockServer()
 
     @BeforeAll
@@ -73,6 +77,7 @@ abstract class IntegrationTestBase {
       prisonApiMockServer.start()
       prisonerSearchApiMockServer.start()
       communityApiMockServer.start()
+      caseNotesApiMockServer.start()
     }
 
     @AfterAll
@@ -81,6 +86,7 @@ abstract class IntegrationTestBase {
       prisonApiMockServer.stop()
       prisonerSearchApiMockServer.stop()
       communityApiMockServer.stop()
+      caseNotesApiMockServer.stop()
       oAuthMockServer.stop()
     }
   }
@@ -102,7 +108,7 @@ abstract class IntegrationTestBase {
     flyway.migrate()
   }
 
-  fun setHeaders(contentType: MediaType = MediaType.APPLICATION_JSON, username: String? = "ITAG_USER", roles: List<String> = listOf()): (HttpHeaders) -> Unit = {
+  fun setHeaders(contentType: MediaType = APPLICATION_JSON, username: String? = "ITAG_USER", roles: List<String> = listOf()): (HttpHeaders) -> Unit = {
     it.setBearerAuth(jwtAuthHelper.createJwt(subject = username, roles = roles))
     it.contentType = contentType
   }

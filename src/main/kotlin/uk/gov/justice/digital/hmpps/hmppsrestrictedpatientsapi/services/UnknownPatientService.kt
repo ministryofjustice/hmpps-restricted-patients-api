@@ -4,11 +4,14 @@ import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVParser
 import org.apache.commons.csv.CSVRecord
 import org.springframework.stereotype.Service
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.CaseNoteApiGateway
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.CaseNoteRequest
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.CommunityApiGateway
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.PrisonApiGateway
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.PrisonerSearchApiGateway
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.request.DischargeToHospitalRequest
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 @Service
@@ -17,6 +20,7 @@ class UnknownPatientService(
   private val prisonApiGateway: PrisonApiGateway,
   private val restrictedPatientsService: RestrictedPatientsService,
   private val communityApiGateway: CommunityApiGateway,
+  private val caseNotesApiGateway: CaseNoteApiGateway,
   private val prisonerSearchApiGateway: PrisonerSearchApiGateway,
 ) {
 
@@ -60,12 +64,17 @@ class UnknownPatientService(
     }
 
   private fun migrateInPatient(unknownPatient: UnknownPatient): UnknownPatientResult =
-    unknownPatient.createPrisoner().offenderNo
-      .also { offenderNumber -> unknownPatient.dischargeToHospital(offenderNumber) }
-      .also { offenderNumber -> unknownPatient.updateNomsNumber(offenderNumber) }
-      .let { offenderNumber ->
-        UnknownPatientResult(mhcsReference = unknownPatient.mhcsReference, offenderNumber = offenderNumber, success = true)
-      }
+    with(unknownPatient) {
+      createPrisoner().offenderNo
+        .also { offenderNumber ->
+          dischargeToHospital(offenderNumber)
+          createCaseNote(offenderNumber)
+          updateNomsNumber(offenderNumber)
+        }
+        .let { offenderNumber ->
+          UnknownPatientResult(mhcsReference = unknownPatient.mhcsReference, offenderNumber = offenderNumber, success = true)
+        }
+    }
 
   private fun UnknownPatient.createPrisoner() =
     runCatching { prisonApiGateway.createPrisoner(surname, firstName, middleNames, gender, dateOfBirth, croNumber, pncNumber) }
@@ -93,6 +102,21 @@ class UnknownPatientService(
       communityApiGateway.updateNomsNumber(crn, offenderNumber)
     }
       .getOrElse { throw MigrateUnknownPatientException(mhcsReference, "Update community NOMS number failed due to: ${it.message}", offenderNumber) }
+
+  private fun UnknownPatient.createCaseNote(offenderNumber: String): Unit =
+    runCatching {
+      caseNotesApiGateway.createCaseNote(
+        CaseNoteRequest(
+          offenderNumber = offenderNumber,
+          type = "MIGRATION",
+          subType = "OBS_GEN",
+          locationId = prisonCode,
+          occurrenceDateTime = LocalDateTime.now(),
+          text = "Automatic admission and release to psychiatric hospital for Restricted Patients",
+        )
+      )
+    }
+      .getOrElse { throw MigrateUnknownPatientException(mhcsReference, "Create case note failed due to: ${it.message}", offenderNumber) }
 
   private fun CSVRecord.mhcsReference() = this[0].ifEmpty { throw IllegalArgumentException("MHCS Reference must not be blank") }
   private fun CSVRecord.surname() = this[1]
