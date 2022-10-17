@@ -78,6 +78,7 @@ class UnknownPatientService(
         hospitalCode,
         prisonCode,
         hospitalOrderDate.atStartOfDay(),
+        noEventPropagation = true,
       )
         .let { restrictedPatientsService.dischargeToHospital(it) }
     }

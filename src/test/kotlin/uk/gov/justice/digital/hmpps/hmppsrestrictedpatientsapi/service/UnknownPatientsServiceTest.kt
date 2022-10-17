@@ -6,6 +6,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertAll
+import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
@@ -137,7 +138,7 @@ class UnknownPatientsServiceTest {
     fun setUp() {
       whenever(prisonApiGateway.createPrisoner(anyString(), anyString(), anyString(), anyString(), any(), anyOrNull(), anyOrNull()))
         .thenReturn(InmateDetail("A1234AA"))
-      whenever(prisonApiGateway.dischargeToHospital(any()))
+      whenever(prisonApiGateway.dischargeToHospital(any(), anyBoolean()))
         .thenReturn(InmateDetail("A1234AA"))
     }
 
@@ -165,7 +166,8 @@ class UnknownPatientsServiceTest {
           "HOI",
           "BROADM",
           "HOI",
-          LocalDate.of(2011, 9, 1).atStartOfDay()
+          LocalDate.of(2011, 9, 1).atStartOfDay(),
+          noEventPropagation = true,
         )
       )
     }
