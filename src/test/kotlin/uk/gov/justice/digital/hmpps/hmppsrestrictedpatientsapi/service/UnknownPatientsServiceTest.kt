@@ -89,7 +89,7 @@ class UnknownPatientsServiceTest {
     fun `handles no middle name`() {
       val patient = service.parsePatient(testRecord("no_middle_name"))
 
-      assertThat(patient.middleNames).isEmpty()
+      assertThat(patient.middleNames).isNull()
     }
 
     @Test
