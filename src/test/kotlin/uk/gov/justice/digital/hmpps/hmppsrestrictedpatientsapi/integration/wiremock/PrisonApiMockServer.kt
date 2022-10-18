@@ -308,6 +308,26 @@ class PrisonApiMockServer : WireMockServer(8989) {
     )
   }
 
+  fun stubCreatePrisonerError() {
+    stubFor(
+      post(urlPathEqualTo("/api/offenders"))
+        .willReturn(
+          aResponse()
+            .withHeader("Content-Type", "application/json")
+            .withStatus(400)
+            .withBody(
+              """
+              {
+                  "status": 400,
+                  "userMessage": "Some user message,
+                  "developerMessage": "Some developer message"
+              }
+              """.trimIndent()
+            )
+        )
+    )
+  }
+
   fun stubServerError(method: (urlPattern: UrlPattern) -> MappingBuilder, urlMatch: String = "/api/.*") {
     stubFor(
       method(urlMatching(urlMatch))
