@@ -103,7 +103,7 @@ class PrisonApiGateway(private val prisonApiClientCreds: WebClient) {
           "gender" to gender,
           "dateOfBirth" to dateOfBirth.toString(),
           "croNumber" to croNumber,
-          "pnvNumber" to pncNumber,
+          "pncNumber" to pncNumber,
         )
       )
       .retrieve()
