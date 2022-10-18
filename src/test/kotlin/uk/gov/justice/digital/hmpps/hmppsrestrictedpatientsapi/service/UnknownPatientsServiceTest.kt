@@ -187,50 +187,50 @@ class UnknownPatientsServiceTest {
     @Test
     fun `will report on errors from create prisoner`() {
       whenever(prisonApiGateway.createPrisoner(anyString(), anyString(), anyString(), anyString(), any(), anyOrNull(), anyOrNull()))
-        .thenThrow(webClientException(500, "some error"))
+        .thenThrow(webClientException(500, statusText = "500 Internal Server Error", body = "some error"))
 
       val results = service.migrateInUnknownPatients(listOf(testRecord("header"), testRecord("valid")))
 
       assertThat(results).containsExactly(
-        UnknownPatientResult("3/6170", null, false, "Create prisoner failed due to: 500 some error")
+        UnknownPatientResult("3/6170", null, false, "Create prisoner failed due to: 500 Internal Server Error, some error")
       )
     }
 
     @Test
     fun `will report on errors from discharge to hospital`() {
-      whenever(restrictedPatientService.addRestrictedPatient(any(), anyBoolean())).thenThrow(webClientException(400, "some client error"))
+      whenever(restrictedPatientService.addRestrictedPatient(any(), anyBoolean())).thenThrow(webClientException(400, statusText = "400 Bad Request", body = "some client error"))
 
       val results = service.migrateInUnknownPatients(listOf(testRecord("header"), testRecord("valid")))
 
       assertThat(results).containsExactly(
-        UnknownPatientResult("3/6170", "A1234AA", false, "Discharge to hospital failed due to: 400 some client error")
+        UnknownPatientResult("3/6170", "A1234AA", false, "Discharge to hospital failed due to: 400 Bad Request, some client error")
       )
     }
 
     @Test
     fun `will report on errors from update community NOMS number`() {
-      whenever(communityApiGateway.updateNomsNumber(anyString(), anyString())).thenThrow(webClientException(404, "CRN not found"))
+      whenever(communityApiGateway.updateNomsNumber(anyString(), anyString())).thenThrow(webClientException(404, statusText = "404 Not Found", body = "CRN not found"))
 
       val results = service.migrateInUnknownPatients(listOf(testRecord("header"), testRecord("valid")))
 
       assertThat(results).containsExactly(
-        UnknownPatientResult("3/6170", "A1234AA", false, "Update community NOMS number failed due to: 404 CRN not found")
+        UnknownPatientResult("3/6170", "A1234AA", false, "Update community NOMS number failed due to: 404 Not Found, CRN not found")
       )
     }
 
     @Test
     fun `will report on errors from create case note`() {
-      whenever(caseNotesApiGateway.createCaseNote(any())).thenThrow(webClientException(503, "Service unavailable"))
+      whenever(caseNotesApiGateway.createCaseNote(any())).thenThrow(webClientException(503, statusText = "503 Service unavailable"))
 
       val results = service.migrateInUnknownPatients(listOf(testRecord("header"), testRecord("valid")))
 
       assertThat(results).containsExactly(
-        UnknownPatientResult("3/6170", "A1234AA", false, "Create case note failed due to: 503 Service unavailable")
+        UnknownPatientResult("3/6170", "A1234AA", false, "Create case note failed due to: 503 Service unavailable, ")
       )
     }
 
-    private fun webClientException(statusCode: Int, statusText: String) =
-      WebClientResponseException.create(statusCode, statusText, HttpHeaders.EMPTY, ByteArray(0), Charset.defaultCharset())
+    private fun webClientException(statusCode: Int, statusText: String, body: String = "") =
+      WebClientResponseException.create(statusCode, statusText, HttpHeaders.EMPTY, body.toByteArray(), Charset.defaultCharset())
   }
 
   @Nested

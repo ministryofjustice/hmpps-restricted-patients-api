@@ -121,7 +121,7 @@ class UnknownPatientService(
 
   private fun UnknownPatient.handleApiError(errorType: String, it: Throwable, offenderNumber: String? = null): Nothing {
     when (it) {
-      is WebClientResponseException -> "$errorType: ${it.responseBodyAsString}"
+      is WebClientResponseException -> "$errorType: ${it.statusText}, ${it.responseBodyAsString}"
       else -> "$errorType: ${it.message}"
     }.let { errorMessage ->
       throw MigrateUnknownPatientException(mhcsReference, errorMessage, offenderNumber)
