@@ -5,6 +5,7 @@ import com.github.tomakehurst.wiremock.client.MappingBuilder
 import com.github.tomakehurst.wiremock.client.WireMock.aResponse
 import com.github.tomakehurst.wiremock.client.WireMock.equalTo
 import com.github.tomakehurst.wiremock.client.WireMock.get
+import com.github.tomakehurst.wiremock.client.WireMock.matchingJsonPath
 import com.github.tomakehurst.wiremock.client.WireMock.post
 import com.github.tomakehurst.wiremock.client.WireMock.put
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
@@ -292,6 +293,12 @@ class PrisonApiMockServer : WireMockServer(8989) {
   fun stubCreatePrisoner(offenderNo: String) {
     stubFor(
       post(urlPathEqualTo("/api/offenders"))
+        .withRequestBody(matchingJsonPath("$.firstName"))
+        .withRequestBody(matchingJsonPath("$.lastName"))
+        .withRequestBody(matchingJsonPath("$.dateOfBirth"))
+        .withRequestBody(matchingJsonPath("$.gender"))
+        .withRequestBody(matchingJsonPath("$.croNumber"))
+        .withRequestBody(matchingJsonPath("$.pncNumber"))
         .willReturn(
           aResponse()
             .withHeader("Content-Type", "application/json")
