@@ -225,7 +225,7 @@ class UnknownPatientsServiceTest {
       val results = service.migrateInUnknownPatients(listOf(testRecord("header"), testRecord("valid")))
 
       assertThat(results).containsExactly(
-        UnknownPatientResult("3/6170", "A1234AA", false, "Create case note failed due to: 503 Service unavailable, ")
+        UnknownPatientResult("3/6170", "A1234AA", false, "Create case note failed due to: 503 Service unavailable")
       )
     }
 
