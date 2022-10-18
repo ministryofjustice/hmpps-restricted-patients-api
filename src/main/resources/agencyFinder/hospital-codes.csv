@@ -1,32 +1,50 @@
 ABERBE,Aberbeeg Hospital
 ARBCOU,Arbury Court Psychiatric Services
+ARNOLD,Arnold Lodge
 ASHWTH,Ashworth Hospital
 BATTHO,Battersea Bridge House
 BETHLM,Bethlem Royal Hospital
 BLACKB,Blackberry Hill Hospital
+CHAFHO,Blue Nile House
 RBHOSP,Bolton Royal Hospital
 FIEHOS,Bretton Centre
 BROADM,Broadmoor Hospital
 BROCHO,Brockfield House
+BROCHO,Brockfield House (frm. Runwell Hospital)
 CHWICK,Chadwick Lodge
+CHAFHO,Chase Farm Hospital (Inactive - use NLFS)
 CHESHO,Cheswold Park Hospital
+CYGENT,Cygnet Hospital Beckton
+CYGBUR,Cygnet Hospital Bury
+CYGMAI,Cygnet Hospital Maidstone
 CYGNHO,Cygnet Hospital Stevenage
+CYGSWH,Cygnet Sherwood House
+CYGSWL,Cygnet Sherwood Lodge
 EDENFD,Edenfield Centre
 EDWHOU,Edward House Low Secure Unit
 FARMFD,Farmfield Hospital
 FIEHOS,Fieldhead Hospital
 FNTAIN,Fountain Way
+GATREC,Gateway Recovery Centre
 GLDLDG,Guild Lodge
+HAMRSM,Hammersmith & Fulham Mental Health Unit
 HLHOSP,Harplands Hospital
+HILLHO,Hillis Lodge
 HUMBER,Humber Centre
+JIGSHO,Jigsaw Independent Hospital
 JHWARD,John Howard Centre
+KEMPLE,Kemple View Psychiatric Services
+KNGSWY,Kingsway Hospital
 KSWRTH,Kneesworth House Hospital
 LANDON,Langdon Hospital
 LNGFRD,Langford Centre
 LTLEMR,Littlemore Mental Health Centre
 LANRTH,Llanarth Court Psychiatric Hospital
+MAPLOD,Maple Lodge
 MARLBR,Marlborough House Regional Secure Unit
+MERCAW,Mersey Care Whalley
 NEWTON,Newton Lodge
+CHAFNO,North London Forensic Service (Low Secure)
 PRESHO,Prestwich Hospital
 PROSPE,Prospect Park Hospital
 RAMTON,Rampton Hospital
@@ -35,25 +53,43 @@ RAVNSW,Ravenswood House Low Secure Unit
 RAVNSW,Ravenswood House Medium Secure Unit
 RESDIE,Reaside Clinic
 ROBIHO,Robin Pinto Unit
+ROBHSE,Robinson House
 ROSEB,Roseberry Park Psychiatric Hospital
 ROWVIE,Rowan View
+CYGSWL,Sherwood Lodge
+SOLOHO,Southfields Low Secure Unit
 SPRFLD,Springfield University Hospital
 STANDW,St Andrew's Healthcare (Northants)
 STABHO,St Andrew's Healthcare Birmingham
 STBERN,St Bernards Hospital
 STCHRL,St Charles's Hospital
 STGEST,St George's Hospital (Stafford)
+STMAHO,St Magnus Hospital
 STNLAS,St Nicholas Hospital
+STNLAS,St Nicholas Hospital Medium Secure Unit
 SCKTON,Stockton Hall Psychiatric Hospital
 TAMCEN,Tamarind Centre
+TMSIDE,Tameside Hospital
 ALICEN,The Allington Centre
 BRATON,The Bracton Centre
+CSWELL,The Caswell Clinic
+FARNUN,The Farndon Unit
 HARBOR,The Harbour
+HELLIN,The Hellingly Centre
+LIMESU,The Limes Independent Hospital
+LUGMMH,The Lowry Unit
 LTLEMR,The Oxford Clinic
+PRIHOS,The Priory Hospital Dewsbury
 THERED,The Redwoods Centre Low Secure Services
 TSPNY,The Spinney (Manchester)
+WELLHO,The Wells Road Centre
 THRNFD,Thornford Park Hospital
 TREVOR,Trevor Gibbens Unit
+TYCWRH,Ty Cwm Rhondda
 TYWLYN,Ty Llywelyn Medium Secure Unit
+VICGDN,Victoria Gardens – Liverpool
+WATLOO,Waterloo Manor
+WATLOO,Waterloo Manor Independent
 WATHWD,Wathwood Hospital
 STBERN,West London Forensic Service (Medium Secure)
+WOLHOU,Wolfson House
