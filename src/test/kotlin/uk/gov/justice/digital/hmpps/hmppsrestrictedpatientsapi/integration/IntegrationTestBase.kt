@@ -1,6 +1,5 @@
 package uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.integration
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.tomakehurst.wiremock.client.WireMock
 import org.flywaydb.core.Flyway
 import org.junit.jupiter.api.AfterAll
@@ -235,16 +234,16 @@ abstract class IntegrationTestBase {
   }
 
   fun processUnknownPatientsWebClient(
-    csvData: List<String> = listOf(),
+    csvData: String = "any",
     headers: (HttpHeaders) -> Unit = {},
   ): WebTestClient.RequestHeadersSpec<*> {
     return webTestClient
       .post()
-      .uri("/process-unknown-patients")
+      .uri("/process-unknown-patient")
       .contentType(APPLICATION_JSON)
       .accept(APPLICATION_JSON)
       .headers(headers)
-      .bodyValue(jacksonObjectMapper().writeValueAsString(csvData))
+      .bodyValue(csvData)
   }
 
   fun saveRestrictedPatient(
