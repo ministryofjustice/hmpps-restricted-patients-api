@@ -11,7 +11,7 @@ class CaseNoteApiGateway(@Qualifier("caseNotesApiClientCreds")private val caseNo
   fun createCaseNote(caseNoteRequest: CaseNoteRequest): Unit =
     with(caseNoteRequest) {
       caseNoteApiClientCreds
-        .put()
+        .post()
         .uri("/case-notes/$offenderNumber")
         .bodyValue(
           mapOf(
