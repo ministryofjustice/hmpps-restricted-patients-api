@@ -148,20 +148,11 @@ class UnknownPatientsServiceTest {
     }
 
     @Test
-    fun `can migrate multiple patients`() {
-      val results = service.migrateInUnknownPatients(
-        listOf(
-          testRecord("header"),
-          testRecord("valid"),
-          testRecord("invalid_dob"),
-          testRecord("invalid_gender"),
-        ),
-      )
+    fun `can migrate a patient`() {
+      val result = service.migrateInUnknownPatient(testRecord("valid"))
 
-      assertThat(results).containsExactly(
-        UnknownPatientResult("3/6170", "A1234AA", true, null),
-        UnknownPatientResult("3/6170", null, false, "Date of birth 1965-02-33 invalid"),
-        UnknownPatientResult("3/6170", null, false, "Gender of Y should be M or F"),
+      assertThat(result).isEqualTo(
+        UnknownPatientResult("3/6170", "A1234AA", true, null)
       )
       verify(prisonApiGateway).createPrisoner("O'Brien", "Steven", "John M", "M", LocalDate.of(1965, 2, 11), "cro", "pnc")
       verify(restrictedPatientService).addRestrictedPatient(
@@ -189,9 +180,9 @@ class UnknownPatientsServiceTest {
       whenever(prisonApiGateway.createPrisoner(anyString(), anyString(), anyString(), anyString(), any(), anyOrNull(), anyOrNull()))
         .thenThrow(webClientException(500, statusText = "500 Internal Server Error", body = "some error"))
 
-      val results = service.migrateInUnknownPatients(listOf(testRecord("header"), testRecord("valid")))
+      val result = service.migrateInUnknownPatient(testRecord("valid"))
 
-      assertThat(results).containsExactly(
+      assertThat(result).isEqualTo(
         UnknownPatientResult("3/6170", null, false, "Create prisoner failed due to: 500 Internal Server Error, some error")
       )
     }
@@ -200,9 +191,9 @@ class UnknownPatientsServiceTest {
     fun `will report on errors from discharge to hospital`() {
       whenever(restrictedPatientService.addRestrictedPatient(any(), anyBoolean())).thenThrow(webClientException(400, statusText = "400 Bad Request", body = "some client error"))
 
-      val results = service.migrateInUnknownPatients(listOf(testRecord("header"), testRecord("valid")))
+      val results = service.migrateInUnknownPatient(testRecord("valid"))
 
-      assertThat(results).containsExactly(
+      assertThat(results).isEqualTo(
         UnknownPatientResult("3/6170", "A1234AA", false, "Discharge to hospital failed due to: 400 Bad Request, some client error")
       )
     }
@@ -211,9 +202,9 @@ class UnknownPatientsServiceTest {
     fun `will report on errors from update community NOMS number`() {
       whenever(communityApiGateway.updateNomsNumber(anyString(), anyString())).thenThrow(webClientException(404, statusText = "404 Not Found", body = "CRN not found"))
 
-      val results = service.migrateInUnknownPatients(listOf(testRecord("header"), testRecord("valid")))
+      val result = service.migrateInUnknownPatient(testRecord("valid"))
 
-      assertThat(results).containsExactly(
+      assertThat(result).isEqualTo(
         UnknownPatientResult("3/6170", "A1234AA", false, "Update community NOMS number failed due to: 404 Not Found, CRN not found")
       )
     }
@@ -222,9 +213,9 @@ class UnknownPatientsServiceTest {
     fun `will report on errors from create case note`() {
       whenever(caseNotesApiGateway.createCaseNote(any())).thenThrow(webClientException(503, statusText = "503 Service unavailable"))
 
-      val results = service.migrateInUnknownPatients(listOf(testRecord("header"), testRecord("valid")))
+      val result = service.migrateInUnknownPatient(testRecord("valid"))
 
-      assertThat(results).containsExactly(
+      assertThat(result).isEqualTo(
         UnknownPatientResult("3/6170", "A1234AA", false, "Create case note failed due to: 503 Service unavailable")
       )
     }
@@ -238,13 +229,12 @@ class UnknownPatientsServiceTest {
 
     @Test
     fun `performs csv parsing and validation without doing anything else`() {
-      val results = service.migrateInUnknownPatients(
+      val results = service.migrateInUnknownPatientsDryRun(
         listOf(
           testRecord("header"),
           testRecord("valid"),
           testRecord("invalid_dob"),
-        ),
-        dryRun = true
+        )
       )
 
       assertThat(results).containsExactly(

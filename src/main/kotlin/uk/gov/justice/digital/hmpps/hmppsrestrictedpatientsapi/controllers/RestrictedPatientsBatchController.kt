@@ -25,13 +25,13 @@ class RestrictedPatientsBatchController(
     batchReleaseDateRemoval.removeNonLifePrisonersPastConditionalReleaseDate()
 
   @Hidden
-  @PostMapping(value = ["/process-unknown-patients"])
+  @PostMapping(value = ["/process-unknown-patient"])
   @PreAuthorize("hasRole('RESTRICTED_PATIENT_MIGRATION')")
   /**
    * Internal endpoint to migrate unknown patients into Nomis and add them to Restricted Patients
    */
-  fun processUnknownPatients(@RequestBody patients: List<String>): List<UnknownPatientResult> =
-    unknownPatientService.migrateInUnknownPatients(patients)
+  fun processUnknownPatient(@RequestBody patient: String): UnknownPatientResult =
+    unknownPatientService.migrateInUnknownPatient(patient)
 
   @Hidden
   @PostMapping(value = ["/dryrun-unknown-patients"])
@@ -40,5 +40,5 @@ class RestrictedPatientsBatchController(
    * DRY RUN version - this will validate input only but perform no actions
    */
   fun dryRunProcessUnknownPatients(@RequestBody patients: List<String>): List<UnknownPatientResult> =
-    unknownPatientService.migrateInUnknownPatients(patients, dryRun = true)
+    unknownPatientService.migrateInUnknownPatientsDryRun(patients)
 }

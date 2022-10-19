@@ -7,12 +7,13 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.ArgumentMatchers.anyList
+import org.mockito.ArgumentMatchers.anyString
 import org.mockito.kotlin.any
-import org.mockito.kotlin.eq
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services.UnknownPatientResult
 
 @ActiveProfiles("test")
 class ProcessUnknownPatientsIntTest : IntegrationTestBase() {
@@ -35,7 +36,7 @@ class ProcessUnknownPatientsIntTest : IntegrationTestBase() {
 
     @Test
     fun `should reject request with wrong role`() {
-      whenever(unknownPatientsService.migrateInUnknownPatients(anyList(), anyBoolean())).thenReturn(listOf())
+      whenever(unknownPatientsService.migrateInUnknownPatient(anyString(), anyBoolean())).thenReturn(anyResult())
 
       processUnknownPatientsWebClient(headers = setHeaders(roles = listOf("ROLE_IS_WRONG")))
         .exchange()
@@ -44,19 +45,21 @@ class ProcessUnknownPatientsIntTest : IntegrationTestBase() {
 
     @Test
     fun `should process request with valid token`() {
-      whenever(unknownPatientsService.migrateInUnknownPatients(anyList(), anyBoolean())).thenReturn(listOf())
+      whenever(unknownPatientsService.migrateInUnknownPatient(anyString(), anyBoolean())).thenReturn(anyResult())
 
       processUnknownPatientsWebClient(headers = setHeaders(roles = listOf("ROLE_RESTRICTED_PATIENT_MIGRATION")))
         .exchange()
         .expectStatus().isOk
     }
+
+    private fun anyResult() = UnknownPatientResult(mhcsReference = "any", success = false)
   }
 
   @Nested
   inner class DryRun {
     @Test
     fun `should call service for a dry run`() {
-      whenever(unknownPatientsService.migrateInUnknownPatients(anyList(), anyBoolean())).thenReturn(listOf())
+      whenever(unknownPatientsService.migrateInUnknownPatientsDryRun(anyList())).thenReturn(listOf())
 
       webTestClient
         .post()
@@ -68,7 +71,7 @@ class ProcessUnknownPatientsIntTest : IntegrationTestBase() {
         .exchange()
         .expectStatus().isOk
 
-      verify(unknownPatientsService).migrateInUnknownPatients(any(), eq(true))
+      verify(unknownPatientsService).migrateInUnknownPatientsDryRun(any())
     }
   }
 
@@ -92,108 +95,82 @@ class ProcessUnknownPatientsIntTest : IntegrationTestBase() {
 
     @Test
     fun `should process valid records`() {
-      val testData = listOf(testRecord("header"), testRecord("valid"))
-
-      processUnknownPatientsWebClient(csvData = testData, headers = setHeaders(roles = listOf("ROLE_RESTRICTED_PATIENT_MIGRATION")))
+      processUnknownPatientsWebClient(csvData = testRecord("valid"), headers = setHeaders(roles = listOf("ROLE_RESTRICTED_PATIENT_MIGRATION")))
         .exchange()
         .expectStatus().isOk
         .expectBody()
-        .jsonPath("$[0].mhcsReference").isEqualTo("3/6170")
-        .jsonPath("$[0].offenderNumber").isEqualTo("A1234AA")
-        .jsonPath("$[0].success").isEqualTo("true")
-        .jsonPath("$[0].errorMessage").isEmpty
+        .jsonPath("$.mhcsReference").isEqualTo("3/6170")
+        .jsonPath("$.offenderNumber").isEqualTo("A1234AA")
+        .jsonPath("$.success").isEqualTo("true")
+        .jsonPath("$.errorMessage").isEmpty
     }
 
     @Test
     fun `should process invalid records`() {
-      val testData = listOf(testRecord("header"), testRecord("invalid_dob"))
-
-      processUnknownPatientsWebClient(csvData = testData, headers = setHeaders(roles = listOf("ROLE_RESTRICTED_PATIENT_MIGRATION")))
+      processUnknownPatientsWebClient(csvData = testRecord("invalid_dob"), headers = setHeaders(roles = listOf("ROLE_RESTRICTED_PATIENT_MIGRATION")))
         .exchange()
         .expectStatus().isOk
         .expectBody()
-        .jsonPath("$[0].mhcsReference").isEqualTo("3/6170")
-        .jsonPath("$[0].offenderNumber").isEqualTo(null)
-        .jsonPath("$[0].success").isEqualTo("false")
-        .jsonPath("$[0].errorMessage").isEqualTo("Date of birth 1965-02-33 invalid")
+        .jsonPath("$.mhcsReference").isEqualTo("3/6170")
+        .jsonPath("$.offenderNumber").isEqualTo(null)
+        .jsonPath("$.success").isEqualTo("false")
+        .jsonPath("$.errorMessage").isEqualTo("Date of birth 1965-02-33 invalid")
     }
 
     @Test
     fun `should handle create prisoner errors`() {
       prisonApiMockServer.stubCreatePrisonerError()
-      val testData = listOf(testRecord("header"), testRecord("valid"))
 
-      processUnknownPatientsWebClient(csvData = testData, headers = setHeaders(roles = listOf("ROLE_RESTRICTED_PATIENT_MIGRATION")))
+      processUnknownPatientsWebClient(csvData = testRecord("valid"), headers = setHeaders(roles = listOf("ROLE_RESTRICTED_PATIENT_MIGRATION")))
         .exchange()
         .expectStatus().isOk
         .expectBody()
-        .jsonPath("$[0].mhcsReference").isEqualTo("3/6170")
-        .jsonPath("$[0].offenderNumber").isEqualTo(null)
-        .jsonPath("$[0].success").isEqualTo("false")
-        .jsonPath("$[0].errorMessage").value<String> { assertThat(it).contains("Create prisoner failed due to:").contains("Some user message") }
+        .jsonPath("$.mhcsReference").isEqualTo("3/6170")
+        .jsonPath("$.offenderNumber").isEqualTo(null)
+        .jsonPath("$.success").isEqualTo("false")
+        .jsonPath("$.errorMessage").value<String> { assertThat(it).contains("Create prisoner failed due to:").contains("Some user message") }
     }
 
     @Test
     fun `should handle discharge to hospital server errors`() {
       prisonApiMockServer.stubDischargeToPrisonError("A1234AA")
-      val testData = listOf(testRecord("header"), testRecord("valid"))
 
-      processUnknownPatientsWebClient(csvData = testData, headers = setHeaders(roles = listOf("ROLE_RESTRICTED_PATIENT_MIGRATION")))
+      processUnknownPatientsWebClient(csvData = testRecord("valid"), headers = setHeaders(roles = listOf("ROLE_RESTRICTED_PATIENT_MIGRATION")))
         .exchange()
         .expectStatus().isOk
         .expectBody()
-        .jsonPath("$[0].mhcsReference").isEqualTo("3/6170")
-        .jsonPath("$[0].offenderNumber").isEqualTo("A1234AA")
-        .jsonPath("$[0].success").isEqualTo("false")
-        .jsonPath("$[0].errorMessage").value<String> { assertThat(it).contains("Discharge to hospital failed due to").contains("some error") }
+        .jsonPath("$.mhcsReference").isEqualTo("3/6170")
+        .jsonPath("$.offenderNumber").isEqualTo("A1234AA")
+        .jsonPath("$.success").isEqualTo("false")
+        .jsonPath("$.errorMessage").value<String> { assertThat(it).contains("Discharge to hospital failed due to").contains("some error") }
     }
 
     @Test
     fun `should handle update NOMS number errors`() {
       communityApiMockServer.stubUpdateNomsNumberError("crn")
-      val testData = listOf(testRecord("header"), testRecord("valid"))
 
-      processUnknownPatientsWebClient(csvData = testData, headers = setHeaders(roles = listOf("ROLE_RESTRICTED_PATIENT_MIGRATION")))
+      processUnknownPatientsWebClient(csvData = testRecord("valid"), headers = setHeaders(roles = listOf("ROLE_RESTRICTED_PATIENT_MIGRATION")))
         .exchange()
         .expectStatus().isOk
         .expectBody()
-        .jsonPath("$[0].mhcsReference").isEqualTo("3/6170")
-        .jsonPath("$[0].offenderNumber").isEqualTo("A1234AA")
-        .jsonPath("$[0].success").isEqualTo("false")
-        .jsonPath("$[0].errorMessage").value<String> { assertThat(it).contains("Update community NOMS number failed due to:").contains("some error") }
+        .jsonPath("$.mhcsReference").isEqualTo("3/6170")
+        .jsonPath("$.offenderNumber").isEqualTo("A1234AA")
+        .jsonPath("$.success").isEqualTo("false")
+        .jsonPath("$.errorMessage").value<String> { assertThat(it).contains("Update community NOMS number failed due to:").contains("some error") }
     }
 
     @Test
     fun `should handle create case note errors`() {
       caseNotesApiMockServer.stubCreateCaseNotesError("A1234AA")
-      val testData = listOf(testRecord("header"), testRecord("valid"))
 
-      processUnknownPatientsWebClient(csvData = testData, headers = setHeaders(roles = listOf("ROLE_RESTRICTED_PATIENT_MIGRATION")))
+      processUnknownPatientsWebClient(csvData = testRecord("valid"), headers = setHeaders(roles = listOf("ROLE_RESTRICTED_PATIENT_MIGRATION")))
         .exchange()
         .expectStatus().isOk
         .expectBody()
-        .jsonPath("$[0].mhcsReference").isEqualTo("3/6170")
-        .jsonPath("$[0].offenderNumber").isEqualTo("A1234AA")
-        .jsonPath("$[0].success").isEqualTo("false")
-        .jsonPath("$[0].errorMessage").value<String> { assertThat(it).contains("Create case note failed due to:").contains("some error") }
-    }
-
-    @Test
-    fun `should process multiple records`() {
-      val testData = listOf(testRecord("header"), testRecord("valid"), testRecord("invalid_dob"))
-
-      processUnknownPatientsWebClient(csvData = testData, headers = setHeaders(roles = listOf("ROLE_RESTRICTED_PATIENT_MIGRATION")))
-        .exchange()
-        .expectStatus().isOk
-        .expectBody()
-        .jsonPath("$[0].mhcsReference").isEqualTo("3/6170")
-        .jsonPath("$[0].offenderNumber").isEqualTo("A1234AA")
-        .jsonPath("$[0].success").isEqualTo("true")
-        .jsonPath("$[0].errorMessage").isEmpty
-        .jsonPath("$[1].mhcsReference").isEqualTo("3/6170")
-        .jsonPath("$[1].offenderNumber").isEqualTo(null)
-        .jsonPath("$[1].success").isEqualTo("false")
-        .jsonPath("$[1].errorMessage").isEqualTo("Date of birth 1965-02-33 invalid")
+        .jsonPath("$.mhcsReference").isEqualTo("3/6170")
+        .jsonPath("$.offenderNumber").isEqualTo("A1234AA")
+        .jsonPath("$.success").isEqualTo("false")
+        .jsonPath("$.errorMessage").value<String> { assertThat(it).contains("Create case note failed due to:").contains("some error") }
     }
   }
 }

@@ -26,11 +26,11 @@ class UnknownPatientService(
   private val prisonerSearchApiGateway: PrisonerSearchApiGateway,
 ) {
 
-  fun migrateInUnknownPatients(patients: List<String>, dryRun: Boolean = false): List<UnknownPatientResult> =
+  fun migrateInUnknownPatientsDryRun(patients: List<String>): List<UnknownPatientResult> =
     patients.drop(1)
-      .map { rawPatient -> migrateInUnknownPatient(rawPatient, dryRun) }
+      .map { rawPatient -> migrateInUnknownPatient(rawPatient, dryRun = true) }
 
-  private fun migrateInUnknownPatient(rawPatient: String, dryRun: Boolean): UnknownPatientResult =
+  fun migrateInUnknownPatient(rawPatient: String, dryRun: Boolean = false): UnknownPatientResult =
     runCatching {
       parsePatient(rawPatient)
         .let {
