@@ -99,7 +99,7 @@ class PrisonApiGateway(private val prisonApiClientCreds: WebClient) {
           "lastName" to surname,
           "firstName" to firstName,
           "middleName1" to middleNames?.split(" ")?.firstOrNull(),
-          "middleName2" to middleNames?.split(" ")?.drop(1)?.joinToString(" "),
+          "middleName2" to middleNames?.split(" ")?.drop(1)?.joinToString(" ")?.takeIf { it.isNotEmpty() },
           "gender" to gender,
           "dateOfBirth" to dateOfBirth.toString(),
           "croNumber" to croNumber,

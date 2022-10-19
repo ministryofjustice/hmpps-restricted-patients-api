@@ -1,7 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.integration
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.github.tomakehurst.wiremock.client.WireMock
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -120,8 +119,8 @@ class ProcessUnknownPatientsIntTest : IntegrationTestBase() {
     }
 
     @Test
-    fun `should handle create prisoner server errors`() {
-      prisonApiMockServer.stubServerError(WireMock::post)
+    fun `should handle create prisoner errors`() {
+      prisonApiMockServer.stubCreatePrisonerError()
       val testData = listOf(testRecord("header"), testRecord("valid"))
 
       processUnknownPatientsWebClient(csvData = testData, headers = setHeaders(roles = listOf("ROLE_RESTRICTED_PATIENT_MIGRATION")))
@@ -131,7 +130,7 @@ class ProcessUnknownPatientsIntTest : IntegrationTestBase() {
         .jsonPath("$[0].mhcsReference").isEqualTo("3/6170")
         .jsonPath("$[0].offenderNumber").isEqualTo(null)
         .jsonPath("$[0].success").isEqualTo("false")
-        .jsonPath("$[0].errorMessage").value<String> { assertThat(it).contains("Create prisoner failed due to: 503") }
+        .jsonPath("$[0].errorMessage").value<String> { assertThat(it).contains("Create prisoner failed due to:").contains("Some user message") }
     }
 
     @Test
@@ -146,7 +145,7 @@ class ProcessUnknownPatientsIntTest : IntegrationTestBase() {
         .jsonPath("$[0].mhcsReference").isEqualTo("3/6170")
         .jsonPath("$[0].offenderNumber").isEqualTo("A1234AA")
         .jsonPath("$[0].success").isEqualTo("false")
-        .jsonPath("$[0].errorMessage").value<String> { assertThat(it).contains("Discharge to hospital failed due to: 400") }
+        .jsonPath("$[0].errorMessage").value<String> { assertThat(it).contains("Discharge to hospital failed due to").contains("some error") }
     }
 
     @Test
@@ -161,7 +160,7 @@ class ProcessUnknownPatientsIntTest : IntegrationTestBase() {
         .jsonPath("$[0].mhcsReference").isEqualTo("3/6170")
         .jsonPath("$[0].offenderNumber").isEqualTo("A1234AA")
         .jsonPath("$[0].success").isEqualTo("false")
-        .jsonPath("$[0].errorMessage").value<String> { assertThat(it).contains("Update community NOMS number failed due to: 400") }
+        .jsonPath("$[0].errorMessage").value<String> { assertThat(it).contains("Update community NOMS number failed due to:").contains("some error") }
     }
 
     @Test
@@ -176,7 +175,7 @@ class ProcessUnknownPatientsIntTest : IntegrationTestBase() {
         .jsonPath("$[0].mhcsReference").isEqualTo("3/6170")
         .jsonPath("$[0].offenderNumber").isEqualTo("A1234AA")
         .jsonPath("$[0].success").isEqualTo("false")
-        .jsonPath("$[0].errorMessage").value<String> { assertThat(it).contains("Create case note failed due to: 400") }
+        .jsonPath("$[0].errorMessage").value<String> { assertThat(it).contains("Create case note failed due to:").contains("some error") }
     }
 
     @Test
