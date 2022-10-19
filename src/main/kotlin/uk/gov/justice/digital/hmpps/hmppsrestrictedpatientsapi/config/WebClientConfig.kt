@@ -65,17 +65,6 @@ class WebClientConfig(
   @Bean
   @RequestScope
   @Profile("!app-scope")
-  fun communityApiClientCreds(
-    clientRegistrationRepository: ClientRegistrationRepository,
-    authorizedClientRepository: OAuth2AuthorizedClientRepository,
-  ): WebClient? = getClientCredsWebClient(
-    "$communityApiUrl/secure",
-    authorizedClientManagerRequestScope(clientRegistrationRepository, authorizedClientRepository)
-  )
-
-  @Bean
-  @RequestScope
-  @Profile("!app-scope")
   fun caseNotesApiClientCreds(
     clientRegistrationRepository: ClientRegistrationRepository,
     authorizedClientRepository: OAuth2AuthorizedClientRepository,
@@ -107,9 +96,7 @@ class WebClientConfig(
   )
 
   @Bean
-  @Qualifier("communityApiClientCreds")
-  @Profile("app-scope")
-  fun communityApiClientCredsAppScope(
+  fun communityApiClientCreds(
     clientRegistrationRepository: ClientRegistrationRepository?,
     oAuth2AuthorizedClientService: OAuth2AuthorizedClientService?
   ): WebClient? = getClientCredsWebClient(
