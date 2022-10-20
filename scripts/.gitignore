@@ -1,0 +1,6 @@
+# Unknown patients test file
+unknown-patients.csv
+# Unknown patients result diretories
+dev/
+preprod/
+prod/
