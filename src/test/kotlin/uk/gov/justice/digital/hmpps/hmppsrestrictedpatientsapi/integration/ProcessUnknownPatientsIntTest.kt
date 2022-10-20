@@ -1,17 +1,14 @@
 package uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.integration
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.mockito.ArgumentMatchers.anyBoolean
-import org.mockito.ArgumentMatchers.anyList
 import org.mockito.ArgumentMatchers.anyString
-import org.mockito.kotlin.any
+import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services.UnknownPatientResult
 
@@ -59,19 +56,18 @@ class ProcessUnknownPatientsIntTest : IntegrationTestBase() {
   inner class DryRun {
     @Test
     fun `should call service for a dry run`() {
-      whenever(unknownPatientsService.migrateInUnknownPatientsDryRun(anyList())).thenReturn(listOf())
+      doReturn(UnknownPatientResult("any", success = true))
+        .whenever(unknownPatientsService).migrateInUnknownPatient(anyString(), anyBoolean())
 
       webTestClient
         .post()
         .uri("/dryrun-unknown-patients")
-        .contentType(MediaType.APPLICATION_JSON)
-        .accept(MediaType.APPLICATION_JSON)
         .headers(setHeaders(roles = listOf("ROLE_RESTRICTED_PATIENT_MIGRATION")))
-        .bodyValue(jacksonObjectMapper().writeValueAsString(listOf<String>()))
+        .bodyValue("any")
         .exchange()
         .expectStatus().isOk
 
-      verify(unknownPatientsService).migrateInUnknownPatientsDryRun(any())
+      verify(unknownPatientsService).migrateInUnknownPatient(anyString(), anyBoolean())
     }
   }
 

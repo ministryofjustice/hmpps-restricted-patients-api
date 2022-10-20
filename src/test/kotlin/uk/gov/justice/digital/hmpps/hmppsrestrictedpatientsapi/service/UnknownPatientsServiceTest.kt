@@ -229,17 +229,10 @@ class UnknownPatientsServiceTest {
 
     @Test
     fun `performs csv parsing and validation without doing anything else`() {
-      val results = service.migrateInUnknownPatientsDryRun(
-        listOf(
-          testRecord("header"),
-          testRecord("valid"),
-          testRecord("invalid_dob"),
-        )
-      )
+      val results = service.migrateInUnknownPatient(testRecord("valid"), dryRun = true)
 
-      assertThat(results).containsExactly(
+      assertThat(results).isEqualTo(
         UnknownPatientResult("3/6170", null, true, null),
-        UnknownPatientResult("3/6170", null, false, "Date of birth 1965-02-33 invalid"),
       )
       verify(prisonApiGateway, never()).createPrisoner(anyString(), anyString(), anyString(), anyString(), any(), anyString(), anyString())
       verify(restrictedPatientService, never()).dischargeToHospital(any())

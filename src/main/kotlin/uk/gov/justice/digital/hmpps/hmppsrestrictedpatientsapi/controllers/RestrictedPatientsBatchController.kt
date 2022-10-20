@@ -39,6 +39,6 @@ class RestrictedPatientsBatchController(
   /**
    * DRY RUN version - this will validate input only but perform no actions
    */
-  fun dryRunProcessUnknownPatients(@RequestBody patients: List<String>): List<UnknownPatientResult> =
-    unknownPatientService.migrateInUnknownPatientsDryRun(patients)
+  fun dryRunProcessUnknownPatients(@RequestBody patient: String): UnknownPatientResult =
+    unknownPatientService.migrateInUnknownPatient(patient, true)
 }
