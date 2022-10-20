@@ -34,7 +34,7 @@ class RestrictedPatientsBatchController(
     unknownPatientService.migrateInUnknownPatient(patient)
 
   @Hidden
-  @PostMapping(value = ["/dryrun-unknown-patients"])
+  @PostMapping(value = ["/dryrun-unknown-patient"])
   @PreAuthorize("hasRole('RESTRICTED_PATIENT_MIGRATION')")
   /**
    * DRY RUN version - this will validate input only but perform no actions
