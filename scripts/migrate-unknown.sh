@@ -50,10 +50,11 @@ do
     continue
   fi
 
-  RESULT=$(curl -sS --http1.1 -X POST "https://restricted-patients-api$ENV_SUFFIX.hmpps.service.justice.gov.uk/$REQ_PATH" \
+  RESULT=$(curl -sfS --http1.1 -X POST "https://restricted-patients-api$ENV_SUFFIX.hmpps.service.justice.gov.uk/$REQ_PATH" \
     -H "Authorization: Bearer ${TOKEN}" \
     -H "Content-Type: application/json" \
-    -d "$unknownPatient")
+    -d "$unknownPatient" \
+    2>&1)
   STATUS="$?"
 
   if [ "$STATUS" -eq 0 ]
@@ -64,7 +65,7 @@ do
     echo "$RESULT" | jq . > "$ENV/$RESULT_FILE"
     echo "$ENV/$RESULT_FILE"
   else
-    REF=$(cut -d ',' -f 1 <<< "$unknownPatient")
+    REF=$(cut -d ',' -f 1 <<< "$unknownPatient" | sed 's/\//-/g')
     echo "$RESULT" > "$ENV/process-unknown-$REF-ERROR.json"
     echo "Error for $REF"
   fi

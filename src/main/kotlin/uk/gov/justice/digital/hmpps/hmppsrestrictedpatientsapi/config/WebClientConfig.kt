@@ -101,7 +101,8 @@ class WebClientConfig(
     oAuth2AuthorizedClientService: OAuth2AuthorizedClientService?
   ): WebClient? = getClientCredsWebClient(
     "$communityApiUrl/secure",
-    authorizedClientManagerAppScope(clientRegistrationRepository, oAuth2AuthorizedClientService)
+    authorizedClientManagerAppScope(clientRegistrationRepository, oAuth2AuthorizedClientService),
+    "community-api",
   )
 
   @Bean
@@ -117,10 +118,11 @@ class WebClientConfig(
 
   private fun getClientCredsWebClient(
     url: String,
-    authorizedClientManager: OAuth2AuthorizedClientManager?
+    authorizedClientManager: OAuth2AuthorizedClientManager,
+    registrationId: String = "restricted-patients-api",
   ): WebClient? {
     val oauth2Client = ServletOAuth2AuthorizedClientExchangeFilterFunction(authorizedClientManager)
-    oauth2Client.setDefaultClientRegistrationId("restricted-patients-api")
+    oauth2Client.setDefaultClientRegistrationId(registrationId)
 
     val exchangeStrategies = ExchangeStrategies.builder()
       .codecs { configurer: ClientCodecConfigurer -> configurer.defaultCodecs().maxInMemorySize(-1) }
