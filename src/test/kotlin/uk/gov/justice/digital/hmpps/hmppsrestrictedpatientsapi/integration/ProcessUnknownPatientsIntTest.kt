@@ -61,7 +61,7 @@ class ProcessUnknownPatientsIntTest : IntegrationTestBase() {
 
       webTestClient
         .post()
-        .uri("/dryrun-unknown-patients")
+        .uri("/dryrun-unknown-patient")
         .headers(setHeaders(roles = listOf("ROLE_RESTRICTED_PATIENT_MIGRATION")))
         .bodyValue("any")
         .exchange()

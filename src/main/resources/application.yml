@@ -42,6 +42,13 @@ spring:
             client-secret: ${restricted.patients.api.client.secret}
             authorization-grant-type: client_credentials
             scope: write
+          # community-api cannot share a registration with the other web clients because it is not request based and cannot have username included on the token
+          community-api:
+            provider: hmpps-auth
+            client-id: ${restricted.patients.api.client.id}
+            client-secret: ${restricted.patients.api.client.secret}
+            authorization-grant-type: client_credentials
+            scope: write
         provider:
           hmpps-auth:
             token-uri: ${oauth.endpoint.url}/oauth/token
