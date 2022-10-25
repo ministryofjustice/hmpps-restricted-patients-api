@@ -92,7 +92,7 @@ fun makePrisonerResult(
   sentenceExpiryDate: LocalDate? = null,
   indeterminateSentence: Boolean? = null,
   recall: Boolean? = null,
-  legalStatus: String = "UNKNOWN",
+  legalStatus: String? = "UNKNOWN",
 ): PrisonerResult = PrisonerResult(
   prisonerNumber = prisonerNumber,
   bookingId = bookingId,
