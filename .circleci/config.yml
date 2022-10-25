@@ -5,7 +5,7 @@ orbs:
 
 # We provide a custom setup as the java_localstack_postgres orb does not allow us to specify a DB name
 # orbs:
-#   hmpps: ministryofjustice/hmpps@6.0.3
+#   hmpps: ministryofjustice/hmpps@6.0.0
 # jobs:
 #   validate:
 #     executor:
