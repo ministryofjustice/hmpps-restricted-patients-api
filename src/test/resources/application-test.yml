@@ -13,8 +13,8 @@ oauth.endpoint.url: http://localhost:8090/auth
 
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/restricted-patients-api-db
-    username: test
+    url: jdbc:postgresql://localhost:5432/restricted-patients
+    username: restricted-patients
     password: test
 
 hmpps.sqs:

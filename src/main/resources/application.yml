@@ -30,7 +30,7 @@ spring:
     enabled: true
 
   datasource:
-    url: 'jdbc:h2:mem:restricted-patients-api-db;MODE=PostgreSQL'
+    url: 'jdbc:h2:mem:restricted-patients;MODE=PostgreSQL'
 
   security:
     oauth2:
