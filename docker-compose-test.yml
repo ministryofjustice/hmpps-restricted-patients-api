@@ -10,8 +10,7 @@ services:
       - "5432:5432"
     environment:
       - POSTGRES_PASSWORD=test
-      - POSTGRES_USER=test
-      - POSTGRES_DB=restricted-patients-api-db
+      - POSTGRES_USER=restricted-patients
 
   localstack:
     image: localstack/localstack:0.14.0

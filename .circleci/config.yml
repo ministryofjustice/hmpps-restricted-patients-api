@@ -1,7 +1,7 @@
 version: 2.1
 
 orbs:
-  hmpps: ministryofjustice/hmpps@dev:alpha
+  hmpps: ministryofjustice/hmpps@6.0.0
 
 jobs:
   validate:
@@ -10,9 +10,8 @@ jobs:
       jdk_tag: "18.0"
       localstack_tag: "0.14.0"
       postgres_tag: "14"
-      postgres_username: "test"
+      postgres_username: "restricted-patients"
       postgres_password: "test"
-      postgres_db: "restricted-patients-api-db"
     steps:
       - run:
           command: |
