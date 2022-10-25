@@ -22,7 +22,7 @@ class RestrictedPatientsBatchController(
    * conditional release date is in the past so shouldn't be handled by restricted patients anymore.
    */
   fun processPastDateRestrictedPatients(): Unit =
-    batchReleaseDateRemoval.removeNonLifePrisonersPastConditionalReleaseDate()
+    batchReleaseDateRemoval.removeNonLifePrisonersPastRelevantDate()
 
   @Hidden
   @PostMapping(value = ["/process-unknown-patient"])

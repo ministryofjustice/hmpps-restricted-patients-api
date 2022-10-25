@@ -62,7 +62,7 @@ class BatchReleaseDateRemovalTest {
       whenever(restrictedPatientsRepository.findAll()).thenReturn(listOf(restrictedPatient))
       whenever(prisonerSearchApiGateway.findByPrisonNumbers(any())).thenReturn(listOf(makePrisonerResult()))
 
-      service.removeNonLifePrisonersPastConditionalReleaseDate()
+      service.removeNonLifePrisonersPastRelevantDate()
 
       verifyNoInteractions(telemetryClient)
     }
@@ -72,7 +72,7 @@ class BatchReleaseDateRemovalTest {
       whenever(restrictedPatientsRepository.findAll()).thenReturn(MutableList(3500) { restrictedPatient })
       whenever(prisonerSearchApiGateway.findByPrisonNumbers(any())).thenReturn(listOf(makePrisonerResult()))
 
-      service.removeNonLifePrisonersPastConditionalReleaseDate()
+      service.removeNonLifePrisonersPastRelevantDate()
 
       argumentCaptor<List<String>>().apply {
         verify(prisonerSearchApiGateway, times(4)).findByPrisonNumbers(capture())
@@ -86,31 +86,46 @@ class BatchReleaseDateRemovalTest {
       whenever(prisonerSearchApiGateway.findByPrisonNumbers(any())).thenReturn(
         listOf(
           makePrisonerResult(
-            prisonerNumber = "YESTERDAY_FALSE",
-            conditionalReleaseDate = LocalDate.now().minusDays(1),
+            prisonerNumber = "YESTERDAY_RECALL_DETERMINATE",
+            sentenceExpiryDate = LocalDate.now().minusDays(1),
+            recall = true,
             indeterminateSentence = false,
+            legalStatus = "RECALL",
           ),
           makePrisonerResult(
-            prisonerNumber = "YESTERDAY_TRUE",
+            prisonerNumber = "YESTERDAY_NONRECALL_DETERMINATE",
             conditionalReleaseDate = LocalDate.now().minusDays(1),
+            recall = false,
+            indeterminateSentence = false,
+            legalStatus = "SENTENCED",
+          ),
+          makePrisonerResult(
+            prisonerNumber = "YESTERDAY_INDETERMINATE",
+            conditionalReleaseDate = LocalDate.now().minusDays(1),
+            recall = false,
             indeterminateSentence = true,
+            legalStatus = "RECALL",
           ),
           makePrisonerResult(
-            prisonerNumber = "YESTERDAY_NOTSET",
+            prisonerNumber = "YESTERDAY_SENTENCE_NOTSET",
             conditionalReleaseDate = LocalDate.now().minusDays(1),
+            recall = false,
             indeterminateSentence = null,
+            legalStatus = "SENTENCED",
           ),
           makePrisonerResult(
             prisonerNumber = "TODAY_FALSE",
             conditionalReleaseDate = LocalDate.now(),
+            recall = false,
             indeterminateSentence = false,
+            legalStatus = "SENTENCED",
           ),
         )
       )
 
-      service.removeNonLifePrisonersPastConditionalReleaseDate()
+      service.removeNonLifePrisonersPastRelevantDate()
 
-      verify(telemetryClient).trackEvent("restricted-patient-batch-removal", mapOf("prisonerNumbers" to "YESTERDAY_FALSE"), null)
+      verify(telemetryClient).trackEvent("restricted-patient-batch-removal", mapOf("prisonerNumbers" to "YESTERDAY_RECALL_DETERMINATE, YESTERDAY_NONRECALL_DETERMINATE"), null)
     }
   }
 }
