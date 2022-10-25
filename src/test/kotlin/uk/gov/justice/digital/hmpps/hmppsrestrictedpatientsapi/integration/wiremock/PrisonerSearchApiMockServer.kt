@@ -72,7 +72,8 @@ class PrisonerSearchApiMockServer : WireMockServer(8100) {
                   "pncNumberCanonicalShort": "96/371915Q",
                   "pncNumberCanonicalLong": "1996/371915Q",
                   "croNumber": "177155/96K",
-                  "bookingId": "1138058"    
+                  "bookingId": "1138058",
+                  "legalStatus": "UNKNOWN"
                 }               
               """.trimIndent()
             )
