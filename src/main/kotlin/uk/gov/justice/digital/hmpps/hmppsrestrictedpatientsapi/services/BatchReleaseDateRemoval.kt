@@ -15,13 +15,16 @@ class BatchReleaseDateRemoval(
   private val clock: Clock,
 ) {
 
-  fun removeNonLifePrisonersPastConditionalReleaseDate() {
+  fun removeNonLifePrisonersPastRelevantDate() {
     val now = LocalDate.now(clock)
     val toBeDeleted = restrictedPatientsRepository.findAll()
       .chunked(1000)
       .flatMap { chunk ->
         val results = prisonerSearchApiGateway.findByPrisonNumbers(chunk.map { it.prisonerNumber })
-        results.filter { it.indeterminateSentence == false && it.conditionalReleaseDate?.isBefore(now) ?: false }
+        results.filter {
+          it.indeterminateSentence == false &&
+            (it.isNotRecallPastConditionalRelease(now) || it.isRecallPastSentenceExpiry(now))
+        }
           .map { it.prisonerNumber }
       }
 

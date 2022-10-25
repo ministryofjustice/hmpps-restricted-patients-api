@@ -89,12 +89,18 @@ fun makePrisonerResult(
   prisonerNumber: String = "A12345",
   bookingId: Long = 1L,
   conditionalReleaseDate: LocalDate? = null,
+  sentenceExpiryDate: LocalDate? = null,
   indeterminateSentence: Boolean? = null,
+  recall: Boolean? = null,
+  legalStatus: String = "UNKNOWN",
 ): PrisonerResult = PrisonerResult(
   prisonerNumber = prisonerNumber,
   bookingId = bookingId,
   conditionalReleaseDate = conditionalReleaseDate,
+  sentenceExpiryDate = sentenceExpiryDate,
   indeterminateSentence = indeterminateSentence,
+  recall = recall,
+  legalStatus = legalStatus,
 )
 
 fun makePrisonerReceiveEvent(prisonerNumber: String) =
