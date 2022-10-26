@@ -33,6 +33,7 @@ internal class PrisonerResultTest {
         Arguments.of(makePrisonerResult(recall = true, legalStatus = "RECALL", sentenceExpiryDate = testDate.minusDays(1)), true),
         Arguments.of(makePrisonerResult(recall = true, legalStatus = "SENTENCED", sentenceExpiryDate = testDate.minusDays(1)), true),
         Arguments.of(makePrisonerResult(recall = true, legalStatus = "RECALL", sentenceExpiryDate = testDate.plusDays(1)), false),
+        Arguments.of(makePrisonerResult(recall = true, legalStatus = null, sentenceExpiryDate = testDate.plusDays(1)), false),
       )
 
     @JvmStatic
@@ -43,6 +44,7 @@ internal class PrisonerResultTest {
         Arguments.of(makePrisonerResult(recall = false, legalStatus = "SENTENCED", conditionalReleaseDate = testDate.minusDays(1)), true),
         Arguments.of(makePrisonerResult(recall = true, legalStatus = "SENTENCED", conditionalReleaseDate = testDate.minusDays(1)), false),
         Arguments.of(makePrisonerResult(recall = false, legalStatus = "SENTENCED", conditionalReleaseDate = testDate.plusDays(1)), false),
+        Arguments.of(makePrisonerResult(recall = false, legalStatus = null, conditionalReleaseDate = testDate.plusDays(1)), false),
       )
   }
 }
