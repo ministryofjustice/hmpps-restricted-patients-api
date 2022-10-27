@@ -70,3 +70,6 @@ ecr.repo
 #Helm
 **/Chart.lock
 helm_deploy/hmpps-restricted-patients-api/charts
+
+# localstack
+volume
