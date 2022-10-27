@@ -30,6 +30,11 @@ class RestrictedPatientCleanup(
     } ?: log.debug("Movement into prison for prisoner {} ignored as not a restricted patient", prisonerNumber)
   }
 
+  fun mergeRestrictedPatient(removedNomsNumber: String?, nomsNumber: String) {
+    // TODO: Add in logic for merging restricted patient
+    log.debug("Merge event received - old prisoner number {}, new prisoner number {}", removedNomsNumber, nomsNumber)
+  }
+
   private companion object {
     private val log: Logger = LoggerFactory.getLogger(this::class.java)
   }

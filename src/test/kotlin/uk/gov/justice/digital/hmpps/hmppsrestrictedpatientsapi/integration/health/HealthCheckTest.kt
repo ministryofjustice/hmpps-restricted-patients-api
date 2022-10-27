@@ -21,6 +21,22 @@ class HealthCheckTest : IntegrationTestBase() {
   }
 
   @Nested
+  inner class DomainEventQueueTests {
+    @Test
+    fun `Queue health ok and dlq health ok, reports everything up`() {
+      webTestClient.get()
+        .uri("/health")
+        .headers(setHeaders())
+        .exchange()
+        .expectStatus().isOk
+        .expectBody()
+        .jsonPath("$.status").isEqualTo("UP")
+        .jsonPath("$.components.domainevents-health.status").isEqualTo("UP")
+        .jsonPath("$.components.domainevents-health.details.dlqStatus").isEqualTo("UP")
+    }
+  }
+
+  @Nested
   inner class OffenderEventQueueTests {
     @Test
     fun `Queue health ok and dlq health ok, reports everything up`() {
