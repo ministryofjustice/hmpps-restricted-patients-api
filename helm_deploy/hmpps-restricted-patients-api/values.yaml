@@ -68,7 +68,7 @@ generic-service:
       HMPPS_SQS_QUEUES_DOMAINEVENTS_QUEUE_ACCESS_KEY_ID: "access_key_id"
       HMPPS_SQS_QUEUES_DOMAINEVENTS_QUEUE_SECRET_ACCESS_KEY: "secret_access_key"
       HMPPS_SQS_QUEUES_DOMAINEVENTS_QUEUE_NAME: "sqs_queue_name"
-    restricted-patients-dlq-queue-for-domain-events:
+    restricted-patients-dlq-for-domain-events:
       HMPPS_SQS_QUEUES_DOMAINEVENTS_DLQ_ACCESS_KEY_ID: "access_key_id"
       HMPPS_SQS_QUEUES_DOMAINEVENTS_DLQ_SECRET_ACCESS_KEY: "secret_access_key"
       HMPPS_SQS_QUEUES_DOMAINEVENTS_DLQ_NAME: "sqs_queue_name"

@@ -14,7 +14,7 @@ class DomainEventSubscriberTest {
   private val domainEventSubscriber = DomainEventSubscriber(GsonAutoConfiguration().gson(GsonBuilder()), restrictedPatientCleanup)
 
   @Test
-  fun `calls delete restricted patient when a new external movement going into a prison is received`() {
+  fun `calls merge restricted patient when two prisoner records are merged`() {
     domainEventSubscriber.handleEvents(makePrisonerMergeEvent("A12345", "A23456"))
     verify(restrictedPatientCleanup).mergeRestrictedPatient("A12345", "A23456")
   }
