@@ -12,6 +12,7 @@ data class MovementResponse(
   val movementTime: String?,
   val movementType: String?,
   val commentText: String?,
+  val toAgency: String?,
 )
 
 data class RestrictivePatient(

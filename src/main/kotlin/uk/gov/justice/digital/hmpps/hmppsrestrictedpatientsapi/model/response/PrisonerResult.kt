@@ -10,6 +10,8 @@ data class PrisonerResult(
   val recall: Boolean?,
   val indeterminateSentence: Boolean?, // will be null if no sentences set
   val legalStatus: String?, // can be null for some reason
+  val lastMovementTypeCode: String?,
+  val lastMovementReasonCode: String?,
 ) {
 
   // I think this is due to dodgy sentence data, but some of the recalls have legal status of INDETERMINATE_SENTENCE

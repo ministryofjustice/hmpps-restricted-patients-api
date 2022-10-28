@@ -4,6 +4,7 @@ package uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.service
 
 import com.microsoft.applicationinsights.TelemetryClient
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -13,12 +14,14 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.verifyNoInteractions
 import org.mockito.kotlin.whenever
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.dataBuilders.makeRestrictedPatient
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.entities.RestrictedPatient
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.repositories.RestrictedPatientsRepository
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services.DomainEventPublisher
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services.RestrictedPatientCleanup
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services.RestrictedPatientCleanup.MergeRestrictedPatientNotImplemented
 import java.time.LocalDateTime
 import java.util.Optional
 
@@ -27,8 +30,18 @@ class RestrictedPatientCleanupTest {
   private val domainEventPublisher: DomainEventPublisher = mock()
   private val telemetryClient: TelemetryClient = mock()
 
-  private val restrictedPatientCleanupMergesDisabled = RestrictedPatientCleanup(restrictedPatientsRepository, domainEventPublisher, telemetryClient, false)
-  private val restrictedPatientCleanup = RestrictedPatientCleanup(restrictedPatientsRepository, domainEventPublisher, telemetryClient, true)
+  private val restrictedPatientCleanupMergesDisabled = RestrictedPatientCleanup(
+    restrictedPatientsRepository,
+    domainEventPublisher,
+    telemetryClient,
+    false,
+  )
+  private val restrictedPatientCleanup = RestrictedPatientCleanup(
+    restrictedPatientsRepository,
+    domainEventPublisher,
+    telemetryClient,
+    true,
+  )
 
   @Nested
   inner class deleteRestrictedPatientOnExternalMovementIntoPrison {
@@ -40,7 +53,7 @@ class RestrictedPatientCleanupTest {
 
         restrictedPatientCleanup.deleteRestrictedPatientOnExternalMovementIntoPrison("A12345")
 
-        verify(telemetryClient, never()).trackEvent(anyString(), any(), any())
+        verifyNoInteractions(telemetryClient)
       }
     }
 
@@ -105,18 +118,24 @@ class RestrictedPatientCleanupTest {
       restrictedPatientCleanupMergesDisabled.mergeRestrictedPatient("A12345", "A23456")
       verify(telemetryClient, never()).trackEvent(anyString(), any(), any())
     }
-    @Test
-    fun `calls the telemetry client`() {
-      restrictedPatientCleanup.mergeRestrictedPatient("A12345", "A23456")
 
-      verify(telemetryClient).trackEvent(
-        "restricted-patient-merge-cleanup",
-        mapOf(
-          "removedPrisonerNumber" to "A12345",
-          "prisonerNumber" to "A23456",
-        ),
-        null
-      )
+    @Test
+    fun `do nothing if removed prisoner doesn't exist`() {
+      whenever(restrictedPatientsRepository.findById(anyString())).thenReturn(Optional.empty())
+      restrictedPatientCleanup.mergeRestrictedPatient("A12345", "A23456")
+      verifyNoInteractions(telemetryClient)
+      verify(restrictedPatientsRepository).findById("A12345")
+    }
+
+    @Test
+    fun `fails as not implemented`() {
+      whenever(restrictedPatientsRepository.findById("A12345")).thenReturn(Optional.of(makeRestrictedPatient()))
+      assertThatThrownBy {
+        restrictedPatientCleanup.mergeRestrictedPatient("A12345", "A23456")
+      }.isInstanceOf(MergeRestrictedPatientNotImplemented::class.java)
+        .hasMessage("Merge not implemented. Patient A12345 was at hospital HAZLWD but record merged into A23456")
+
+      verifyNoInteractions(telemetryClient)
     }
   }
 }
