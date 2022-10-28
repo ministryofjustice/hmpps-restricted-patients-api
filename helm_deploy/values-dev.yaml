@@ -15,7 +15,6 @@ generic-service:
     CASENOTES_API_ENDPOINT_URL: https://dev.offender-case-notes.service.justice.gov.uk
     OAUTH_ENDPOINT_URL: https://sign-in-dev.hmpps.service.justice.gov.uk/auth
     SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: https://sign-in-dev.hmpps.service.justice.gov.uk/auth/.well-known/jwks.json
-    BATCH_MERGES_ENABLED: true
 
   allowlist: null
 

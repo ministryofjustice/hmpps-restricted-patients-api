@@ -10,9 +10,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.anyString
-import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
-import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoInteractions
 import org.mockito.kotlin.whenever
@@ -30,95 +28,75 @@ class RestrictedPatientCleanupTest {
   private val domainEventPublisher: DomainEventPublisher = mock()
   private val telemetryClient: TelemetryClient = mock()
 
-  private val restrictedPatientCleanupMergesDisabled = RestrictedPatientCleanup(
-    restrictedPatientsRepository,
-    domainEventPublisher,
-    telemetryClient,
-    false,
-  )
-  private val restrictedPatientCleanup = RestrictedPatientCleanup(
-    restrictedPatientsRepository,
-    domainEventPublisher,
-    telemetryClient,
-    true,
-  )
+  private val restrictedPatientCleanup = RestrictedPatientCleanup(restrictedPatientsRepository, domainEventPublisher, telemetryClient)
 
   @Nested
-  inner class deleteRestrictedPatientOnExternalMovementIntoPrison {
-    @Nested
-    inner class ErrorHandling {
-      @Test
-      fun `fails gracefully when the restricted patient record no longer exists`() {
-        whenever(restrictedPatientsRepository.findById(anyString())).thenReturn(Optional.empty())
+  inner class ErrorHandling {
+    @Test
+    fun `fails gracefully when the restricted patient record no longer exists`() {
+      whenever(restrictedPatientsRepository.findById(anyString())).thenReturn(Optional.empty())
 
-        restrictedPatientCleanup.deleteRestrictedPatientOnExternalMovementIntoPrison("A12345")
+      restrictedPatientCleanup.deleteRestrictedPatientOnExternalMovementIntoPrison("A12345")
 
-        verifyNoInteractions(telemetryClient)
-      }
+      verifyNoInteractions(telemetryClient)
+    }
+  }
+
+  @Nested
+  inner class WithValidBookingAndRestrictedPatient {
+    @BeforeEach
+    fun beforeEach() {
+      whenever(restrictedPatientsRepository.findById(anyString())).thenReturn(Optional.of(makeRestrictedPatient()))
     }
 
-    @Nested
-    inner class WithValidBookingAndRestrictedPatient {
-      @BeforeEach
-      fun beforeEach() {
-        whenever(restrictedPatientsRepository.findById(anyString())).thenReturn(Optional.of(makeRestrictedPatient()))
-      }
+    @Test
+    fun `loads the restricted patient by prisoner number`() {
+      restrictedPatientCleanup.deleteRestrictedPatientOnExternalMovementIntoPrison("A12345")
 
-      @Test
-      fun `loads the restricted patient by prisoner number`() {
-        restrictedPatientCleanup.deleteRestrictedPatientOnExternalMovementIntoPrison("A12345")
+      verify(restrictedPatientsRepository).findById("A12345")
+    }
 
-        verify(restrictedPatientsRepository).findById("A12345")
-      }
+    @Test
+    fun `loads the restricted patient then deletes it`() {
+      restrictedPatientCleanup.deleteRestrictedPatientOnExternalMovementIntoPrison("A12345")
 
-      @Test
-      fun `loads the restricted patient then deletes it`() {
-        restrictedPatientCleanup.deleteRestrictedPatientOnExternalMovementIntoPrison("A12345")
+      val argumentCaptor = ArgumentCaptor.forClass(RestrictedPatient::class.java)
 
-        val argumentCaptor = ArgumentCaptor.forClass(RestrictedPatient::class.java)
+      verify(restrictedPatientsRepository).delete(argumentCaptor.capture())
 
-        verify(restrictedPatientsRepository).delete(argumentCaptor.capture())
+      assertThat(argumentCaptor.value).extracting(
+        "prisonerNumber",
+        "fromLocationId",
+        "hospitalLocationCode",
+        "supportingPrisonId",
+        "dischargeTime",
+        "commentText"
+      ).contains("A12345", "MDI", "HAZLWD", "MDI", LocalDateTime.parse("2020-10-10T20:00:01"), "test")
+    }
 
-        assertThat(argumentCaptor.value).extracting(
-          "prisonerNumber",
-          "fromLocationId",
-          "hospitalLocationCode",
-          "supportingPrisonId",
-          "dischargeTime",
-          "commentText"
-        ).contains("A12345", "MDI", "HAZLWD", "MDI", LocalDateTime.parse("2020-10-10T20:00:01"), "test")
-      }
+    @Test
+    fun `triggers a telemetry event`() {
+      restrictedPatientCleanup.deleteRestrictedPatientOnExternalMovementIntoPrison("A12345")
 
-      @Test
-      fun `triggers a telemetry event`() {
-        restrictedPatientCleanup.deleteRestrictedPatientOnExternalMovementIntoPrison("A12345")
+      verify(telemetryClient).trackEvent(
+        "restricted-patient-removed-cleanup",
+        mapOf(
+          "prisonerNumber" to "A12345",
+        ),
+        null
+      )
+    }
 
-        verify(telemetryClient).trackEvent(
-          "restricted-patient-removed-cleanup",
-          mapOf(
-            "prisonerNumber" to "A12345",
-          ),
-          null
-        )
-      }
+    @Test
+    fun `calls the domainEventPublisher service to raise a restricted patient removed event`() {
+      restrictedPatientCleanup.deleteRestrictedPatientOnExternalMovementIntoPrison("A12345")
 
-      @Test
-      fun `calls the domainEventPublisher service to raise a restricted patient removed event`() {
-        restrictedPatientCleanup.deleteRestrictedPatientOnExternalMovementIntoPrison("A12345")
-
-        verify(domainEventPublisher).publishRestrictedPatientRemoved("A12345")
-      }
+      verify(domainEventPublisher).publishRestrictedPatientRemoved("A12345")
     }
   }
 
   @Nested
   inner class mergeRestrictedPatient {
-    @Test
-    fun `does nothing if merges disabled`() {
-      restrictedPatientCleanupMergesDisabled.mergeRestrictedPatient("A12345", "A23456")
-      verify(telemetryClient, never()).trackEvent(anyString(), any(), any())
-    }
-
     @Test
     fun `do nothing if removed prisoner doesn't exist`() {
       whenever(restrictedPatientsRepository.findById(anyString())).thenReturn(Optional.empty())
