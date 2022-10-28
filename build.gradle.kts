@@ -1,5 +1,5 @@
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "4.5.6-beta"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "4.5.6"
   kotlin("plugin.spring") version "1.7.20"
   kotlin("plugin.jpa") version "1.7.20"
 }
@@ -20,7 +20,7 @@ dependencies {
   implementation("org.springdoc:springdoc-openapi-kotlin:1.6.12")
   implementation("org.springdoc:springdoc-openapi-data-rest:1.6.12")
   implementation("org.springframework:spring-jms")
-  implementation("com.google.code.gson:gson:2.9.1")
+  implementation("com.google.code.gson:gson:2.10")
   implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:1.1.12")
   implementation("org.apache.commons:commons-csv:1.9.0")
 
