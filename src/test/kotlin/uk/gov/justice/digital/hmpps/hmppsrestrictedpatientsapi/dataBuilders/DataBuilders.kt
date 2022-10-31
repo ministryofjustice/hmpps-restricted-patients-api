@@ -93,6 +93,8 @@ fun makePrisonerResult(
   indeterminateSentence: Boolean? = null,
   recall: Boolean? = null,
   legalStatus: String? = "UNKNOWN",
+  lastMovementTypeCode: String? = null,
+  lastMovementReasonCode: String? = null,
 ): PrisonerResult = PrisonerResult(
   prisonerNumber = prisonerNumber,
   bookingId = bookingId,
@@ -101,6 +103,8 @@ fun makePrisonerResult(
   indeterminateSentence = indeterminateSentence,
   recall = recall,
   legalStatus = legalStatus,
+  lastMovementTypeCode = lastMovementTypeCode,
+  lastMovementReasonCode = lastMovementReasonCode,
 )
 
 fun makePrisonerMergeEvent(removedPrisonerNumber: String = "A4432FD", prisonerNumber: String) =
@@ -140,11 +144,13 @@ fun makeLatestMovementReturn(
   movementDate: String? = "2022-05-01",
   movementTime: String? = "15:33:11",
   movementType: String = "REL",
-  commentText: String? = "Released for some reason"
+  commentText: String? = "Released for some reason",
+  toAgency: String? = null,
 ): MovementResponse = MovementResponse(
   fromAgency,
   movementDate,
   movementTime,
   movementType,
-  commentText
+  commentText,
+  toAgency,
 )
