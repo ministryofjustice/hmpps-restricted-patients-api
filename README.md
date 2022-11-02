@@ -39,7 +39,32 @@ The message is published via amazon sns. The payload is defined below.
 This service subscribes to a `prison-offender-events.prisoner.received`, which indicates that a prisoner has been
 received into prison.  We check to see if the prisoner was a restricted patient and remove them if necessary.
 
+### Subscribe -> prison-offender-events.prisoner.merged
+We listen into prisoner merge events to see if a restricted patient has been merged.  At present the code is detection
+only, so we spot a merge and then throw an exception so that the message is kept on the dead letter queue and constantly
+retried.  This is because merges don't happen that frequently anyway and the code to deal with the merge would be
+quite complicated, so it is better for now to just require manual intervention to resolve.  A restricted patient is
+also still serving an active sentence so wouldn't normally be expected to be merged with a different record.
+
+When a message is stuck on the dead letter queue look in application insights
+```
+traces
+| where cloud_RoleName == 'hmpps-restricted-patients-api'
+```
+should show the issue.  There will be a message similar to
+```
+Merge not implemented. Patient A1234BC was at hospital ESURRY but record merged into B2345CD
+```
+If the merged offender is now in prison then it could just be a case of removing the manually removing the database
+record from restricted patients. This could be either of the prisoner numbers depending on which was the oldest NOMS
+number.
+If the merged offender is outside of prison then the movements and sentence information need to be investigated to work
+out whether the prisoner should still be in hospital or has now been released.  It has been known for the merge to be
+done the wrong way round with an old booking now as the latest booking record, rather than the movement to hospital
+being the last booking record.  In that case syscon will need to amend the results of the merge.
+
 ## Prisoner offender events
+### Subscribe -> OFFENDER_MOVEMENT-RECEPTION
 
 This service subscribes to a `OFFENDER_MOVEMENT-RECEPTION`, which indicates that a prisoner has been
 received into prison.  We check to see if the prisoner was a restricted patient and remove them if necessary.
