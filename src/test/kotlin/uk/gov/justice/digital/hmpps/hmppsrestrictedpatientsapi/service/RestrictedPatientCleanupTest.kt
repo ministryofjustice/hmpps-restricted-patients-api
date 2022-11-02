@@ -106,12 +106,23 @@ class RestrictedPatientCleanupTest {
     }
 
     @Test
-    fun `fails as not implemented`() {
+    fun `fails as not implemented on old prisoner`() {
       whenever(restrictedPatientsRepository.findById("A12345")).thenReturn(Optional.of(makeRestrictedPatient()))
       assertThatThrownBy {
         restrictedPatientCleanup.mergeRestrictedPatient("A12345", "A23456")
       }.isInstanceOf(MergeRestrictedPatientNotImplemented::class.java)
         .hasMessage("Merge not implemented. Patient A12345 was at hospital HAZLWD but record merged into A23456")
+
+      verifyNoInteractions(telemetryClient)
+    }
+
+    @Test
+    fun `fails as not implemented on new prisoner`() {
+      whenever(restrictedPatientsRepository.findById("A23456")).thenReturn(Optional.of(makeRestrictedPatient()))
+      assertThatThrownBy {
+        restrictedPatientCleanup.mergeRestrictedPatient("A12345", "A23456")
+      }.isInstanceOf(MergeRestrictedPatientNotImplemented::class.java)
+        .hasMessage("Merge not implemented. Patient A12345 is at hospital HAZLWD.  Record merged from A12345")
 
       verifyNoInteractions(telemetryClient)
     }

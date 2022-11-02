@@ -19,5 +19,10 @@ generic-service:
 # CloudPlatform AlertManager receiver to route prometheus alerts to slack
 generic-prometheus-alerts:
   alertSeverity: digital-prison-service-dev
+  sqsAlertsQueueNames:
+    - "Digital-Prison-Services-preprod-restricted_patients_queue"
+    - "Digital-Prison-Services-preprod-restricted_patients_queue_dl"
+    - "Digital-Prison-Services-preprod-rp_queue_for_domain_events"
+    - "Digital-Prison-Services-preprod-rp_queue_for_domain_events_dl"
 
 environment: preprod
