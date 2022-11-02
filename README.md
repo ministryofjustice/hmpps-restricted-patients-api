@@ -55,13 +55,18 @@ should show the issue.  There will be a message similar to
 ```
 Merge not implemented. Patient A1234BC was at hospital ESURRY but record merged into B2345CD
 ```
-If the merged offender is now in prison then it could just be a case of removing the manually removing the database
+If the merged offender is now in prison then it could just be a case of manually removing the database
 record from restricted patients. This could be either of the prisoner numbers depending on which was the oldest NOMS
 number.
 If the merged offender is outside of prison then the movements and sentence information need to be investigated to work
-out whether the prisoner should still be in hospital or has now been released.  It has been known for the merge to be
-done the wrong way round with an old booking now as the latest booking record, rather than the movement to hospital
-being the last booking record.  In that case syscon will need to amend the results of the merge.
+out whether the prisoner should still be in hospital or has now been released.  If the prisoner has been released then
+again the database record needs to be removed.  If the prisoner should still be in hospital then it could be a case of
+changing the database record to point to the new prisoner number, or removing one of the rows if the prisoner was in
+hospital under both records.
+
+It has been known for the merge to be done the wrong way round with an old booking now as the latest booking record,
+rather than the movement to hospital being the last booking record.  In that case raise the issue in #ask-prison-nomis,
+it could be the case that syscon have to run a script to amend the sequence of the bookings in the merge.
 
 ## Prisoner offender events
 ### Subscribe -> OFFENDER_MOVEMENT-RECEPTION
