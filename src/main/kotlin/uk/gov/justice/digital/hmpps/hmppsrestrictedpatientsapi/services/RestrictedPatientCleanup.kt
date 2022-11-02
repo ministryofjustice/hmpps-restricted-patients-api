@@ -31,15 +31,22 @@ class RestrictedPatientCleanup(
   }
 
   fun mergeRestrictedPatient(removedPrisonerNumber: String?, prisonerNumber: String) {
-    restrictedPatientsRepository.findByIdOrNull(removedPrisonerNumber)?.let { removed ->
-      // we don't expect this scenario to happen and there are lots of edge cases where we wouldn't be able to do the
-      // merge automatically anyway so better to just throw our toys out of the pram.
-      // Fix would normally be to manually remove the old prisoner number from the restricted patients database
-      // and then work out where the prisoner is now and move them to the correct hospital if required.
+    // If we find that either side of the merge was a restricted patient then we throw our toys out of the pram.
+    // Fix would normally be to manually remove the old prisoner number from the restricted patients database
+    // and then work out where the prisoner is now and move them to the correct hospital if required.  See README.md.
+    restrictedPatientsRepository.findByIdOrNull(removedPrisonerNumber)?.let {
       throw MergeRestrictedPatientNotImplemented(
-        "Merge not implemented. Patient ${removed.prisonerNumber} was at hospital ${removed.hospitalLocationCode} but record merged into $prisonerNumber"
+        "Merge not implemented. Patient ${it.prisonerNumber} was at hospital ${it.hospitalLocationCode} but record merged into $prisonerNumber"
       )
-    } ?: log.debug("Merge for removed prisoner {} ignored as not a restricted patient", removedPrisonerNumber)
+    }
+
+    restrictedPatientsRepository.findByIdOrNull(prisonerNumber)?.let {
+      throw MergeRestrictedPatientNotImplemented(
+        "Merge not implemented. Patient ${it.prisonerNumber} is at hospital ${it.hospitalLocationCode}.  Record merged from $removedPrisonerNumber"
+      )
+    }
+
+    log.debug("Merge from prisoner {} to prisoner {} ignored as neither a restricted patient", removedPrisonerNumber, prisonerNumber)
   }
 
   private companion object {
