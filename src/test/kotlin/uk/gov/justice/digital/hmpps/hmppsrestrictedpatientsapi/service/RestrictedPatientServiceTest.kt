@@ -2,7 +2,7 @@ package uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.service
 
 import com.microsoft.applicationinsights.TelemetryClient
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -10,6 +10,7 @@ import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.kotlin.any
+import org.mockito.kotlin.check
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.inOrder
 import org.mockito.kotlin.mock
@@ -95,7 +96,7 @@ class RestrictedPatientServiceTest {
     fun `handles no restricted patient record exists`() {
       whenever(restrictedPatientsRepository.findById(anyString())).thenReturn(Optional.empty())
 
-      val exception = Assertions.assertThrows(EntityNotFoundException::class.java) {
+      val exception = assertThrows(EntityNotFoundException::class.java) {
         service.removeRestrictedPatient("A12345")
       }
 
@@ -121,7 +122,7 @@ class RestrictedPatientServiceTest {
       )
       whenever(prisonerSearchApiGateway.searchByPrisonNumber(anyString())).thenReturn(emptyList())
 
-      val exception = Assertions.assertThrows(EntityNotFoundException::class.java) {
+      val exception = assertThrows(EntityNotFoundException::class.java) {
         service.removeRestrictedPatient("A12345")
       }
 
@@ -225,7 +226,7 @@ class RestrictedPatientServiceTest {
       fun `throws exception when offender not found`() {
         whenever(prisonApiGateway.getOffenderBooking(any())).thenReturn(null)
 
-        Assertions.assertThrows(EntityNotFoundException::class.java) {
+        assertThrows(EntityNotFoundException::class.java) {
           service.dischargeToHospital(makeDischargeRequest())
         }
       }
@@ -236,7 +237,7 @@ class RestrictedPatientServiceTest {
           OffenderBookingResponse(1234567, "A1234AA", false)
         )
 
-        Assertions.assertThrows(EntityNotFoundException::class.java) {
+        assertThrows(EntityNotFoundException::class.java) {
           service.dischargeToHospital(makeDischargeRequest())
         }
       }
@@ -245,7 +246,7 @@ class RestrictedPatientServiceTest {
       fun `throws exception when the offender is already a restricted patient`() {
         whenever(restrictedPatientsRepository.findById(anyString())).thenReturn(Optional.of(makeRestrictedPatient()))
 
-        Assertions.assertThrows(BadRequestException::class.java) {
+        assertThrows(BadRequestException::class.java) {
           service.dischargeToHospital(makeDischargeRequest())
         }
       }
@@ -258,7 +259,7 @@ class RestrictedPatientServiceTest {
         )
         whenever(prisonApiGateway.dischargeToHospital(any(), anyBoolean())).thenThrow(WebClientResponseException::class.java)
 
-        Assertions.assertThrows(WebClientResponseException::class.java) {
+        assertThrows(WebClientResponseException::class.java) {
           service.dischargeToHospital(makeDischargeRequest())
         }
 
@@ -345,7 +346,7 @@ class RestrictedPatientServiceTest {
       fun `throws entity not found`() {
         whenever(restrictedPatientsRepository.findById(any())).thenReturn(Optional.empty())
 
-        Assertions.assertThrows(EntityNotFoundException::class.java) {
+        assertThrows(EntityNotFoundException::class.java) {
           service.getRestrictedPatient("A12345")
         }
       }
@@ -389,7 +390,7 @@ class RestrictedPatientServiceTest {
       fun `throws exception when the offender is already a restricted patient`() {
         whenever(restrictedPatientsRepository.findById(anyString())).thenReturn(Optional.of(makeRestrictedPatient()))
 
-        Assertions.assertThrows(BadRequestException::class.java) {
+        assertThrows(BadRequestException::class.java) {
           service.migrateInPatient(makeMigrateInRequest())
         }
       }
@@ -398,7 +399,7 @@ class RestrictedPatientServiceTest {
       fun `throws exception when the offender has not got any previous movements`() {
         whenever(prisonApiGateway.getLatestMovements(any())).thenReturn(emptyList())
 
-        Assertions.assertThrows(BadRequestException::class.java) {
+        assertThrows(BadRequestException::class.java) {
           service.migrateInPatient(makeMigrateInRequest())
         }
       }
@@ -407,7 +408,7 @@ class RestrictedPatientServiceTest {
       fun `throws exception when Prison API returns multiple movements`() {
         whenever(prisonApiGateway.getLatestMovements(any())).thenReturn(listOf(makeLatestMovementReturn(), makeLatestMovementReturn()))
 
-        Assertions.assertThrows(RuntimeException::class.java) {
+        assertThrows(RuntimeException::class.java) {
           service.migrateInPatient(makeMigrateInRequest())
         }
       }
@@ -419,7 +420,7 @@ class RestrictedPatientServiceTest {
         )
         whenever(prisonApiGateway.getLatestMovements(any())).thenReturn(listOf(nonRelMovement))
 
-        Assertions.assertThrows(BadRequestException::class.java) {
+        assertThrows(BadRequestException::class.java) {
           service.migrateInPatient(makeMigrateInRequest())
         }
       }
@@ -431,7 +432,7 @@ class RestrictedPatientServiceTest {
         )
         whenever(prisonApiGateway.getLatestMovements(any())).thenReturn(listOf(movementWithoutFromAgency))
 
-        Assertions.assertThrows(BadRequestException::class.java) {
+        assertThrows(BadRequestException::class.java) {
           service.migrateInPatient(makeMigrateInRequest())
         }
       }
@@ -443,7 +444,7 @@ class RestrictedPatientServiceTest {
         )
         whenever(prisonApiGateway.getLatestMovements(any())).thenReturn(listOf(movementWithInvalidDate))
 
-        Assertions.assertThrows(BadRequestException::class.java) {
+        assertThrows(BadRequestException::class.java) {
           service.migrateInPatient(makeMigrateInRequest())
         }
       }
@@ -455,7 +456,7 @@ class RestrictedPatientServiceTest {
         )
         whenever(prisonApiGateway.getLatestMovements(any())).thenReturn(listOf(movementWithInvalidTime))
 
-        Assertions.assertThrows(BadRequestException::class.java) {
+        assertThrows(BadRequestException::class.java) {
           service.migrateInPatient(makeMigrateInRequest())
         }
       }
@@ -466,7 +467,7 @@ class RestrictedPatientServiceTest {
         whenever(prisonApiGateway.getLatestMovements(any())).thenReturn(listOf(makeLatestMovementReturn()))
         whenever(prisonApiGateway.dischargeToHospital(any(), anyBoolean())).thenThrow(WebClientResponseException::class.java)
 
-        Assertions.assertThrows(WebClientResponseException::class.java) {
+        assertThrows(WebClientResponseException::class.java) {
           service.migrateInPatient(makeMigrateInRequest())
         }
 
@@ -568,6 +569,59 @@ class RestrictedPatientServiceTest {
         service.migrateInPatient(makeMigrateInRequest())
 
         verify(prisonerSearchApiGateway).refreshPrisonerIndex("A12345")
+      }
+    }
+
+    @Nested
+    inner class SuccessfulMigrationWithCommentsSanitised {
+      private val dischargeDate = "2022-05-02"
+      private val dischargeTime = "15:00:11"
+      private val dischargeDateTime = LocalDateTime.parse("${dischargeDate}T$dischargeTime")
+      private val testComment = "A test comment with TO=ST NICH''S NEWCASTLE"
+
+      private val migratedRestrictedPatient = RestrictedPatient(
+        prisonerNumber = "A12345",
+        fromLocationId = "MDI",
+        hospitalLocationCode = "HAZLWD",
+        supportingPrisonId = "MDI",
+        dischargeTime = dischargeDateTime,
+        commentText = testComment
+      )
+
+      @BeforeEach
+      fun beforeEach() {
+        whenever(restrictedPatientsRepository.saveAndFlush(any())).thenReturn(
+          makeRestrictedPatient(
+            dischargeTime = dischargeDateTime,
+            commentText = "comment saved to restricted patients"
+          )
+        )
+        whenever(prisonApiGateway.getLatestMovements(any())).thenReturn(
+          listOf(
+            makeLatestMovementReturn(
+              movementDate = dischargeDate,
+              movementTime = dischargeTime,
+              commentText = testComment
+            )
+          )
+        )
+      }
+
+      @Test
+      fun `it makes a call to prison api to update discharge record`() {
+        val response = service.migrateInPatient(makeMigrateInRequest())
+        assertThat(response.commentText).isEqualTo("comment saved to restricted patients")
+        verify(restrictedPatientsRepository).saveAndFlush(
+          check {
+            assertThat(it.commentText).isEqualTo("A test comment with TO=ST NICH'S NEWCASTLE")
+          }
+        )
+        verify(prisonApiGateway).dischargeToHospital(
+          newRestrictedPatient = check {
+            assertThat(it.commentText).isEqualTo("comment saved to restricted patients")
+          },
+          noEventPropagation = eq(false)
+        )
       }
     }
   }
