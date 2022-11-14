@@ -14,22 +14,28 @@ GTI,HMP Gartree
 GNI,HMP Grendon
 HEI,HMP Hewell
 HOI,HMP High Down
+HPI,HMP Highpoint
 HLI,HMP Hull
 LEI,HMP Leeds
 LCI,HMP Leicester
 LWI,HMP Lewes
 LII,HMP Lincoln
+LHI,HMP Lindholme
 LPI,HMP Liverpool
 MSI,HMP Maidstone
 MRI,HMP Manchester
+NMI,HMP Nottingham
 PVI,HMP Pentonville
 PFI,HMP Peterborough
+RCI,HMP Rochester
+RHI,HMP Rye Hill
 SLI,HMP Swaleside
 WDI,HMP Wakefield
 WWI,HMP Wandsworth
-XXX,HMP Windmill Hill
+WRI,HMP Whitemoor
 WHI,HMP Woodhill
 WSI,HMP Wormwood Scrubs
+EXI,HMP/YOI Exeter
 FBI,HMP/YOI Forest Bank
 NHI,HMP/YOI New Hall
 STI,HMP/YOI Styal
@@ -37,3 +43,7 @@ AYI,HMYOI Aylesbury
 HII,HMYOI Hindley
 LNI,HMYOI Low Newton
 SNI,HMYOI Swinfen Hall
+GTI,Unknown - transferred from HMP Gartree
+HDI,zzzHMP/YOI Moorland Open (Now Hatfield)
+IWI,zzzIsle of Wight (HMP - Albany site)
+IWI,zzzIsle of Wight (HMP - Parkhurst site)
