@@ -70,7 +70,7 @@ class RestrictedPatientsService(
       hospitalLocationCode = migrateIn.hospitalLocationCode,
       supportingPrisonId = dischargeData.fromLocationId,
       dischargeTime = dischargeData.dischargeTime,
-      commentText = dischargeData.comment?.replace("''", "'")
+      commentText = "Historical discharge to hospital added to restricted patients"
     )
       .let { addRestrictedPatient(it) }
       .also { prisonerSearchApiGateway.refreshPrisonerIndex(migrateIn.offenderNo) }
