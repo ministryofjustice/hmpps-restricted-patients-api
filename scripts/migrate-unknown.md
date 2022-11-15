@@ -6,11 +6,11 @@ We have many patients who do not have NOMIS records but need adding to Restricte
 
 ## Pre-requisites
 
-Obtain a copy of the spreadsheet containing these patients - currently named `15922 MHCS RP data no queries`. Export the worksheet `MHCS data included` as a CSV file and copy it into this directory with file name `unknown-patients.csv`.
+Obtain a copy of the spreadsheet containing these patients - currently named `RP no NOMIS`. Export the worksheet `mhcs_data_included` as a CSV file and copy it into this directory with file name `unknown-patients.csv`.
 
 The script needs a valid HMPPS-Auth token with role `ROLE_RESTRICTED_PATIENT_MIGRATION` and a NOMIS user in the `user_name` claim (achieved by adding `?username=<enter-username-here>` to the Access Token URL).
 
-The case note type/sub-type `MIGRATION`/`OBS_GEN` needs activating in production NOMIS. You can request this in the `#ask_prison_nomis` Slack channel, and when the migration is complete it should be turned off again.
+The case note type/sub-type `MIGRATION`/`OBS_GEN` needs activating in production NOMIS. You can request this in the `#ask_prison_nomis` Slack channel, and when the migration is complete it should be turned off again. Once activated the case note type cache will need refreshing in prisonm-api - use command `kubectl rollout restart deployment/prison-api`. Once complete the case note type should be deactivated - make this request in `#ask_prison_nomis`.
 
 ## Method
 
