@@ -545,13 +545,11 @@ class RestrictedPatientServiceTest {
 
         verify(restrictedPatientsRepository).saveAndFlush(argumentCaptor.capture())
 
-        assertThat(argumentCaptor.value).extracting(
-          "fromLocationId",
-          "supportingPrisonId",
-          "hospitalLocationCode",
-          "commentText",
-          "dischargeTime"
-        ).contains("MDI", "MDI", "HAZLWD", testComment, LocalDateTime.parse("${dischargeDate}T$dischargeTime"))
+        assertThat(argumentCaptor.value.fromLocationId).isEqualTo("MDI")
+        assertThat(argumentCaptor.value.supportingPrisonId).isEqualTo("MDI")
+        assertThat(argumentCaptor.value.hospitalLocationCode).isEqualTo("HAZLWD")
+        assertThat(argumentCaptor.value.commentText).isEqualTo("Historical discharge to hospital added to restricted patients")
+        assertThat(argumentCaptor.value.dischargeTime).isEqualTo(LocalDateTime.parse("${dischargeDate}T$dischargeTime"))
       }
 
       @Test
@@ -613,7 +611,7 @@ class RestrictedPatientServiceTest {
         assertThat(response.commentText).isEqualTo("comment saved to restricted patients")
         verify(restrictedPatientsRepository).saveAndFlush(
           check {
-            assertThat(it.commentText).isEqualTo("A test comment with TO=ST NICH'S NEWCASTLE")
+            assertThat(it.commentText).isEqualTo("Historical discharge to hospital added to restricted patients")
           }
         )
         verify(prisonApiGateway).dischargeToHospital(

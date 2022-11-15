@@ -96,7 +96,7 @@ class RestrictedPatientIntegrationTest : IntegrationTestBase() {
       .jsonPath("$.hospitalLocation.agencyId").isEqualTo("HAZLWD")
       .jsonPath("$.supportingPrison.agencyId").isEqualTo("MDI")
       .jsonPath("$.dischargeTime").isEqualTo("2022-05-20T14:36:13")
-      .jsonPath("$.commentText").isEqualTo("Psychiatric Hospital Discharge to Avesbury House, Care UK")
+      .jsonPath("$.commentText").isEqualTo("Historical discharge to hospital added to restricted patients")
 
     prisonApiMockServer.verify(
       postRequestedFor(urlEqualTo("/api/movements/offenders?latestOnly=true&allBookings=false"))
