@@ -13,12 +13,14 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoInteractions
+import org.mockito.kotlin.verifyNoMoreInteractions
 import org.mockito.kotlin.whenever
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.dataBuilders.makePrisonerResult
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.PrisonerSearchApiGateway
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.entities.RestrictedPatient
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.repositories.RestrictedPatientsRepository
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services.BatchReleaseDateRemoval
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services.RestrictedPatientsService
 import java.time.Clock
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -27,6 +29,7 @@ import java.time.ZoneId
 class BatchReleaseDateRemovalTest {
   private val prisonerSearchApiGateway: PrisonerSearchApiGateway = mock()
   private val restrictedPatientsRepository: RestrictedPatientsRepository = mock()
+  private val restrictedPatientsService: RestrictedPatientsService = mock()
   private val telemetryClient: TelemetryClient = mock()
   private val clock: Clock = mock()
 
@@ -45,6 +48,7 @@ class BatchReleaseDateRemovalTest {
   private val service = BatchReleaseDateRemoval(
     restrictedPatientsRepository,
     prisonerSearchApiGateway,
+    restrictedPatientsService,
     telemetryClient,
     clock,
   )
@@ -65,6 +69,7 @@ class BatchReleaseDateRemovalTest {
       service.removeNonLifePrisonersPastRelevantDate()
 
       verifyNoInteractions(telemetryClient)
+      verifyNoInteractions(restrictedPatientsService)
     }
 
     @Test
@@ -126,6 +131,9 @@ class BatchReleaseDateRemovalTest {
       service.removeNonLifePrisonersPastRelevantDate()
 
       verify(telemetryClient).trackEvent("restricted-patient-batch-removal", mapOf("prisonerNumbers" to "YESTERDAY_RECALL_DETERMINATE, YESTERDAY_NONRECALL_DETERMINATE"), null)
+      verify(restrictedPatientsService).removeRestrictedPatient("YESTERDAY_RECALL_DETERMINATE")
+      verify(restrictedPatientsService).removeRestrictedPatient("YESTERDAY_NONRECALL_DETERMINATE")
+      verifyNoMoreInteractions(restrictedPatientsService)
     }
   }
 }
