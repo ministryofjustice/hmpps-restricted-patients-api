@@ -10,9 +10,9 @@ spec:
   successfulJobsHistoryLimit: 5
   jobTemplate:
     spec:
+      ttlSecondsAfterFinished: 345600
       template:
         spec:
-          ttlSecondsAfterFinished: 345600
           containers:
             - name: housekeeping
               image: ghcr.io/ministryofjustice/hmpps-devops-tools
