@@ -11,6 +11,7 @@ spec:
   successfulJobsHistoryLimit: 5
   jobTemplate:
     spec:
+      ttlSecondsAfterFinished: 345600
       template:
         spec:
           containers:
