@@ -11,6 +11,7 @@ import java.time.LocalDate
 class BatchReleaseDateRemoval(
   private val restrictedPatientsRepository: RestrictedPatientsRepository,
   private val prisonerSearchApiGateway: PrisonerSearchApiGateway,
+  private val restrictedPatientsService: RestrictedPatientsService,
   private val telemetryClient: TelemetryClient,
   private val clock: Clock,
 ) {
@@ -34,6 +35,7 @@ class BatchReleaseDateRemoval(
         mapOf("prisonerNumbers" to toBeDeleted.joinToString()),
         null
       )
+      toBeDeleted.forEach { restrictedPatientsService.removeRestrictedPatient(it) }
     }
   }
 }
