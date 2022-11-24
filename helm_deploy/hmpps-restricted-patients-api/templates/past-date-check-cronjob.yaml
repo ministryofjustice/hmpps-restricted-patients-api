@@ -20,5 +20,5 @@ spec:
               args:
                 - /bin/sh
                 - -c
-                - curl --retry 2 http://hmpps-restricted-patients-api/process-past-date-restricted-patients
+                - curl --retry 2 -XPOST http://hmpps-restricted-patients-api/process-past-date-restricted-patients
           restartPolicy: Never
