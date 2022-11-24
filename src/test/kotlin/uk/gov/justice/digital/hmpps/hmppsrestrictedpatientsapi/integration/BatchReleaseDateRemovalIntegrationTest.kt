@@ -22,7 +22,7 @@ class BatchReleaseDateRemovalIntegrationTest : IntegrationTestBase() {
 
     prisonerSearchApiMockServer.stubSearchByPrisonNumber("A12345")
 
-    webTestClient.get()
+    webTestClient.post()
       .uri("/process-past-date-restricted-patients")
       .exchange()
       .expectStatus().isOk

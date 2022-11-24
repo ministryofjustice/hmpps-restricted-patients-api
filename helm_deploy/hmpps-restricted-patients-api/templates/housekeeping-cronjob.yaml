@@ -12,6 +12,7 @@ spec:
     spec:
       template:
         spec:
+          ttlSecondsAfterFinished: 345600
           containers:
             - name: housekeeping
               image: ghcr.io/ministryofjustice/hmpps-devops-tools
