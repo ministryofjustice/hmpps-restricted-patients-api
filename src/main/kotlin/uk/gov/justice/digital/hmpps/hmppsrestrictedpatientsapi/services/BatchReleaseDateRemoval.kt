@@ -1,6 +1,7 @@
 package uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services
 
 import com.microsoft.applicationinsights.TelemetryClient
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.PrisonerSearchApiGateway
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.repositories.RestrictedPatientsRepository
@@ -35,7 +36,17 @@ class BatchReleaseDateRemoval(
         mapOf("prisonerNumbers" to toBeDeleted.joinToString()),
         null
       )
-      toBeDeleted.forEach { restrictedPatientsService.removeRestrictedPatient(it) }
+      toBeDeleted.forEach {
+        try {
+          restrictedPatientsService.removeRestrictedPatient(it)
+        } catch (ex: Exception) {
+          log.error("restricted-patient-batch-removal failed for offender $it", ex)
+        }
+      }
     }
+  }
+
+  companion object {
+    val log = LoggerFactory.getLogger(this::class.java)
   }
 }
