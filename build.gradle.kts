@@ -1,7 +1,7 @@
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "4.7.1"
-  kotlin("plugin.spring") version "1.7.21"
-  kotlin("plugin.jpa") version "1.7.21"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "4.7.2-beta-1"
+  kotlin("plugin.spring") version "1.7.22"
+  kotlin("plugin.jpa") version "1.7.22"
 }
 
 configurations {
@@ -21,7 +21,7 @@ dependencies {
   implementation("org.springdoc:springdoc-openapi-data-rest:1.6.13")
   implementation("org.springframework:spring-jms")
   implementation("com.google.code.gson:gson:2.10")
-  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:1.1.13")
+  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:1.2.0")
   implementation("org.apache.commons:commons-csv:1.9.0")
 
   runtimeOnly("com.h2database:h2:2.1.214")
