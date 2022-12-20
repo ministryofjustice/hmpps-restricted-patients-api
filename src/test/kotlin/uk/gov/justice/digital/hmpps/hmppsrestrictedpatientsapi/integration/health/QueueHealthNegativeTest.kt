@@ -1,19 +1,19 @@
 package uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.integration.health
 
-import com.amazonaws.auth.AWSStaticCredentialsProvider
-import com.amazonaws.auth.AnonymousAWSCredentials
-import com.amazonaws.client.builder.AwsClientBuilder
-import com.amazonaws.services.sqs.AmazonSQSClientBuilder
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import org.springframework.http.HttpStatus
 import org.springframework.test.context.ActiveProfiles
+import software.amazon.awssdk.auth.credentials.AnonymousCredentialsProvider
+import software.amazon.awssdk.regions.Region
+import software.amazon.awssdk.services.sqs.SqsAsyncClient
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.integration.IntegrationTestBase
 import uk.gov.justice.hmpps.sqs.HmppsQueue
 import uk.gov.justice.hmpps.sqs.HmppsQueueHealth
 import uk.gov.justice.hmpps.sqs.HmppsSqsProperties
+import java.net.URI
 
 @ActiveProfiles("test")
 class QueueHealthNegativeTest : IntegrationTestBase() {
@@ -21,10 +21,11 @@ class QueueHealthNegativeTest : IntegrationTestBase() {
   @TestConfiguration
   class TestConfig {
     @Bean
-    fun badQueueHealth(hmppsConfigProperties: HmppsSqsProperties): HmppsQueueHealth {
-      val sqsClient = AmazonSQSClientBuilder.standard()
-        .withEndpointConfiguration(AwsClientBuilder.EndpointConfiguration(hmppsConfigProperties.localstackUrl, hmppsConfigProperties.region))
-        .withCredentials(AWSStaticCredentialsProvider(AnonymousAWSCredentials()))
+    fun badQueueHealth(hmppsSqsProperties: HmppsSqsProperties): HmppsQueueHealth {
+      val sqsClient = SqsAsyncClient.builder()
+        .region(Region.of(hmppsSqsProperties.region))
+        .endpointOverride(URI.create(hmppsSqsProperties.localstackUrl))
+        .credentialsProvider { AnonymousCredentialsProvider.create().resolveCredentials() }
         .build()
       return HmppsQueueHealth(HmppsQueue("missingQueueId", sqsClient, "missingQueue", sqsClient, "missingDlq"))
     }

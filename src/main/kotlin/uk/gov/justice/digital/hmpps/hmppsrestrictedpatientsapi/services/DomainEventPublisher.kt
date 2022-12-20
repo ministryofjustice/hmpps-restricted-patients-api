@@ -1,10 +1,10 @@
 package uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services
 
-import com.amazonaws.services.sns.model.MessageAttributeValue
-import com.amazonaws.services.sns.model.PublishRequest
 import com.google.gson.Gson
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import software.amazon.awssdk.services.sns.model.MessageAttributeValue
+import software.amazon.awssdk.services.sns.model.PublishRequest
 import uk.gov.justice.hmpps.sqs.HmppsQueueService
 import uk.gov.justice.hmpps.sqs.MissingTopicException
 import java.time.LocalDateTime
@@ -43,12 +43,11 @@ class DomainEventPublisher(hmppsQueueService: HmppsQueueService, private val gso
     val payload = gson.toJson(domainEvent)
 
     outboundTopic.snsClient.publish(
-      PublishRequest(outboundTopic.arn, payload)
-        .withMessageAttributes(
-          mapOf("eventType" to MessageAttributeValue().withDataType("String").withStringValue(domainEvent.eventType))
-        )
+      PublishRequest.builder().topicArn(outboundTopic.arn).message(payload).messageAttributes(
+        mapOf("eventType" to MessageAttributeValue.builder().dataType("String").stringValue(domainEvent.eventType).build())
+      ).build()
         .also { log.info("Published event to outbound topic. Type: ${domainEvent.eventType}") }
-    )
+    ).get()
   }
 
   companion object {
