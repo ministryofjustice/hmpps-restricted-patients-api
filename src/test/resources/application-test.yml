@@ -16,6 +16,8 @@ spring:
     url: jdbc:postgresql://localhost:5432/restricted-patients
     username: restricted-patients
     password: test
+  flyway:
+    clean-disabled: false
 
 hmpps.sqs:
   provider: localstack

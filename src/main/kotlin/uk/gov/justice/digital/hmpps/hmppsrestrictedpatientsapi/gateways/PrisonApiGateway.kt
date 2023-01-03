@@ -80,7 +80,7 @@ class PrisonApiGateway(private val prisonApiClientCreds: WebClient) {
       .block()
 
   private fun <T> emptyWhenNotFound(exception: WebClientResponseException): Mono<T> =
-    if (exception.rawStatusCode == NOT_FOUND.value()) Mono.empty() else Mono.error(exception)
+    if (exception.statusCode == NOT_FOUND) Mono.empty() else Mono.error(exception)
 
   fun createPrisoner(
     surname: String,

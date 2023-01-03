@@ -1,24 +1,30 @@
 package uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.controllers
 
+import jakarta.persistence.EntityNotFoundException
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.doThrow
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import org.springframework.boot.autoconfigure.security.oauth2.client.servlet.OAuth2ClientAutoConfiguration
+import org.springframework.boot.autoconfigure.security.oauth2.resource.servlet.OAuth2ResourceServerAutoConfiguration
+import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.security.test.context.support.WithMockUser
+import org.springframework.test.web.servlet.post
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.dataBuilders.makeDischargeRequest
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.dataBuilders.makeRestrictedPatientDto
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services.RestrictedPatientsService
-import javax.persistence.EntityNotFoundException
 
-@WebMvcTest(value = [RestrictedPatientsController::class])
+@WebMvcTest(
+  RestrictedPatientsController::class,
+  excludeAutoConfiguration = [SecurityAutoConfiguration::class, OAuth2ClientAutoConfiguration::class, OAuth2ResourceServerAutoConfiguration::class]
+)
 class RestrictedPatientControllerTest : ControllerTestBase() {
-
   @MockBean
   lateinit var restrictedPatientsService: RestrictedPatientsService
 
@@ -27,17 +33,10 @@ class RestrictedPatientControllerTest : ControllerTestBase() {
     @Test
     @WithMockUser(username = "ITAG_USER")
     fun `call the service with the correct parameters`() {
-      mockMvc
-        .perform(
-          MockMvcRequestBuilders.post("/discharge-to-hospital")
-            .header("Content-Type", "application/json")
-            .content(
-              objectMapper.writeValueAsString(
-                makeDischargeBody()
-              )
-            )
-        )
-        .andExpect(MockMvcResultMatchers.status().isCreated)
+      mockMvc.post("/discharge-to-hospital") {
+        header("Content-Type", "application/json")
+        content = objectMapper.writeValueAsString(makeDischargeBody())
+      }.andExpect { status { isCreated() } }
 
       verify(restrictedPatientsService).dischargeToHospital(makeDischargeRequest().copy(supportingPrisonId = "MDI"))
     }

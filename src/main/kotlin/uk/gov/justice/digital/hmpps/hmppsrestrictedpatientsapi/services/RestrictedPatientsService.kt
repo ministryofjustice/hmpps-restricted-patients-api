@@ -1,6 +1,8 @@
 package uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services
 
 import com.microsoft.applicationinsights.TelemetryClient
+import jakarta.persistence.EntityNotFoundException
+import jakarta.transaction.Transactional
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.config.BadRequestException
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.PrisonApiGateway
@@ -15,8 +17,6 @@ import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.Re
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.repositories.RestrictedPatientsRepository
 import java.time.Clock
 import java.time.LocalDateTime
-import javax.persistence.EntityNotFoundException
-import javax.transaction.Transactional
 
 data class ExistingDischargeData(
   val dischargeTime: LocalDateTime,

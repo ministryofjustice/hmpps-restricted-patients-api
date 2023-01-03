@@ -6,6 +6,9 @@ import org.awaitility.kotlin.untilCallTo
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.ActiveProfiles
+import software.amazon.awssdk.services.sqs.model.GetQueueAttributesRequest
+import software.amazon.awssdk.services.sqs.model.QueueAttributeName
+import software.amazon.awssdk.services.sqs.model.SendMessageRequest
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.dataBuilders.makeOffenderMovementReceptionEvent
 import uk.gov.justice.hmpps.sqs.HmppsQueue
 import uk.gov.justice.hmpps.sqs.HmppsQueueService
@@ -26,7 +29,9 @@ class OffenderEventQueueIntegrationTest : IntegrationTestBase() {
       .expectStatus().is2xxSuccessful
 
     hmppsQueueService.findByQueueId("offenderevents")!!.let {
-      it.sqsClient.sendMessage(it.queueUrl, makeOffenderMovementReceptionEvent("A12346"))
+      it.sqsClient.sendMessage(
+        SendMessageRequest.builder().queueUrl(it.queueUrl).messageBody(makeOffenderMovementReceptionEvent("A12346")).build()
+      ).get()
 
       await untilCallTo { getNumberOfMessagesCurrentlyOnQueue(it) } matches { it == 0 }
     }
@@ -36,9 +41,11 @@ class OffenderEventQueueIntegrationTest : IntegrationTestBase() {
       .expectStatus().isNotFound
   }
 
-  fun getNumberOfMessagesCurrentlyOnQueue(hmppsQueue: HmppsQueue): Int? {
+  private fun getNumberOfMessagesCurrentlyOnQueue(hmppsQueue: HmppsQueue): Int? {
     val queueAttributes =
-      hmppsQueue.sqsClient.getQueueAttributes(hmppsQueue.queueUrl, listOf("ApproximateNumberOfMessages"))
-    return queueAttributes.attributes["ApproximateNumberOfMessages"]?.toInt()
+      hmppsQueue.sqsClient.getQueueAttributes(
+        GetQueueAttributesRequest.builder().queueUrl(hmppsQueue.queueUrl).attributeNames(QueueAttributeName.APPROXIMATE_NUMBER_OF_MESSAGES).build()
+      ).get()
+    return queueAttributes.attributes()[QueueAttributeName.APPROXIMATE_NUMBER_OF_MESSAGES]?.toInt()
   }
 }

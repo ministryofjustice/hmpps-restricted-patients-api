@@ -1,9 +1,9 @@
 package uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services
 
 import com.google.gson.Gson
+import io.awspring.cloud.sqs.annotation.SqsListener
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.jms.annotation.JmsListener
 import org.springframework.stereotype.Service
 
 data class HmppsDomainEvent(
@@ -22,10 +22,7 @@ class DomainEventSubscriber(
   private val restrictedPatientCleanup: RestrictedPatientCleanup
 ) {
 
-  @JmsListener(
-    destination = "domainevents",
-    containerFactory = "hmppsQueueContainerFactoryProxy"
-  )
+  @SqsListener("domainevents", factory = "hmppsQueueContainerFactoryProxy")
   fun handleEvents(requestJson: String?) {
     val event = gson.fromJson(requestJson, Event::class.java)
     with(gson.fromJson(event.Message, HmppsDomainEvent::class.java)) {

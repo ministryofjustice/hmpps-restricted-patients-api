@@ -1,5 +1,7 @@
 package uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.config
 
+import jakarta.persistence.EntityNotFoundException
+import jakarta.validation.ValidationException
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatus.BAD_REQUEST
@@ -16,8 +18,6 @@ import org.springframework.web.client.RestClientResponseException
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException
 import org.springframework.web.reactive.function.client.WebClientResponseException
 import java.lang.RuntimeException
-import javax.persistence.EntityNotFoundException
-import javax.validation.ValidationException
 
 @RestControllerAdvice
 class HmppsRestrictedPatientsApiExceptionHandler {
@@ -68,7 +68,7 @@ class HmppsRestrictedPatientsApiExceptionHandler {
   fun handleException(e: RestClientResponseException): ResponseEntity<ByteArray> {
     log.error("Unexpected exception {}", e.message)
     return ResponseEntity
-      .status(e.rawStatusCode)
+      .status(e.statusCode)
       .body(e.responseBodyAsByteArray)
   }
 
