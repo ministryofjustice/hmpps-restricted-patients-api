@@ -1,7 +1,7 @@
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "5.0.0-beta"
-  kotlin("plugin.spring") version "1.7.22"
-  kotlin("plugin.jpa") version "1.7.22"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "5.0.0-beta-3"
+  kotlin("plugin.spring") version "1.8.0"
+  kotlin("plugin.jpa") version "1.8.0"
 }
 
 configurations {
@@ -22,8 +22,8 @@ dependencies {
   implementation("io.swagger:swagger-annotations:1.6.9")
   implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.2")
   implementation("org.springframework:spring-jms")
-  implementation("com.google.code.gson:gson:2.10")
-  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:2.0.0-beta-2")
+  implementation("com.google.code.gson:gson:2.10.1")
+  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:2.0.0-beta-6")
   implementation("org.apache.commons:commons-csv:1.9.0")
 
   runtimeOnly("com.h2database:h2:2.1.214")
@@ -37,6 +37,8 @@ dependencies {
   testImplementation("org.springframework.security:spring-security-test")
   testImplementation("net.javacrumbs.json-unit:json-unit-assertj:2.36.0")
   testImplementation("org.awaitility:awaitility-kotlin:4.2.0")
+
+  testImplementation("io.opentelemetry:opentelemetry-sdk-testing:1.22.0")
 }
 
 allOpen {
@@ -47,8 +49,12 @@ allOpen {
   )
 }
 
+java {
+  toolchain.languageVersion.set(JavaLanguageVersion.of(18))
+}
+
 tasks {
-  compileKotlin {
+  withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
     kotlinOptions {
       jvmTarget = "18"
     }
