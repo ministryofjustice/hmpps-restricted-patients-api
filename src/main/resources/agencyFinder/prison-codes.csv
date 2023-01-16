@@ -3,10 +3,13 @@ BAI,HMP Belmarsh
 BMI,HMP Birmingham
 BLI,HMP Bristol
 BCI,HMP Buckley Hall
+BNI,HMP Bullingdon
 CFI,HMP Cardiff
+CDI,HMP Chelmsford
 DRI,HMP Dorchester
 DMI,HMP Durham
 EYI,HMP Elmley
+FBI,HMP Forest Bank
 FHI,HMP Foston Hall
 FKI,HMP Frankland
 FNI,HMP Full Sutton
@@ -24,15 +27,21 @@ LHI,HMP Lindholme
 LPI,HMP Liverpool
 MSI,HMP Maidstone
 MRI,HMP Manchester
+NHI,HMP New Hall
+NLI,HMP Northumberland
 NMI,HMP Nottingham
 PVI,HMP Pentonville
 PFI,HMP Peterborough
+PNI,HMP Preston
 RCI,HMP Rochester
 RHI,HMP Rye Hill
+STI,HMP Styal
 SLI,HMP Swaleside
+SWI,HMP Swansea
 WDI,HMP Wakefield
 WWI,HMP Wandsworth
 WRI,HMP Whitemoor
+WCI,HMP Winchester
 WHI,HMP Woodhill
 WSI,HMP Wormwood Scrubs
 EXI,HMP/YOI Exeter
