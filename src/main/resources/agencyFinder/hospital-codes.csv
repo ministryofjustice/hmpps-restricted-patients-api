@@ -16,6 +16,7 @@ BETHLM,Bethlem Royal Hospital
 BIRHIL,Birch Hill Hospital
 BLACKB,Blackberry Hill Hospital
 CHAFHO,Blue Nile House
+BLUBHO,Bluebird House
 RBHOSP,Bolton Royal Hospital
 FIEHOS,Bretton Centre
 BROADM,Broadmoor Hospital
@@ -39,6 +40,7 @@ CYGHEA,Cygnet Heathers
 CYGDER,Cygnet Hospital (Derby)
 CYGHAR,Cygnet Hospital (Harrow)
 CYGENT,Cygnet Hospital Beckton
+CYGWHO,Cygnet Hospital Blackheath
 CYGBUR,Cygnet Hospital Bury
 CYGCLI,Cygnet Hospital Clifton
 CYGMAI,Cygnet Hospital Maidstone
@@ -77,6 +79,7 @@ HAZLWD,Hazelwood House
 HEALAN,Heath Lane Hospital
 HEACOU,Heatherwood Court Hospital
 HELHOS,Hellesdon Hospital
+HELLIN,Hellingly Hospital
 HILLHO,Hillis Lodge
 CHTONT,Hollins Park Hospital
 HUMBER,Humber Centre
@@ -106,6 +109,8 @@ MERCAW,Mersey Care Whalley (Low Secure Services)
 MIDSTG,Middleton St George Hospital
 MILGAR,Mill Garth Hospital - Leeds
 MILUNI,Millfields Unit (Centre for Forensic MH)
+MRANDA,Miranda House
+NEWHAM,Newham Centre for Mental Health
 NEWTON,Newton Lodge
 CHAFHO,North London Forensic Service (Low Secure)
 CHAFHO,North London Forensic Service (Medium Secure)
