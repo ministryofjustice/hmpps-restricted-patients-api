@@ -1,5 +1,7 @@
 prison.api.endpoint.url: https://api-dev.prison.service.justice.gov.uk
 prisoner.search.api.endpoint.url: https://prisoner-offender-search-dev.prison.service.justice.gov.uk
+community.api.endpoint.url: http://localhost:8080
+casenotes.api.endpoint.url: http://localhost:8080
 
 spring:
   security:

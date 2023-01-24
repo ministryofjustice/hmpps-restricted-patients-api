@@ -6,8 +6,8 @@ hmpps.sqs:
       dlqName: rp_api_dlq
       subscribeTopicId: offendereventsqueue
     domainevents:
-      queueName: rp_api_queue
-      dlqName: rp_api_dlq
+      queueName: rp_de_api_queue
+      dlqName: rp_de_api_dlq
       subscribeTopicId: domaineventsqueue
   topics:
     offendereventsqueue:
