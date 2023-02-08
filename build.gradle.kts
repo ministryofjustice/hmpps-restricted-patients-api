@@ -1,7 +1,7 @@
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "5.0.1"
-  kotlin("plugin.spring") version "1.8.0"
-  kotlin("plugin.jpa") version "1.8.0"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "5.1.0"
+  kotlin("plugin.spring") version "1.8.10"
+  kotlin("plugin.jpa") version "1.8.10"
 }
 
 configurations {
@@ -24,12 +24,12 @@ dependencies {
   implementation("org.springframework:spring-jms")
   implementation("com.google.code.gson:gson:2.10.1")
   implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:2.0.0-beta-10")
-  implementation("org.apache.commons:commons-csv:1.9.0")
+  implementation("org.apache.commons:commons-csv:1.10.0")
   implementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:1.22.1")
 
   runtimeOnly("com.h2database:h2:2.1.214")
   runtimeOnly("org.flywaydb:flyway-core")
-  runtimeOnly("org.postgresql:postgresql:42.5.2")
+  runtimeOnly("org.postgresql:postgresql:42.5.3")
 
   testImplementation("org.flywaydb:flyway-core")
   testImplementation("io.jsonwebtoken:jjwt-impl:0.11.5")
