@@ -162,7 +162,7 @@ class UnknownPatientsServiceTest {
       val result = service.migrateInUnknownPatient(testRecord("valid"))
 
       assertThat(result).isEqualTo(
-        UnknownPatientResult("3/6170", "A1234AA", true, null)
+        UnknownPatientResult("3/6170", "A1234AA", true, null),
       )
       verify(prisonApiGateway).createPrisoner("O'Brien", "Steven", "John M", "M", LocalDate.of(1965, 2, 11), "cro", "pnc")
       verify(restrictedPatientService).addRestrictedPatient(
@@ -180,7 +180,7 @@ class UnknownPatientsServiceTest {
       verify(caseNotesApiGateway).createCaseNote(
         check {
           assertThat(it.offenderNumber).isEqualTo("A1234AA")
-        }
+        },
       )
       verify(prisonerSearchApiGateway).refreshPrisonerIndex("A1234AA")
     }
@@ -193,7 +193,7 @@ class UnknownPatientsServiceTest {
       val result = service.migrateInUnknownPatient(testRecord("valid"))
 
       assertThat(result).isEqualTo(
-        UnknownPatientResult("3/6170", null, false, "Create prisoner failed due to: 500 Internal Server Error, some error")
+        UnknownPatientResult("3/6170", null, false, "Create prisoner failed due to: 500 Internal Server Error, some error"),
       )
     }
 
@@ -204,7 +204,7 @@ class UnknownPatientsServiceTest {
       val results = service.migrateInUnknownPatient(testRecord("valid"))
 
       assertThat(results).isEqualTo(
-        UnknownPatientResult("3/6170", "A1234AA", false, "Discharge to hospital failed due to: 400 Bad Request, some client error")
+        UnknownPatientResult("3/6170", "A1234AA", false, "Discharge to hospital failed due to: 400 Bad Request, some client error"),
       )
     }
 
@@ -215,7 +215,7 @@ class UnknownPatientsServiceTest {
       val result = service.migrateInUnknownPatient(testRecord("valid"))
 
       assertThat(result).isEqualTo(
-        UnknownPatientResult("3/6170", "A1234AA", false, "Update community NOMS number failed due to: 404 Not Found, CRN not found")
+        UnknownPatientResult("3/6170", "A1234AA", false, "Update community NOMS number failed due to: 404 Not Found, CRN not found"),
       )
     }
 
@@ -226,7 +226,7 @@ class UnknownPatientsServiceTest {
       val result = service.migrateInUnknownPatient(testRecord("valid"))
 
       assertThat(result).isEqualTo(
-        UnknownPatientResult("3/6170", "A1234AA", false, "Create case note failed due to: 503 Service unavailable")
+        UnknownPatientResult("3/6170", "A1234AA", false, "Create case note failed due to: 503 Service unavailable"),
       )
     }
 

@@ -22,7 +22,7 @@ data class RestrictedPatientDto(
   @Schema(description = "Date time the record was created")
   var createDateTime: LocalDateTime? = null,
   @Schema(description = "The user id of the person who created the record")
-  var createUserId: String? = null
+  var createUserId: String? = null,
 )
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -31,5 +31,5 @@ data class Agency(
   val description: String? = null,
   val longDescription: String? = null,
   val agencyType: String? = null,
-  val active: Boolean? = null
+  val active: Boolean? = null,
 )

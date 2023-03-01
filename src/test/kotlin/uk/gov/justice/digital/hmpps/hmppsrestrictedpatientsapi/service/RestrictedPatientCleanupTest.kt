@@ -70,7 +70,7 @@ class RestrictedPatientCleanupTest {
         "hospitalLocationCode",
         "supportingPrisonId",
         "dischargeTime",
-        "commentText"
+        "commentText",
       ).contains("A12345", "MDI", "HAZLWD", "MDI", LocalDateTime.parse("2020-10-10T20:00:01"), "test")
     }
 
@@ -83,7 +83,7 @@ class RestrictedPatientCleanupTest {
         mapOf(
           "prisonerNumber" to "A12345",
         ),
-        null
+        null,
       )
     }
 

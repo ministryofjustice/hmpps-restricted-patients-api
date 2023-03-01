@@ -12,7 +12,7 @@ class CommunityApiGateway(@Qualifier("communityApiClientCreds") private val comm
       .put()
       .uri("/offenders/crn/$crn/nomsNumber")
       .bodyValue(
-        mapOf("nomsNumber" to nomsNumber)
+        mapOf("nomsNumber" to nomsNumber),
       )
       .retrieve()
       .bodyToMono<Unit>()

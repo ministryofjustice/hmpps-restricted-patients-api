@@ -26,9 +26,9 @@ class PrisonApiMockServer : WireMockServer(8989) {
                {
                  "status": "UP"
                }
-              """.trimIndent()
-            )
-        )
+              """.trimIndent(),
+            ),
+        ),
     )
   }
 
@@ -77,9 +77,9 @@ class PrisonApiMockServer : WireMockServer(8989) {
                       "dischargeDetails": "Psychiatric Hospital Discharge to Hazelwood House"
                   }
               }
-              """.trimIndent()
-            )
-        )
+              """.trimIndent(),
+            ),
+        ),
     )
   }
 
@@ -96,9 +96,9 @@ class PrisonApiMockServer : WireMockServer(8989) {
                   "status": 400,
                   "userMessage": "some error",
               }
-              """.trimIndent()
-            )
-        )
+              """.trimIndent(),
+            ),
+        ),
     )
   }
 
@@ -130,9 +130,9 @@ class PrisonApiMockServer : WireMockServer(8989) {
                  "commentText": "Psychiatric Hospital Discharge to Avesbury House, Care UK"
                 }
               ]
-              """.trimIndent()
-            )
-        )
+              """.trimIndent(),
+            ),
+        ),
     )
   }
 
@@ -160,9 +160,9 @@ class PrisonApiMockServer : WireMockServer(8989) {
                  "movementTime": "14:36:13"
                 }
               ]
-              """.trimIndent()
-            )
-        )
+              """.trimIndent(),
+            ),
+        ),
     )
   }
 
@@ -198,9 +198,9 @@ class PrisonApiMockServer : WireMockServer(8989) {
                   "active": true
                 }
               ]
-              """.trimIndent()
-            )
-        )
+              """.trimIndent(),
+            ),
+        ),
     )
   }
 
@@ -237,8 +237,8 @@ class PrisonApiMockServer : WireMockServer(8989) {
           aResponse()
             .withHeader("Content-Type", "application/json")
             .withStatus(200)
-            .withBody(response)
-        )
+            .withBody(response),
+        ),
     )
     stubFor(
       get(urlEqualTo("/api/agencies/type/HOSPITAL"))
@@ -246,8 +246,8 @@ class PrisonApiMockServer : WireMockServer(8989) {
           aResponse()
             .withHeader("Content-Type", "application/json")
             .withStatus(200)
-            .withBody(response)
-        )
+            .withBody(response),
+        ),
     )
   }
 
@@ -257,8 +257,8 @@ class PrisonApiMockServer : WireMockServer(8989) {
         .willReturn(
           aResponse()
             .withHeader("Content-Type", "application/json")
-            .withStatus(200)
-        )
+            .withStatus(200),
+        ),
     )
   }
 
@@ -269,8 +269,8 @@ class PrisonApiMockServer : WireMockServer(8989) {
           mapOf(
             "fullInfo" to equalTo("true"),
             "extraInfo" to equalTo("false"),
-            "csraSummary" to equalTo("false")
-          )
+            "csraSummary" to equalTo("false"),
+          ),
         )
         .willReturn(
           aResponse()
@@ -284,9 +284,9 @@ class PrisonApiMockServer : WireMockServer(8989) {
                   "ignoredField": "ignored",
                   "activeFlag": "$activeFlag"
                 }
-              """.trimIndent()
-            )
-        )
+              """.trimIndent(),
+            ),
+        ),
     )
   }
 
@@ -303,8 +303,8 @@ class PrisonApiMockServer : WireMockServer(8989) {
           aResponse()
             .withHeader("Content-Type", "application/json")
             .withStatus(200)
-            .withBody(""" { "offenderNo": "$offenderNo" } """)
-        )
+            .withBody(""" { "offenderNo": "$offenderNo" } """),
+        ),
     )
   }
 
@@ -322,9 +322,9 @@ class PrisonApiMockServer : WireMockServer(8989) {
                   "userMessage": "Some user message,
                   "developerMessage": "Some developer message"
               }
-              """.trimIndent()
-            )
-        )
+              """.trimIndent(),
+            ),
+        ),
     )
   }
 
@@ -334,8 +334,8 @@ class PrisonApiMockServer : WireMockServer(8989) {
         .willReturn(
           aResponse()
             .withHeader("Content-Type", "application/json")
-            .withStatus(503)
-        )
+            .withStatus(503),
+        ),
     )
   }
 }

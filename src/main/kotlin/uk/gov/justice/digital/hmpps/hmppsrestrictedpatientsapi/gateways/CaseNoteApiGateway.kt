@@ -19,8 +19,8 @@ class CaseNoteApiGateway(@Qualifier("caseNotesApiClientCreds")private val caseNo
             "type" to type,
             "subType" to subType,
             "occurrenceDateTime" to occurrenceDateTime,
-            "text" to text
-          )
+            "text" to text,
+          ),
         )
         .retrieve()
         .bodyToMono<Unit>()

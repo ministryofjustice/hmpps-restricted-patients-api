@@ -34,7 +34,7 @@ class BatchReleaseDateRemoval(
       telemetryClient.trackEvent(
         "restricted-patient-batch-removal",
         mapOf("prisonerNumbers" to toBeDeleted.joinToString()),
-        null
+        null,
       )
       toBeDeleted.forEach {
         try {

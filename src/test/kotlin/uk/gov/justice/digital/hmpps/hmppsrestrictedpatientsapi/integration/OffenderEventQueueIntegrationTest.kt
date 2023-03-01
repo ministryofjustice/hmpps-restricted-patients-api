@@ -30,7 +30,7 @@ class OffenderEventQueueIntegrationTest : IntegrationTestBase() {
 
     hmppsQueueService.findByQueueId("offenderevents")!!.let {
       it.sqsClient.sendMessage(
-        SendMessageRequest.builder().queueUrl(it.queueUrl).messageBody(makeOffenderMovementReceptionEvent("A12346")).build()
+        SendMessageRequest.builder().queueUrl(it.queueUrl).messageBody(makeOffenderMovementReceptionEvent("A12346")).build(),
       ).get()
 
       await untilCallTo { getNumberOfMessagesCurrentlyOnQueue(it) } matches { it == 0 }
@@ -44,7 +44,7 @@ class OffenderEventQueueIntegrationTest : IntegrationTestBase() {
   private fun getNumberOfMessagesCurrentlyOnQueue(hmppsQueue: HmppsQueue): Int? {
     val queueAttributes =
       hmppsQueue.sqsClient.getQueueAttributes(
-        GetQueueAttributesRequest.builder().queueUrl(hmppsQueue.queueUrl).attributeNames(QueueAttributeName.APPROXIMATE_NUMBER_OF_MESSAGES).build()
+        GetQueueAttributesRequest.builder().queueUrl(hmppsQueue.queueUrl).attributeNames(QueueAttributeName.APPROXIMATE_NUMBER_OF_MESSAGES).build(),
       ).get()
     return queueAttributes.attributes()[QueueAttributeName.APPROXIMATE_NUMBER_OF_MESSAGES]?.toInt()
   }

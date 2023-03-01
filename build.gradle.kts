@@ -1,5 +1,5 @@
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "5.1.0"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "5.1.1-beta-2"
   kotlin("plugin.spring") version "1.8.10"
   kotlin("plugin.jpa") version "1.8.10"
 }
@@ -25,11 +25,11 @@ dependencies {
   implementation("com.google.code.gson:gson:2.10.1")
   implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:2.0.0-beta-10")
   implementation("org.apache.commons:commons-csv:1.10.0")
-  implementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:1.22.1")
+  implementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:1.23.0")
 
   runtimeOnly("com.h2database:h2:2.1.214")
   runtimeOnly("org.flywaydb:flyway-core")
-  runtimeOnly("org.postgresql:postgresql:42.5.3")
+  runtimeOnly("org.postgresql:postgresql:42.5.4")
 
   testImplementation("org.flywaydb:flyway-core")
   testImplementation("io.jsonwebtoken:jjwt-impl:0.11.5")
@@ -39,7 +39,7 @@ dependencies {
   testImplementation("net.javacrumbs.json-unit:json-unit-assertj:2.36.1")
   testImplementation("org.awaitility:awaitility-kotlin:4.2.0")
 
-  testImplementation("io.opentelemetry:opentelemetry-sdk-testing:1.22.0")
+  testImplementation("io.opentelemetry:opentelemetry-sdk-testing:1.23.1")
 }
 
 allOpen {
@@ -51,13 +51,13 @@ allOpen {
 }
 
 java {
-  toolchain.languageVersion.set(JavaLanguageVersion.of(18))
+  toolchain.languageVersion.set(JavaLanguageVersion.of(19))
 }
 
 tasks {
   withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
     kotlinOptions {
-      jvmTarget = "18"
+      jvmTarget = "19"
     }
   }
   test {

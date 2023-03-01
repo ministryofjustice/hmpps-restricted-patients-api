@@ -42,8 +42,8 @@ class RestrictedPatientRepositoryTest {
         supportingPrisonId = "LEI",
         dischargeTime = now,
         hospitalLocationCode = "HAZLWD",
-        commentText = "test"
-      )
+        commentText = "test",
+      ),
     ).prisonerNumber
 
     val entity = repository.findById(id).orElseThrow()
@@ -56,7 +56,7 @@ class RestrictedPatientRepositoryTest {
         "dischargeTime",
         "hospitalLocationCode",
         "commentText",
-        "createUserId"
+        "createUserId",
       )
       .contains("A12345", "MDI", "LEI", now, "HAZLWD", "test", "user")
 
@@ -72,8 +72,8 @@ class RestrictedPatientRepositoryTest {
         supportingPrisonId = "LEI",
         dischargeTime = LocalDateTime.now(),
         hospitalLocationCode = "HAZLWD",
-        commentText = "test"
-      )
+        commentText = "test",
+      ),
     )
 
     val entity = repository.findById("A12345").get()
@@ -85,7 +85,7 @@ class RestrictedPatientRepositoryTest {
         "supportingPrisonId",
         "hospitalLocationCode",
         "commentText",
-        "createUserId"
+        "createUserId",
       )
       .contains("A12345", "MDI", "LEI", "HAZLWD", "test", "user")
 

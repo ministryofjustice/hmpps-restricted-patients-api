@@ -36,13 +36,13 @@ class RestrictedPatientCleanup(
     // and then work out where the prisoner is now and move them to the correct hospital if required.  See README.md.
     restrictedPatientsRepository.findByIdOrNull(removedPrisonerNumber)?.let {
       throw MergeRestrictedPatientNotImplemented(
-        "Merge not implemented. Patient ${it.prisonerNumber} was at hospital ${it.hospitalLocationCode} but record merged into $prisonerNumber"
+        "Merge not implemented. Patient ${it.prisonerNumber} was at hospital ${it.hospitalLocationCode} but record merged into $prisonerNumber",
       )
     }
 
     restrictedPatientsRepository.findByIdOrNull(prisonerNumber)?.let {
       throw MergeRestrictedPatientNotImplemented(
-        "Merge not implemented. Patient ${it.prisonerNumber} is at hospital ${it.hospitalLocationCode}.  Record merged from $removedPrisonerNumber"
+        "Merge not implemented. Patient ${it.prisonerNumber} is at hospital ${it.hospitalLocationCode}.  Record merged from $removedPrisonerNumber",
       )
     }
 

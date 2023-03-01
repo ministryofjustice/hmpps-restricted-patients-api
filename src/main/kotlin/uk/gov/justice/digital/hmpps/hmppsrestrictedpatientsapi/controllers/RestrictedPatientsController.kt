@@ -17,21 +17,23 @@ import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services.Restrict
 @RestController
 class RestrictedPatientsController(private val restrictedPatientsService: RestrictedPatientsService) {
   @PostMapping(
-    value = ["/discharge-to-hospital"], consumes = [MediaType.APPLICATION_JSON_VALUE]
+    value = ["/discharge-to-hospital"],
+    consumes = [MediaType.APPLICATION_JSON_VALUE],
   )
   @ResponseStatus(code = HttpStatus.CREATED)
   fun dischargeToHospital(@RequestBody dischargeToHospital: DischargeToHospitalRequest): RestrictedPatientDto =
     restrictedPatientsService.dischargeToHospital(dischargeToHospital)
 
   @PostMapping(
-    value = ["/migrate-in-restricted-patient"], consumes = [MediaType.APPLICATION_JSON_VALUE]
+    value = ["/migrate-in-restricted-patient"],
+    consumes = [MediaType.APPLICATION_JSON_VALUE],
   )
   @ResponseStatus(code = HttpStatus.CREATED)
   fun migrateInPatient(@RequestBody migrateIn: MigrateInRequest): RestrictedPatientDto =
     restrictedPatientsService.migrateInPatient(migrateIn)
 
   @GetMapping(
-    value = ["/restricted-patient/prison-number/{prison-number}"]
+    value = ["/restricted-patient/prison-number/{prison-number}"],
   )
   fun getRestrictedPatientByPrisonNumber(@PathVariable(name = "prison-number") prisonNumber: String): RestrictedPatientDto =
     restrictedPatientsService.getRestrictedPatient(prisonNumber)

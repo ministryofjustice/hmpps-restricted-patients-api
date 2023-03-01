@@ -17,7 +17,7 @@ data class DomainEvent(
   val version: Int,
   val occurredAt: String,
   val publishedAt: String,
-  val description: String
+  val description: String,
 )
 
 data class RestrictedPatientRemovedAdditionalInformation(val prisonerNumber: String)
@@ -37,16 +37,16 @@ class DomainEventPublisher(hmppsQueueService: HmppsQueueService, private val gso
       occurredAt = now,
       publishedAt = now,
       description = "Prisoner no longer a restricted patient",
-      additionalInformation = RestrictedPatientRemovedAdditionalInformation(prisonerNumber)
+      additionalInformation = RestrictedPatientRemovedAdditionalInformation(prisonerNumber),
     )
 
     val payload = gson.toJson(domainEvent)
 
     outboundTopic.snsClient.publish(
       PublishRequest.builder().topicArn(outboundTopic.arn).message(payload).messageAttributes(
-        mapOf("eventType" to MessageAttributeValue.builder().dataType("String").stringValue(domainEvent.eventType).build())
+        mapOf("eventType" to MessageAttributeValue.builder().dataType("String").stringValue(domainEvent.eventType).build()),
       ).build()
-        .also { log.info("Published event to outbound topic. Type: ${domainEvent.eventType}") }
+        .also { log.info("Published event to outbound topic. Type: ${domainEvent.eventType}") },
     ).get()
   }
 
