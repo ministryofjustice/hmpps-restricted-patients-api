@@ -1,5 +1,5 @@
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "5.1.1-beta-2"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "5.1.1-beta-3"
   kotlin("plugin.spring") version "1.8.10"
   kotlin("plugin.jpa") version "1.8.10"
 }
@@ -23,7 +23,7 @@ dependencies {
   implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.2")
   implementation("org.springframework:spring-jms")
   implementation("com.google.code.gson:gson:2.10.1")
-  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:2.0.0-beta-10")
+  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:2.0.0-beta-13")
   implementation("org.apache.commons:commons-csv:1.10.0")
   implementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:1.23.0")
 
