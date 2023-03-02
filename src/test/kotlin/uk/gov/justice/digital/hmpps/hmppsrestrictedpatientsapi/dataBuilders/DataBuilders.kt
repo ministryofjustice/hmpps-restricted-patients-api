@@ -17,7 +17,7 @@ val HOSPITAL = Agency(
   agencyType = "HSHOSP",
   active = true,
   description = "Hazelwood House",
-  longDescription = "Hazelwood House"
+  longDescription = "Hazelwood House",
 )
 
 fun makeDischargeRequest(
@@ -25,13 +25,13 @@ fun makeDischargeRequest(
   commentText: String = "test",
   fromLocationId: String = "MDI",
   hospitalLocationCode: String = "HAZLWD",
-  supportingPrisonId: String? = null
+  supportingPrisonId: String? = null,
 ) = DischargeToHospitalRequest(
   offenderNo,
   commentText,
   fromLocationId,
   hospitalLocationCode,
-  supportingPrisonId
+  supportingPrisonId,
 )
 
 fun makeMigrateInRequest(
@@ -39,7 +39,7 @@ fun makeMigrateInRequest(
   hospitalLocationCode: String = "HAZLWD",
 ) = MigrateInRequest(
   offenderNo,
-  hospitalLocationCode
+  hospitalLocationCode,
 )
 
 fun makeRestrictedPatientDto(
@@ -50,7 +50,7 @@ fun makeRestrictedPatientDto(
   commentText: String = "test",
   dischargeTime: LocalDateTime = LocalDateTime.parse("2020-10-10T20:00:01"),
   createDateTime: LocalDateTime = LocalDateTime.parse("2020-10-10T20:00:01"),
-  createUserId: String = "user"
+  createUserId: String = "user",
 ): RestrictedPatientDto = RestrictedPatientDto(
   prisonerNumber,
   fromLocationId,
@@ -59,7 +59,7 @@ fun makeRestrictedPatientDto(
   dischargeTime,
   commentText,
   createDateTime,
-  createUserId
+  createUserId,
 )
 
 fun makeRestrictedPatient(
@@ -70,7 +70,7 @@ fun makeRestrictedPatient(
   commentText: String = "test",
   dischargeTime: LocalDateTime = LocalDateTime.parse("2020-10-10T20:00:01"),
   createDateTime: LocalDateTime = LocalDateTime.parse("2020-10-10T20:00:01"),
-  createUserId: String = "ITAG_USER"
+  createUserId: String = "ITAG_USER",
 ): RestrictedPatient {
   val patient = RestrictedPatient(
     prisonerNumber,
@@ -78,7 +78,7 @@ fun makeRestrictedPatient(
     hospitalLocationCode,
     supportingPrisonId,
     dischargeTime,
-    commentText
+    commentText,
   )
   patient.createDateTime = createDateTime
   patient.createUserId = createUserId

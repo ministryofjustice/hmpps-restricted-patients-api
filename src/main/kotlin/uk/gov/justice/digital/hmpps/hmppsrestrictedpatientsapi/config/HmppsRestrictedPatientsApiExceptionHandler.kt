@@ -30,8 +30,8 @@ class HmppsRestrictedPatientsApiExceptionHandler {
         ErrorResponse(
           status = BAD_REQUEST,
           userMessage = "Validation failure: ${e.message}",
-          developerMessage = e.message
-        )
+          developerMessage = e.message,
+        ),
       )
   }
 
@@ -45,8 +45,8 @@ class HmppsRestrictedPatientsApiExceptionHandler {
           status = BAD_REQUEST,
           errorCode = e.errorCode,
           developerMessage = "Validation failure: ${e.message}",
-          userMessage = e.message
-        )
+          userMessage = e.message,
+        ),
       )
   }
 
@@ -59,8 +59,8 @@ class HmppsRestrictedPatientsApiExceptionHandler {
         ErrorResponse(
           status = INTERNAL_SERVER_ERROR,
           userMessage = "Unexpected error: ${e.message}",
-          developerMessage = e.message
-        )
+          developerMessage = e.message,
+        ),
       )
   }
 
@@ -80,8 +80,8 @@ class HmppsRestrictedPatientsApiExceptionHandler {
       .body(
         ErrorResponse(
           status = INTERNAL_SERVER_ERROR.value(),
-          developerMessage = e.message
-        )
+          developerMessage = e.message,
+        ),
       )
   }
 
@@ -94,8 +94,8 @@ class HmppsRestrictedPatientsApiExceptionHandler {
         ErrorResponse(
           status = INTERNAL_SERVER_ERROR.value(),
           errorCode = "UPSTREAM_ERROR",
-          developerMessage = e.message
-        )
+          developerMessage = e.message,
+        ),
       )
   }
 
@@ -105,7 +105,7 @@ class HmppsRestrictedPatientsApiExceptionHandler {
     return ResponseEntity
       .status(HttpStatus.FORBIDDEN)
       .body(
-        ErrorResponse(status = HttpStatus.FORBIDDEN.value())
+        ErrorResponse(status = HttpStatus.FORBIDDEN.value()),
       )
   }
 
@@ -117,8 +117,8 @@ class HmppsRestrictedPatientsApiExceptionHandler {
       .body(
         ErrorResponse(
           status = BAD_REQUEST.value(),
-          developerMessage = e.message
-        )
+          developerMessage = e.message,
+        ),
       )
   }
 
@@ -130,8 +130,8 @@ class HmppsRestrictedPatientsApiExceptionHandler {
       .body(
         ErrorResponse(
           status = BAD_REQUEST.value(),
-          developerMessage = e.message
-        )
+          developerMessage = e.message,
+        ),
       )
   }
 
@@ -143,8 +143,8 @@ class HmppsRestrictedPatientsApiExceptionHandler {
       .body(
         ErrorResponse(
           status = BAD_REQUEST.value(),
-          developerMessage = e.message
-        )
+          developerMessage = e.message,
+        ),
       )
   }
 
@@ -156,8 +156,8 @@ class HmppsRestrictedPatientsApiExceptionHandler {
       .body(
         ErrorResponse(
           status = BAD_REQUEST.value(),
-          developerMessage = e.message
-        )
+          developerMessage = e.message,
+        ),
       )
   }
 
@@ -169,8 +169,8 @@ class HmppsRestrictedPatientsApiExceptionHandler {
       .body(
         ErrorResponse(
           status = BAD_REQUEST.value(),
-          developerMessage = e.message
-        )
+          developerMessage = e.message,
+        ),
       )
   }
 
@@ -181,8 +181,8 @@ class HmppsRestrictedPatientsApiExceptionHandler {
       .body(
         ErrorResponse(
           status = HttpStatus.NOT_FOUND.value(),
-          developerMessage = e.message
-        )
+          developerMessage = e.message,
+        ),
       )
   }
 
@@ -196,14 +196,14 @@ data class ErrorResponse(
   val errorCode: String? = null,
   val userMessage: String? = null,
   val developerMessage: String? = null,
-  val moreInfo: String? = null
+  val moreInfo: String? = null,
 ) {
   constructor(
     status: HttpStatus,
     errorCode: String? = null,
     userMessage: String? = null,
     developerMessage: String? = null,
-    moreInfo: String? = null
+    moreInfo: String? = null,
   ) :
     this(status.value(), errorCode, userMessage, developerMessage, moreInfo)
 }

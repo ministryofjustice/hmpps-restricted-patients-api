@@ -16,7 +16,7 @@ class BatchReleaseDateRemovalIntegrationTest : IntegrationTestBase() {
       hospitalLocationCode = "HAZLWD",
       supportingPrisonId = "LEI",
       dischargeTime = LocalDateTime.now(),
-      commentText = "test"
+      commentText = "test",
     )
     restrictedPatientRepository.save(restrictedPatient)
 

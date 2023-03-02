@@ -27,8 +27,8 @@ class PrisonApiGateway(private val prisonApiClientCreds: WebClient) {
           "dischargeTime" to newRestrictedPatient.dischargeTime.toString(),
           "fromLocationId" to newRestrictedPatient.fromLocationId,
           "hospitalLocationCode" to newRestrictedPatient.hospitalLocationCode,
-          "supportingPrisonId" to newRestrictedPatient.supportingPrisonId
-        )
+          "supportingPrisonId" to newRestrictedPatient.supportingPrisonId,
+        ),
       )
       .retrieve()
       .bodyToMono<InmateDetail>()
@@ -40,8 +40,8 @@ class PrisonApiGateway(private val prisonApiClientCreds: WebClient) {
       .uri("/movements/offenders?latestOnly=true&allBookings=false")
       .bodyValue(
         listOf(
-          offenderNo
-        )
+          offenderNo,
+        ),
       )
       .retrieve()
       .bodyToMono(object : ParameterizedTypeReference<List<MovementResponse>>() {})
@@ -104,7 +104,7 @@ class PrisonApiGateway(private val prisonApiClientCreds: WebClient) {
           "dateOfBirth" to dateOfBirth.toString(),
           "croNumber" to croNumber,
           "pncNumber" to pncNumber,
-        )
+        ),
       )
       .retrieve()
       .bodyToMono<InmateDetail>()

@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service
 
 data class HmppsDomainEvent(
   val eventType: String,
-  val additionalInformation: AdditionalInformation
+  val additionalInformation: AdditionalInformation,
 )
 
 data class AdditionalInformation(
@@ -21,7 +21,7 @@ data class AdditionalInformation(
 @Service
 class DomainEventSubscriber(
   private val gson: Gson,
-  private val restrictedPatientCleanup: RestrictedPatientCleanup
+  private val restrictedPatientCleanup: RestrictedPatientCleanup,
 ) {
 
   @SqsListener("domainevents", factory = "hmppsQueueContainerFactoryProxy")

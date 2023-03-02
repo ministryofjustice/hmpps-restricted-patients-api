@@ -95,7 +95,7 @@ abstract class IntegrationTestBase {
     val fixedClock =
       Clock.fixed(
         LocalDate.parse("2020-10-10").atStartOfDay(ZoneId.systemDefault()).toInstant(),
-        ZoneId.systemDefault()
+        ZoneId.systemDefault(),
       )
     whenever(clock.instant()).thenReturn(fixedClock.instant())
     whenever(clock.getZone()).thenReturn(fixedClock.getZone())
@@ -141,8 +141,8 @@ abstract class IntegrationTestBase {
           "commentText" to commentText,
           "fromLocationId" to fromLocationId,
           "hospitalLocationCode" to hospitalLocationCode,
-          "supportingPrisonId" to supportingPrisonId
-        )
+          "supportingPrisonId" to supportingPrisonId,
+        ),
       )
   }
 
@@ -172,8 +172,8 @@ abstract class IntegrationTestBase {
           "commentText" to commentText,
           "fromLocationId" to fromLocationId,
           "hospitalLocationCode" to hospitalLocationCode,
-          "supportingPrisonId" to supportingPrisonId
-        )
+          "supportingPrisonId" to supportingPrisonId,
+        ),
       )
   }
 
@@ -193,7 +193,7 @@ abstract class IntegrationTestBase {
         mapOf(
           "offenderNo" to prisonerNumber,
           "hospitalLocationCode" to hospitalLocationCode,
-        )
+        ),
       )
   }
 
@@ -211,7 +211,7 @@ abstract class IntegrationTestBase {
         mapOf(
           "offenderNo" to prisonerNumber,
           "hospitalLocationCode" to hospitalLocationCode,
-        )
+        ),
       )
   }
 
@@ -229,7 +229,7 @@ abstract class IntegrationTestBase {
         mapOf(
           "offenderNo" to prisonerNumber,
           "hospitalLocationCode" to hospitalLocationCode,
-        )
+        ),
       )
   }
 
@@ -252,7 +252,7 @@ abstract class IntegrationTestBase {
     hospitalLocationCode: String = "HAZLWD",
     supportingPrisonId: String = "MDI",
     dischargeTime: LocalDateTime = LocalDateTime.now(clock).minusDays(1),
-    commentText: String? = null
+    commentText: String? = null,
   ) {
     restrictedPatientRepository.save(RestrictedPatient(prisonerNumber, fromLocationId, hospitalLocationCode, supportingPrisonId, dischargeTime, commentText))
   }

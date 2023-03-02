@@ -21,7 +21,7 @@ class RestrictedPatient(
   val hospitalLocationCode: String,
   val supportingPrisonId: String,
   val dischargeTime: LocalDateTime,
-  val commentText: String? = null
+  val commentText: String? = null,
 ) {
   @CreatedDate
   @Column(name = "CREATE_DATETIME", nullable = false)

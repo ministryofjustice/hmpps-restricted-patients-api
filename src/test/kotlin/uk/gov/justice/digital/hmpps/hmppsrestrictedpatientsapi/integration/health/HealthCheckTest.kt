@@ -71,7 +71,7 @@ class HealthCheckTest : IntegrationTestBase() {
       .expectBody().jsonPath("components.healthInfo.details.version").value(
         Consumer<String> {
           assertThat(it).startsWith(LocalDateTime.now().format(DateTimeFormatter.ISO_DATE))
-        }
+        },
       )
   }
 
@@ -84,12 +84,12 @@ class HealthCheckTest : IntegrationTestBase() {
       .jsonPath("components.prisonApiHealthCheck.status").value(
         Consumer<String> {
           assertThat(it).isEqualTo("UP")
-        }
+        },
       )
       .jsonPath("components.prisonApiHealthCheck.details.HttpStatus").value(
         Consumer<String> {
           assertThat(it).isEqualTo("OK")
-        }
+        },
       )
   }
 
@@ -102,12 +102,12 @@ class HealthCheckTest : IntegrationTestBase() {
       .jsonPath("components.prisonerSearchApiHealthCheck.status").value(
         Consumer<String> {
           assertThat(it).isEqualTo("UP")
-        }
+        },
       )
       .jsonPath("components.prisonerSearchApiHealthCheck.details.HttpStatus").value(
         Consumer<String> {
           assertThat(it).isEqualTo("OK")
-        }
+        },
       )
   }
 

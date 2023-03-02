@@ -18,7 +18,7 @@ class AgencyFinderTest : IntegrationTestBase() {
   fun `finds hospitals`() {
     assertAll(
       { assertThat(agencyFinder.findHospitalCode("UNKNOWN")).isNull() },
-      { assertThat(agencyFinder.findHospitalCode("Harplands Hospital")).isEqualTo("HLHOSP") }
+      { assertThat(agencyFinder.findHospitalCode("Harplands Hospital")).isEqualTo("HLHOSP") },
     )
   }
 
@@ -26,7 +26,7 @@ class AgencyFinderTest : IntegrationTestBase() {
   fun `finds prisons`() {
     assertAll(
       { assertThat(agencyFinder.findPrisonCode("UNKNOWN")).isNull() },
-      { assertThat(agencyFinder.findPrisonCode("HMP Foston Hall")).isEqualTo("FHI") }
+      { assertThat(agencyFinder.findPrisonCode("HMP Foston Hall")).isEqualTo("FHI") },
     )
   }
 }

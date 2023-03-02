@@ -21,7 +21,7 @@ import java.time.LocalDateTime
 data class ExistingDischargeData(
   val dischargeTime: LocalDateTime,
   val fromLocationId: String,
-  val comment: String?
+  val comment: String?,
 )
 
 @Service
@@ -31,7 +31,7 @@ class RestrictedPatientsService(
   private val restrictedPatientsRepository: RestrictedPatientsRepository,
   private val domainEventPublisher: DomainEventPublisher,
   private val telemetryClient: TelemetryClient,
-  private val clock: Clock
+  private val clock: Clock,
 ) {
 
   @Transactional(value = Transactional.TxType.NOT_SUPPORTED)
@@ -43,7 +43,7 @@ class RestrictedPatientsService(
       ?: throw EntityNotFoundException("No prisoner with activeFlag 'Y' found for ${dischargeToHospital.offenderNo}")
 
     val dischargeToHospitalWithDefaultSupportingPrison = dischargeToHospital.copy(
-      supportingPrisonId = dischargeToHospital.supportingPrisonId ?: dischargeToHospital.fromLocationId
+      supportingPrisonId = dischargeToHospital.supportingPrisonId ?: dischargeToHospital.fromLocationId,
     )
     val restrictedPatient = RestrictedPatient(
       prisonerNumber = dischargeToHospitalWithDefaultSupportingPrison.offenderNo,
@@ -51,7 +51,7 @@ class RestrictedPatientsService(
       hospitalLocationCode = dischargeToHospitalWithDefaultSupportingPrison.hospitalLocationCode,
       supportingPrisonId = dischargeToHospitalWithDefaultSupportingPrison.supportingPrisonId!!,
       dischargeTime = dischargeToHospital.dischargeTime ?: LocalDateTime.now(clock),
-      commentText = dischargeToHospitalWithDefaultSupportingPrison.commentText
+      commentText = dischargeToHospitalWithDefaultSupportingPrison.commentText,
     )
     return addRestrictedPatient(restrictedPatient)
   }
@@ -70,7 +70,7 @@ class RestrictedPatientsService(
       hospitalLocationCode = migrateIn.hospitalLocationCode,
       supportingPrisonId = dischargeData.fromLocationId,
       dischargeTime = dischargeData.dischargeTime,
-      commentText = "Historical discharge to hospital added to restricted patients"
+      commentText = "Historical discharge to hospital added to restricted patients",
     )
       .let { addRestrictedPatient(it) }
       .also { prisonerSearchApiGateway.refreshPrisonerIndex(migrateIn.offenderNo) }
@@ -180,8 +180,8 @@ class RestrictedPatientsService(
           movementTime = LocalDateTime.now(clock),
           movementType = "REL",
           movementReason = "CR",
-          directionCode = "OUT"
-        )
+          directionCode = "OUT",
+        ),
       )
 
       prisonerSearchApiGateway.refreshPrisonerIndex(prisonerNumber)
@@ -197,7 +197,7 @@ class RestrictedPatientsService(
           "supportingPrisonId" to restrictedPatient.supportingPrisonId,
           "dischargeTime" to restrictedPatient.dischargeTime.toString(),
         ),
-        null
+        null,
       )
     } catch (e: Exception) {
       restrictedPatientsRepository.saveAndFlush(restrictedPatient)
@@ -209,7 +209,7 @@ class RestrictedPatientsService(
     restrictedPatient: RestrictedPatient,
     fromAgency: Agency? = null,
     toAgency: Agency? = null,
-    supportingPrisonAgency: Agency? = null
+    supportingPrisonAgency: Agency? = null,
   ): RestrictedPatientDto = RestrictedPatientDto(
     prisonerNumber = restrictedPatient.prisonerNumber,
     fromLocation = fromAgency,
@@ -218,6 +218,6 @@ class RestrictedPatientsService(
     commentText = restrictedPatient.commentText,
     hospitalLocation = toAgency,
     createUserId = restrictedPatient.createUserId,
-    createDateTime = restrictedPatient.createDateTime
+    createDateTime = restrictedPatient.createDateTime,
   )
 }

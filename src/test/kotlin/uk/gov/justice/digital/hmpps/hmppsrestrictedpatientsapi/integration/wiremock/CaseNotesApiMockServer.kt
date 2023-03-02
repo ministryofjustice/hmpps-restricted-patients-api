@@ -12,8 +12,8 @@ class CaseNotesApiMockServer : WireMockServer(8102) {
         .willReturn(
           aResponse()
             .withHeader("Content-Type", "application/json")
-            .withStatus(200)
-        )
+            .withStatus(200),
+        ),
     )
   }
 
@@ -30,9 +30,9 @@ class CaseNotesApiMockServer : WireMockServer(8102) {
                   "status": 400,
                   "userMessage": "some error",
               }
-              """.trimIndent()
-            )
-        )
+              """.trimIndent(),
+            ),
+        ),
     )
   }
 }

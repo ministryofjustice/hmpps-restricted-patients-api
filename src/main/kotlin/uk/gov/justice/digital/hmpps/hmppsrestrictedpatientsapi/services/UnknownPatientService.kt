@@ -86,7 +86,7 @@ class UnknownPatientService(
         hospitalCode,
         prisonCode,
         hospitalOrderDate.atStartOfDay(),
-        "Historical hospital release added to NOMIS for addition to Restricted Patients"
+        "Historical hospital release added to NOMIS for addition to Restricted Patients",
       )
         .let { restrictedPatientsService.addRestrictedPatient(it, noEventPropagation = true) }
         .also { prisonerSearchApiGateway.refreshPrisonerIndex(offenderNumber) }
@@ -110,7 +110,7 @@ class UnknownPatientService(
           locationId = prisonCode,
           occurrenceDateTime = LocalDateTime.now(),
           text = "Automatic admission and release to psychiatric hospital for Restricted Patients",
-        )
+        ),
       )
     }
       .getOrElse { handleApiError("Create case note failed due to", it, offenderNumber) }
@@ -157,7 +157,7 @@ data class UnknownPatientResult(
   val mhcsReference: String?,
   val offenderNumber: String? = null,
   val success: Boolean,
-  val errorMessage: String? = null
+  val errorMessage: String? = null,
 )
 
 class MigrateUnknownPatientException(val mhcsReference: String, errorMessage: String, val offenderNumber: String? = null) : RuntimeException(errorMessage)

@@ -56,7 +56,7 @@ class RestrictedPatientServiceTest {
     hospitalLocationCode = "HAZLWD",
     supportingPrisonId = "LEI",
     dischargeTime = LocalDateTime.now(),
-    commentText = "test"
+    commentText = "test",
   )
 
   private lateinit var service: RestrictedPatientsService
@@ -74,7 +74,7 @@ class RestrictedPatientServiceTest {
       restrictedPatientsRepository,
       domainEventPublisher,
       telemetryClient,
-      clock
+      clock,
     )
   }
 
@@ -83,7 +83,7 @@ class RestrictedPatientServiceTest {
     @Test
     fun `checks to see if there is a restricted patient associated with the prisoner number`() {
       whenever(restrictedPatientsRepository.findById(anyString())).thenReturn(
-        Optional.of(makeRestrictedPatient())
+        Optional.of(makeRestrictedPatient()),
       )
       whenever(prisonerSearchApiGateway.searchByPrisonNumber(anyString())).thenReturn(listOf(makePrisonerResult()))
 
@@ -107,7 +107,7 @@ class RestrictedPatientServiceTest {
     fun `makes a call to prisoner offender search`() {
       whenever(prisonerSearchApiGateway.searchByPrisonNumber(anyString())).thenReturn(listOf(makePrisonerResult()))
       whenever(restrictedPatientsRepository.findById(anyString())).thenReturn(
-        Optional.of(makeRestrictedPatient())
+        Optional.of(makeRestrictedPatient()),
       )
 
       service.removeRestrictedPatient("A12345")
@@ -118,7 +118,7 @@ class RestrictedPatientServiceTest {
     @Test
     fun `handles no prisoner offender search results returned`() {
       whenever(restrictedPatientsRepository.findById(anyString())).thenReturn(
-        Optional.of(makeRestrictedPatient())
+        Optional.of(makeRestrictedPatient()),
       )
       whenever(prisonerSearchApiGateway.searchByPrisonNumber(anyString())).thenReturn(emptyList())
 
@@ -132,7 +132,7 @@ class RestrictedPatientServiceTest {
     @Test
     fun `makes a call to prison api to create an external movement form hospital to community`() {
       whenever(restrictedPatientsRepository.findById(anyString())).thenReturn(
-        Optional.of(makeRestrictedPatient())
+        Optional.of(makeRestrictedPatient()),
       )
       whenever(prisonerSearchApiGateway.searchByPrisonNumber(anyString())).thenReturn(listOf(makePrisonerResult()))
 
@@ -146,8 +146,8 @@ class RestrictedPatientServiceTest {
           movementTime = LocalDateTime.now(clock),
           movementType = "REL",
           movementReason = "CR",
-          directionCode = "OUT"
-        )
+          directionCode = "OUT",
+        ),
       )
     }
 
@@ -168,7 +168,7 @@ class RestrictedPatientServiceTest {
         "hospitalLocationCode",
         "supportingPrisonId",
         "dischargeTime",
-        "commentText"
+        "commentText",
       ).contains("A12345", "MDI", "HAZLWD", "MDI", LocalDateTime.parse("2020-10-10T20:00:01"), "test")
     }
 
@@ -188,7 +188,7 @@ class RestrictedPatientServiceTest {
           "supportingPrisonId" to "MDI",
           "dischargeTime" to LocalDateTime.parse("2020-10-10T20:00:01").toString(),
         ),
-        null
+        null,
       )
     }
 
@@ -234,7 +234,7 @@ class RestrictedPatientServiceTest {
       @Test
       fun `throws exception when offender is OUT`() {
         whenever(prisonApiGateway.getOffenderBooking(any())).thenReturn(
-          OffenderBookingResponse(1234567, "A1234AA", false)
+          OffenderBookingResponse(1234567, "A1234AA", false),
         )
 
         assertThrows(EntityNotFoundException::class.java) {
@@ -255,7 +255,7 @@ class RestrictedPatientServiceTest {
       fun `removes recently persisted restricted patient on prison api discharge error`() {
         whenever(restrictedPatientsRepository.saveAndFlush(any())).thenReturn(makeRestrictedPatient())
         whenever(prisonApiGateway.getOffenderBooking(any())).thenReturn(
-          OffenderBookingResponse(1234567, "A1234AA", true)
+          OffenderBookingResponse(1234567, "A1234AA", true),
         )
         whenever(prisonApiGateway.dischargeToHospital(any(), anyBoolean())).thenThrow(WebClientResponseException::class.java)
 
@@ -281,7 +281,7 @@ class RestrictedPatientServiceTest {
       @BeforeEach
       fun beforeEach() {
         whenever(prisonApiGateway.getOffenderBooking(any())).thenReturn(
-          OffenderBookingResponse(1234567, "A1234AA", true)
+          OffenderBookingResponse(1234567, "A1234AA", true),
         )
         whenever(restrictedPatientsRepository.saveAndFlush(any())).thenReturn(makeRestrictedPatient())
       }
@@ -300,7 +300,7 @@ class RestrictedPatientServiceTest {
           .extracting(
             "prisonerNumber",
             "dischargeTime",
-            "commentText"
+            "commentText",
           )
           .contains("A12345", LocalDateTime.parse("2020-10-10T20:00:01"), "test")
       }
@@ -325,7 +325,7 @@ class RestrictedPatientServiceTest {
           "supportingPrisonId",
           "hospitalLocationCode",
           "commentText",
-          "dischargeTime"
+          "dischargeTime",
         ).contains("MDI", "MDI", "HAZLWD", "test", now)
       }
 
@@ -356,7 +356,7 @@ class RestrictedPatientServiceTest {
         whenever(prisonApiGateway.getAgencyLocationsByType("HSHOSP")).thenReturn(listOf(HOSPITAL))
         whenever(prisonApiGateway.getAgencyLocationsByType("INST")).thenReturn(listOf(PRISON))
         whenever(restrictedPatientsRepository.findById(anyString())).thenReturn(
-          Optional.of(makeRestrictedPatient())
+          Optional.of(makeRestrictedPatient()),
         )
 
         val restrictedPatient = service.getRestrictedPatient("A12345")
@@ -370,13 +370,13 @@ class RestrictedPatientServiceTest {
           "dischargeTime",
           "commentText",
           "createDateTime",
-          "createUserId"
+          "createUserId",
         ).contains(
           "A12345",
           LocalDateTime.parse("2020-10-10T20:00:01"),
           "test",
           LocalDateTime.parse("2020-10-10T20:00:01"),
-          "ITAG_USER"
+          "ITAG_USER",
         )
       }
     }
@@ -416,7 +416,7 @@ class RestrictedPatientServiceTest {
       @Test
       fun `throws exception when the offender's latest movement is not a REL`() {
         val nonRelMovement = makeLatestMovementReturn().copy(
-          movementType = "TPT"
+          movementType = "TPT",
         )
         whenever(prisonApiGateway.getLatestMovements(any())).thenReturn(listOf(nonRelMovement))
 
@@ -428,7 +428,7 @@ class RestrictedPatientServiceTest {
       @Test
       fun `throws exception when the offender's latest movement does not have a from agency`() {
         val movementWithoutFromAgency = makeLatestMovementReturn().copy(
-          fromAgency = null
+          fromAgency = null,
         )
         whenever(prisonApiGateway.getLatestMovements(any())).thenReturn(listOf(movementWithoutFromAgency))
 
@@ -440,7 +440,7 @@ class RestrictedPatientServiceTest {
       @Test
       fun `throws exception when the offender's latest movement has an invalid date`() {
         val movementWithInvalidDate = makeLatestMovementReturn().copy(
-          movementDate = null
+          movementDate = null,
         )
         whenever(prisonApiGateway.getLatestMovements(any())).thenReturn(listOf(movementWithInvalidDate))
 
@@ -452,7 +452,7 @@ class RestrictedPatientServiceTest {
       @Test
       fun `throws exception when the offender's latest movement has an invalid time`() {
         val movementWithInvalidTime = makeLatestMovementReturn().copy(
-          movementTime = null
+          movementTime = null,
         )
         whenever(prisonApiGateway.getLatestMovements(any())).thenReturn(listOf(movementWithInvalidTime))
 
@@ -497,7 +497,7 @@ class RestrictedPatientServiceTest {
         hospitalLocationCode = "HAZLWD",
         supportingPrisonId = "MDI",
         dischargeTime = dischargeDateTime,
-        commentText = testComment
+        commentText = testComment,
       )
 
       @BeforeEach
@@ -505,17 +505,17 @@ class RestrictedPatientServiceTest {
         whenever(restrictedPatientsRepository.saveAndFlush(any())).thenReturn(
           makeRestrictedPatient(
             dischargeTime = dischargeDateTime,
-            commentText = testComment
-          )
+            commentText = testComment,
+          ),
         )
         whenever(prisonApiGateway.getLatestMovements(any())).thenReturn(
           listOf(
             makeLatestMovementReturn(
               movementDate = dischargeDate,
               movementTime = dischargeTime,
-              commentText = testComment
-            )
-          )
+              commentText = testComment,
+            ),
+          ),
         )
       }
 
@@ -533,7 +533,7 @@ class RestrictedPatientServiceTest {
           .extracting(
             "prisonerNumber",
             "dischargeTime",
-            "commentText"
+            "commentText",
           )
           .contains("A12345", dischargeDateTime, testComment)
       }
@@ -583,7 +583,7 @@ class RestrictedPatientServiceTest {
         hospitalLocationCode = "HAZLWD",
         supportingPrisonId = "MDI",
         dischargeTime = dischargeDateTime,
-        commentText = testComment
+        commentText = testComment,
       )
 
       @BeforeEach
@@ -591,17 +591,17 @@ class RestrictedPatientServiceTest {
         whenever(restrictedPatientsRepository.saveAndFlush(any())).thenReturn(
           makeRestrictedPatient(
             dischargeTime = dischargeDateTime,
-            commentText = "comment saved to restricted patients"
-          )
+            commentText = "comment saved to restricted patients",
+          ),
         )
         whenever(prisonApiGateway.getLatestMovements(any())).thenReturn(
           listOf(
             makeLatestMovementReturn(
               movementDate = dischargeDate,
               movementTime = dischargeTime,
-              commentText = testComment
-            )
-          )
+              commentText = testComment,
+            ),
+          ),
         )
       }
 
@@ -612,13 +612,13 @@ class RestrictedPatientServiceTest {
         verify(restrictedPatientsRepository).saveAndFlush(
           check {
             assertThat(it.commentText).isEqualTo("Historical discharge to hospital added to restricted patients")
-          }
+          },
         )
         verify(prisonApiGateway).dischargeToHospital(
           newRestrictedPatient = check {
             assertThat(it.commentText).isEqualTo("comment saved to restricted patients")
           },
-          noEventPropagation = eq(false)
+          noEventPropagation = eq(false),
         )
       }
     }

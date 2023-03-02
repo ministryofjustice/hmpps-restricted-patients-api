@@ -20,9 +20,9 @@ class PrisonerSearchApiMockServer : WireMockServer(8100) {
                {
                  "status": "UP"
                }
-              """.trimIndent()
-            )
-        )
+              """.trimIndent(),
+            ),
+        ),
     )
   }
 
@@ -51,9 +51,9 @@ class PrisonerSearchApiMockServer : WireMockServer(8100) {
                   "legalStatus": "SENTENCED"
                 }
                ]
-              """.trimIndent()
-            )
-        )
+              """.trimIndent(),
+            ),
+        ),
     )
   }
 
@@ -75,9 +75,9 @@ class PrisonerSearchApiMockServer : WireMockServer(8100) {
                   "bookingId": "1138058",
                   "legalStatus": "UNKNOWN"
                 }               
-              """.trimIndent()
-            )
-        )
+              """.trimIndent(),
+            ),
+        ),
     )
   }
 }

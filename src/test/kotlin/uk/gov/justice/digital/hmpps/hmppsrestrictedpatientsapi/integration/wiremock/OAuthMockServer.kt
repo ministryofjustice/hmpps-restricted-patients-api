@@ -17,9 +17,9 @@ class OAuthMockServer : WireMockServer(8090) {
             .withBody(
               """
               {"access_token": "ABCDE", "token_type": "bearer"}
-             """
-            )
-        )
+             """,
+            ),
+        ),
     )
   }
 }

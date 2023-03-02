@@ -11,5 +11,5 @@ data class CreateExternalMovement(
   val movementTime: LocalDateTime,
   val movementType: String,
   val movementReason: String,
-  val directionCode: String
+  val directionCode: String,
 )

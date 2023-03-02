@@ -34,8 +34,8 @@ class RestrictedPatientIntegrationTest : IntegrationTestBase() {
     prisonApiMockServer.verify(
       putRequestedFor(urlEqualTo("/api/offenders/A12345/discharge-to-hospital"))
         .withRequestBody(
-          equalToJson(loadResourceFile("discharge-to-hospital-request.json"))
-        ).withHeader("Authorization", WireMock.containing("Bearer"))
+          equalToJson(loadResourceFile("discharge-to-hospital-request.json")),
+        ).withHeader("Authorization", WireMock.containing("Bearer")),
     )
 
     prisonApiMockServer.verify(
@@ -43,7 +43,7 @@ class RestrictedPatientIntegrationTest : IntegrationTestBase() {
         .withQueryParam("fullInfo", equalTo("true"))
         .withQueryParam("extraInfo", equalTo("false"))
         .withQueryParam("csraSummary", equalTo("false"))
-        .withHeader("Authorization", WireMock.containing("Bearer"))
+        .withHeader("Authorization", WireMock.containing("Bearer")),
     )
   }
 
@@ -101,12 +101,12 @@ class RestrictedPatientIntegrationTest : IntegrationTestBase() {
     prisonApiMockServer.verify(
       postRequestedFor(urlEqualTo("/api/movements/offenders?latestOnly=true&allBookings=false"))
         .withRequestBody(
-          equalToJson("""["A12345"]""")
-        ).withHeader("Authorization", WireMock.containing("Bearer"))
+          equalToJson("""["A12345"]"""),
+        ).withHeader("Authorization", WireMock.containing("Bearer")),
     )
 
     prisonerSearchApiMockServer.verify(
-      putRequestedFor(urlEqualTo("/prisoner-index/index/prisoner/A12345"))
+      putRequestedFor(urlEqualTo("/prisoner-index/index/prisoner/A12345")),
     )
 
     val rpEntry = restrictedPatientRepository.findById("A12345")
@@ -126,6 +126,7 @@ class RestrictedPatientIntegrationTest : IntegrationTestBase() {
         .jsonPath("$.status").isEqualTo(400)
         .jsonPath("$.errorCode").isEqualTo("EXISTING_PATIENT")
     }
+
     @Test
     fun `should error if offender is not released`() {
       migrateInRestrictedPatientWebClientNotReleased(prisonerNumber = "A12345")
@@ -186,12 +187,12 @@ class RestrictedPatientIntegrationTest : IntegrationTestBase() {
     prisonApiMockServer.verify(
       postRequestedFor(urlEqualTo("/api/movements"))
         .withRequestBody(
-          equalToJson(loadResourceFile("create-external-movement-request.json"))
-        )
+          equalToJson(loadResourceFile("create-external-movement-request.json")),
+        ),
     )
 
     prisonerSearchApiMockServer.verify(
-      putRequestedFor(urlEqualTo("/prisoner-index/index/prisoner/A12345"))
+      putRequestedFor(urlEqualTo("/prisoner-index/index/prisoner/A12345")),
     )
 
     getRestrictedPatient(prisonerNumber = "A12345")

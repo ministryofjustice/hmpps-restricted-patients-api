@@ -15,7 +15,7 @@ class PrisonerSearchApiGateway(@Qualifier("prisonerSearchClientCreds") private v
     .post()
     .uri("/prisoner-search/prisoner-numbers")
     .bodyValue(
-      mapOf("prisonerNumbers" to prisonNumbers)
+      mapOf("prisonerNumbers" to prisonNumbers),
     )
     .retrieve()
     .bodyToMono(object : ParameterizedTypeReference<List<PrisonerResult>>() {})

@@ -37,12 +37,12 @@ class SpringOauthIntegrationTest : IntegrationTestBase() {
 
     oAuthMockServer.verify(
       WireMock.postRequestedFor(WireMock.urlEqualTo("/auth/oauth/token"))
-        .withRequestBody(WireMock.equalTo("grant_type=client_credentials&scope=write&username=USER1"))
+        .withRequestBody(WireMock.equalTo("grant_type=client_credentials&scope=write&username=USER1")),
     )
 
     oAuthMockServer.verify(
       WireMock.postRequestedFor(WireMock.urlEqualTo("/auth/oauth/token"))
-        .withRequestBody(WireMock.equalTo("grant_type=client_credentials&scope=write&username=USER2"))
+        .withRequestBody(WireMock.equalTo("grant_type=client_credentials&scope=write&username=USER2")),
     )
   }
 
@@ -52,7 +52,7 @@ class SpringOauthIntegrationTest : IntegrationTestBase() {
     "dischargeTime" to "2010-10-10T21:00",
     "fromLocationId" to "MDI",
     "hospitalLocationCode" to "HAZLWD",
-    "supportingPrisonId" to "MDI"
+    "supportingPrisonId" to "MDI",
   )
 
   companion object {

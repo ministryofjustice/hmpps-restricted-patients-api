@@ -18,7 +18,7 @@ data class Event(val Message: String)
 @Service
 class OffenderEventSubscriber(
   private val gson: Gson,
-  private val restrictedPatientCleanup: RestrictedPatientCleanup
+  private val restrictedPatientCleanup: RestrictedPatientCleanup,
 ) {
 
   @SqsListener("offenderevents", factory = "hmppsQueueContainerFactoryProxy")
@@ -30,7 +30,7 @@ class OffenderEventSubscriber(
     when (offenderMovementReception.eventType) {
       "OFFENDER_MOVEMENT-RECEPTION" ->
         restrictedPatientCleanup.deleteRestrictedPatientOnExternalMovementIntoPrison(
-          offenderMovementReception.offenderIdDisplay
+          offenderMovementReception.offenderIdDisplay,
         )
       else -> log.warn("Unexpected offender event received: {}", offenderMovementReception.eventType)
     }

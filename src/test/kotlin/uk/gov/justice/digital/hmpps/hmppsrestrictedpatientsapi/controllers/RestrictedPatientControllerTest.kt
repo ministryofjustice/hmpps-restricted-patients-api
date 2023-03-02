@@ -22,7 +22,7 @@ import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services.Restrict
 
 @WebMvcTest(
   RestrictedPatientsController::class,
-  excludeAutoConfiguration = [SecurityAutoConfiguration::class, OAuth2ClientAutoConfiguration::class, OAuth2ResourceServerAutoConfiguration::class]
+  excludeAutoConfiguration = [SecurityAutoConfiguration::class, OAuth2ClientAutoConfiguration::class, OAuth2ResourceServerAutoConfiguration::class],
 )
 class RestrictedPatientControllerTest : ControllerTestBase() {
   @MockBean
@@ -52,9 +52,9 @@ class RestrictedPatientControllerTest : ControllerTestBase() {
             .header("Content-Type", "application/json")
             .content(
               objectMapper.writeValueAsString(
-                makeDischargeBody()
-              )
-            )
+                makeDischargeBody(),
+              ),
+            ),
         )
         .andExpect(MockMvcResultMatchers.status().isInternalServerError)
     }
@@ -70,9 +70,9 @@ class RestrictedPatientControllerTest : ControllerTestBase() {
               objectMapper.writeValueAsString(
                 mapOf(
                   "offenderNo" to "A12345",
-                )
-              )
-            )
+                ),
+              ),
+            ),
         )
         .andExpect(MockMvcResultMatchers.status().isBadRequest)
     }
@@ -87,8 +87,8 @@ class RestrictedPatientControllerTest : ControllerTestBase() {
           MockMvcRequestBuilders.post("/discharge-to-hospital")
             .header("Content-Type", "application/json")
             .content(
-              objectMapper.writeValueAsString(makeDischargeBody())
-            )
+              objectMapper.writeValueAsString(makeDischargeBody()),
+            ),
         )
         .andExpect(MockMvcResultMatchers.status().isNotFound)
     }
@@ -106,8 +106,8 @@ class RestrictedPatientControllerTest : ControllerTestBase() {
           MockMvcRequestBuilders.get("/restricted-patient/prison-number/A12345")
             .header("Content-Type", "application/json")
             .content(
-              objectMapper.writeValueAsString(makeRestrictedPatientDto())
-            )
+              objectMapper.writeValueAsString(makeRestrictedPatientDto()),
+            ),
         )
         .andExpect(MockMvcResultMatchers.status().isNotFound)
     }
@@ -121,8 +121,8 @@ class RestrictedPatientControllerTest : ControllerTestBase() {
           MockMvcRequestBuilders.get("/restricted-patient/prison-number/A12345")
             .header("Content-Type", "application/json")
             .content(
-              objectMapper.writeValueAsString(makeRestrictedPatientDto())
-            )
+              objectMapper.writeValueAsString(makeRestrictedPatientDto()),
+            ),
         )
         .andExpect(MockMvcResultMatchers.status().is2xxSuccessful)
     }
@@ -135,7 +135,7 @@ class RestrictedPatientControllerTest : ControllerTestBase() {
     fun `remove restricted patient from the service`() {
       mockMvc
         .perform(
-          MockMvcRequestBuilders.delete("/restricted-patient/prison-number/A12345")
+          MockMvcRequestBuilders.delete("/restricted-patient/prison-number/A12345"),
         ).andExpect(MockMvcResultMatchers.status().is2xxSuccessful)
 
       verify(restrictedPatientsService).removeRestrictedPatient("A12345")
@@ -147,6 +147,6 @@ class RestrictedPatientControllerTest : ControllerTestBase() {
     "commentText" to "test",
     "fromLocationId" to "MDI",
     "hospitalLocationCode" to "HAZLWD",
-    "supportingPrisonId" to "MDI"
+    "supportingPrisonId" to "MDI",
   )
 }

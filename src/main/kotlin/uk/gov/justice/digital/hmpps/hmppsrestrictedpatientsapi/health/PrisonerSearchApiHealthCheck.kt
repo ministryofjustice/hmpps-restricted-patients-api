@@ -9,5 +9,5 @@ import java.time.Duration
 @Component
 class PrisonerSearchApiHealthCheck @Autowired constructor(
   prisonerSearchNoAuthWebClient: WebClient,
-  @Value("\${api.health-timeout-ms}") timeout: Duration
+  @Value("\${api.health-timeout-ms}") timeout: Duration,
 ) : HealthCheck(prisonerSearchNoAuthWebClient, timeout)

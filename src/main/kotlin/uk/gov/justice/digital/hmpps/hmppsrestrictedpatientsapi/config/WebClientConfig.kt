@@ -48,7 +48,7 @@ class WebClientConfig(
     authorizedClientRepository: OAuth2AuthorizedClientRepository,
   ): WebClient? = getClientCredsWebClient(
     "$prisonApiUrl/api",
-    authorizedClientManagerRequestScope(clientRegistrationRepository, authorizedClientRepository)
+    authorizedClientManagerRequestScope(clientRegistrationRepository, authorizedClientRepository),
   )
 
   @Bean
@@ -59,7 +59,7 @@ class WebClientConfig(
     authorizedClientRepository: OAuth2AuthorizedClientRepository,
   ): WebClient? = getClientCredsWebClient(
     prisonerSearchApiUrl,
-    authorizedClientManagerRequestScope(clientRegistrationRepository, authorizedClientRepository)
+    authorizedClientManagerRequestScope(clientRegistrationRepository, authorizedClientRepository),
   )
 
   @Bean
@@ -70,7 +70,7 @@ class WebClientConfig(
     authorizedClientRepository: OAuth2AuthorizedClientRepository,
   ): WebClient? = getClientCredsWebClient(
     caseNotesApiUrl,
-    authorizedClientManagerRequestScope(clientRegistrationRepository, authorizedClientRepository)
+    authorizedClientManagerRequestScope(clientRegistrationRepository, authorizedClientRepository),
   )
 
   @Bean
@@ -78,10 +78,10 @@ class WebClientConfig(
   @Profile("app-scope")
   fun prisonApiClientCredsAppScope(
     clientRegistrationRepository: ClientRegistrationRepository?,
-    oAuth2AuthorizedClientService: OAuth2AuthorizedClientService?
+    oAuth2AuthorizedClientService: OAuth2AuthorizedClientService?,
   ): WebClient? = getClientCredsWebClient(
     "$prisonApiUrl/api",
-    authorizedClientManagerAppScope(clientRegistrationRepository, oAuth2AuthorizedClientService)
+    authorizedClientManagerAppScope(clientRegistrationRepository, oAuth2AuthorizedClientService),
   )
 
   @Bean
@@ -89,16 +89,16 @@ class WebClientConfig(
   @Profile("app-scope")
   fun prisonerSearchClientCredsAppScope(
     clientRegistrationRepository: ClientRegistrationRepository?,
-    oAuth2AuthorizedClientService: OAuth2AuthorizedClientService?
+    oAuth2AuthorizedClientService: OAuth2AuthorizedClientService?,
   ): WebClient? = getClientCredsWebClient(
     prisonerSearchApiUrl,
-    authorizedClientManagerAppScope(clientRegistrationRepository, oAuth2AuthorizedClientService)
+    authorizedClientManagerAppScope(clientRegistrationRepository, oAuth2AuthorizedClientService),
   )
 
   @Bean
   fun communityApiClientCreds(
     clientRegistrationRepository: ClientRegistrationRepository?,
-    oAuth2AuthorizedClientService: OAuth2AuthorizedClientService?
+    oAuth2AuthorizedClientService: OAuth2AuthorizedClientService?,
   ): WebClient? = getClientCredsWebClient(
     "$communityApiUrl/secure",
     authorizedClientManagerAppScope(clientRegistrationRepository, oAuth2AuthorizedClientService),
@@ -110,10 +110,10 @@ class WebClientConfig(
   @Profile("app-scope")
   fun caseNotesApiClientCredsAppScope(
     clientRegistrationRepository: ClientRegistrationRepository?,
-    oAuth2AuthorizedClientService: OAuth2AuthorizedClientService?
+    oAuth2AuthorizedClientService: OAuth2AuthorizedClientService?,
   ): WebClient? = getClientCredsWebClient(
     caseNotesApiUrl,
-    authorizedClientManagerAppScope(clientRegistrationRepository, oAuth2AuthorizedClientService)
+    authorizedClientManagerAppScope(clientRegistrationRepository, oAuth2AuthorizedClientService),
   )
 
   private fun getClientCredsWebClient(
@@ -137,7 +137,7 @@ class WebClientConfig(
 
   fun authorizedClientManagerAppScope(
     clientRegistrationRepository: ClientRegistrationRepository?,
-    oAuth2AuthorizedClientService: OAuth2AuthorizedClientService?
+    oAuth2AuthorizedClientService: OAuth2AuthorizedClientService?,
   ): OAuth2AuthorizedClientManager {
     val authorizedClientProvider = OAuth2AuthorizedClientProviderBuilder.builder().clientCredentials().build()
     val authorizedClientManager =
@@ -148,7 +148,7 @@ class WebClientConfig(
 
   private fun authorizedClientManagerRequestScope(
     clientRegistrationRepository: ClientRegistrationRepository,
-    authorizedClientRepository: OAuth2AuthorizedClientRepository
+    authorizedClientRepository: OAuth2AuthorizedClientRepository,
   ): OAuth2AuthorizedClientManager {
     val defaultClientCredentialsTokenResponseClient = DefaultClientCredentialsTokenResponseClient()
     val authentication: Authentication = SecurityContextHolder.getContext().authentication
@@ -161,7 +161,7 @@ class WebClientConfig(
     val authorizedClientProvider = OAuth2AuthorizedClientProviderBuilder.builder()
       .clientCredentials { clientCredentialsGrantBuilder: OAuth2AuthorizedClientProviderBuilder.ClientCredentialsGrantBuilder ->
         clientCredentialsGrantBuilder.accessTokenResponseClient(
-          defaultClientCredentialsTokenResponseClient
+          defaultClientCredentialsTokenResponseClient,
         )
       }
       .build()

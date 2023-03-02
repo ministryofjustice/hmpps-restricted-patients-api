@@ -45,7 +45,7 @@ class BatchReleaseDateRemovalTest {
     hospitalLocationCode = "HAZLWD",
     supportingPrisonId = "LEI",
     dischargeTime = LocalDateTime.now(),
-    commentText = "test"
+    commentText = "test",
   )
 
   private val service = BatchReleaseDateRemoval(
@@ -128,7 +128,7 @@ class BatchReleaseDateRemovalTest {
             indeterminateSentence = false,
             legalStatus = "SENTENCED",
           ),
-        )
+        ),
       )
 
       service.removeNonLifePrisonersPastRelevantDate()
@@ -158,7 +158,7 @@ class BatchReleaseDateRemovalTest {
             indeterminateSentence = false,
             legalStatus = "SENTENCED",
           ),
-        )
+        ),
       )
       doThrow(WebClientResponseException::class)
         .doNothing()
