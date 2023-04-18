@@ -1,5 +1,5 @@
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "5.1.3-beta-2"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "5.1.4-beta"
   kotlin("plugin.spring") version "1.8.10"
   kotlin("plugin.jpa") version "1.8.10"
 }
@@ -20,12 +20,12 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-data-jpa")
   implementation("org.apache.commons:commons-text:1.10.0")
   implementation("io.swagger:swagger-annotations:1.6.10")
-  implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.4")
+  implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.1.0")
   implementation("org.springframework:spring-jms")
   implementation("com.google.code.gson:gson:2.10.1")
-  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:2.0.0-beta-13")
+  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:2.0.0-beta-14")
   implementation("org.apache.commons:commons-csv:1.10.0")
-  implementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:1.24.0")
+  implementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:1.25.0")
 
   runtimeOnly("com.h2database:h2:2.1.214")
   runtimeOnly("org.flywaydb:flyway-core")
@@ -39,7 +39,7 @@ dependencies {
   testImplementation("net.javacrumbs.json-unit:json-unit-assertj:2.37.0")
   testImplementation("org.awaitility:awaitility-kotlin:4.2.0")
 
-  testImplementation("io.opentelemetry:opentelemetry-sdk-testing:1.24.0")
+  testImplementation("io.opentelemetry:opentelemetry-sdk-testing:1.25.0")
 }
 
 allOpen {
