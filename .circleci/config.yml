@@ -103,6 +103,7 @@ workflows:
                 - main
     jobs:
       - hmpps/gradle_owasp_dependency_check:
+          jdk_tag: "19.0"
           context:
             - hmpps-common-vars
       - hmpps/trivy_latest_scan:
