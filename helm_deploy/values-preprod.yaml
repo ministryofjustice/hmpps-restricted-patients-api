@@ -4,6 +4,8 @@
 generic-service:
   replicaCount: 2
 
+  serviceAccountName: hmpps-restricted-patients-api-preprod
+
   ingress:
     host: restricted-patients-api-preprod.hmpps.service.justice.gov.uk
 
