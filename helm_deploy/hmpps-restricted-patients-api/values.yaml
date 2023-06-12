@@ -2,6 +2,8 @@
 generic-service:
   nameOverride: hmpps-restricted-patients-api
 
+  serviceAccountName: hmpps-restricted-patients-api
+
   replicaCount: 4
 
   image:
