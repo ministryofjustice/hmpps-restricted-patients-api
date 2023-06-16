@@ -53,6 +53,10 @@ spring:
           hmpps-auth:
             token-uri: ${oauth.endpoint.url}/oauth/token
 
+      resourceserver:
+        jwt:
+          jwk-set-uri: ${oauth.endpoint.url}/.well-known/jwks.json
+
   sql:
     init:
       continue-on-error: true
