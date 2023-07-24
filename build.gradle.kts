@@ -1,7 +1,7 @@
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "5.2.2"
-  kotlin("plugin.spring") version "1.8.22"
-  kotlin("plugin.jpa") version "1.8.22"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "5.3.0-beta"
+  kotlin("plugin.spring") version "1.9.0"
+  kotlin("plugin.jpa") version "1.9.0"
 }
 
 configurations {
@@ -25,11 +25,11 @@ dependencies {
   implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.1.0")
   implementation("org.springframework:spring-jms")
   implementation("com.google.code.gson:gson:2.10.1")
-  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:2.0.0")
+  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:2.0.1")
   implementation("org.apache.commons:commons-csv:1.10.0")
-  implementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:1.27.0")
+  implementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:1.28.0")
 
-  runtimeOnly("com.h2database:h2:2.1.214")
+  runtimeOnly("com.h2database:h2:2.2.220")
   runtimeOnly("org.flywaydb:flyway-core")
   runtimeOnly("org.postgresql:postgresql:42.6.0")
 
@@ -38,10 +38,10 @@ dependencies {
   testImplementation("io.jsonwebtoken:jjwt-jackson:0.11.5")
   testImplementation("com.github.tomakehurst:wiremock-jre8-standalone:2.35.0")
   testImplementation("org.springframework.security:spring-security-test")
-  testImplementation("net.javacrumbs.json-unit:json-unit-assertj:2.38.0")
+  testImplementation("net.javacrumbs.json-unit:json-unit-assertj:3.0.0")
   testImplementation("org.awaitility:awaitility-kotlin:4.2.0")
 
-  testImplementation("io.opentelemetry:opentelemetry-sdk-testing:1.27.0")
+  testImplementation("io.opentelemetry:opentelemetry-sdk-testing:1.28.0")
 }
 
 allOpen {
