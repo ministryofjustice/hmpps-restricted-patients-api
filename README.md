@@ -68,6 +68,8 @@ It has been known for the merge to be done the wrong way round with an old booki
 rather than the movement to hospital being the last booking record.  In that case raise the issue in #ask-prison-nomis,
 it could be the case that syscon have to run a script to amend the sequence of the bookings in the merge.
 
+**Note that after changing any database records the prisoner will have to be re-indexed in search.**
+
 ## Prisoner offender events
 ### Subscribe -> OFFENDER_MOVEMENT-RECEPTION
 
