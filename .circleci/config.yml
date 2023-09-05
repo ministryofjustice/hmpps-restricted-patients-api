@@ -7,7 +7,7 @@ jobs:
   validate:
     executor:
       name: hmpps/java_localstack_postgres
-      jdk_tag: "19.0"
+      jdk_tag: "20.0"
       localstack_tag: "1.2"
       postgres_tag: "15"
       postgres_username: "restricted-patients"
@@ -103,7 +103,7 @@ workflows:
                 - main
     jobs:
       - hmpps/gradle_owasp_dependency_check:
-          jdk_tag: "19.0"
+          jdk_tag: "20.0"
           context:
             - hmpps-common-vars
       - hmpps/trivy_latest_scan:
