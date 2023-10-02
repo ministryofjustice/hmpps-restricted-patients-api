@@ -27,21 +27,21 @@ dependencies {
   implementation("com.google.code.gson:gson:2.10.1")
   implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:2.0.1")
   implementation("org.apache.commons:commons-csv:1.10.0")
-  implementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:1.29.0")
+  implementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:1.30.0")
 
-  runtimeOnly("com.h2database:h2:2.2.222")
+  runtimeOnly("com.h2database:h2:2.2.224")
   runtimeOnly("org.flywaydb:flyway-core")
   runtimeOnly("org.postgresql:postgresql:42.6.0")
 
   testImplementation("org.flywaydb:flyway-core")
   testImplementation("io.jsonwebtoken:jjwt-impl:0.11.5")
   testImplementation("io.jsonwebtoken:jjwt-jackson:0.11.5")
-  testImplementation("org.wiremock:wiremock:3.0.3")
+  testImplementation("org.wiremock:wiremock:3.2.0")
   testImplementation("org.springframework.security:spring-security-test")
-  testImplementation("net.javacrumbs.json-unit:json-unit-assertj:3.0.0")
+  testImplementation("net.javacrumbs.json-unit:json-unit-assertj:3.2.2")
   testImplementation("org.awaitility:awaitility-kotlin:4.2.0")
 
-  testImplementation("io.opentelemetry:opentelemetry-sdk-testing:1.29.0")
+  testImplementation("io.opentelemetry:opentelemetry-sdk-testing:1.30.1")
 }
 
 allOpen {
