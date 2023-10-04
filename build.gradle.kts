@@ -1,5 +1,5 @@
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "5.4.1"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "5.5.0"
   kotlin("plugin.spring") version "1.9.10"
   kotlin("plugin.jpa") version "1.9.10"
 }
@@ -25,7 +25,7 @@ dependencies {
   implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0")
   implementation("org.springframework:spring-jms")
   implementation("com.google.code.gson:gson:2.10.1")
-  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:2.0.1")
+  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:2.1.0")
   implementation("org.apache.commons:commons-csv:1.10.0")
   implementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:1.30.0")
 
@@ -34,8 +34,8 @@ dependencies {
   runtimeOnly("org.postgresql:postgresql:42.6.0")
 
   testImplementation("org.flywaydb:flyway-core")
-  testImplementation("io.jsonwebtoken:jjwt-impl:0.11.5")
-  testImplementation("io.jsonwebtoken:jjwt-jackson:0.11.5")
+  testImplementation("io.jsonwebtoken:jjwt-impl:0.12.0")
+  testImplementation("io.jsonwebtoken:jjwt-jackson:0.12.0")
   testImplementation("org.wiremock:wiremock:3.2.0")
   testImplementation("org.springframework.security:spring-security-test")
   testImplementation("net.javacrumbs.json-unit:json-unit-assertj:3.2.2")
@@ -66,6 +66,8 @@ tasks {
     useJUnitPlatform {
       excludeTags("race-condition-test")
     }
+    // required for jjwt 0.12 - see https://github.com/jwtk/jjwt/issues/849
+    jvmArgs("--add-exports", "java.base/sun.security.util=ALL-UNNAMED")
   }
 
   task<Test>("testTargetAppScope") {
