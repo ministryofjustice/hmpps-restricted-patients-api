@@ -8,7 +8,7 @@ jobs:
     executor:
       name: hmpps/java_localstack_postgres
       jdk_tag: "20.0"
-      localstack_tag: "1.2"
+      localstack_tag: "2.3"
       postgres_tag: "15"
       postgres_username: "restricted-patients"
       postgres_password: "test"
