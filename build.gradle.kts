@@ -41,7 +41,7 @@ dependencies {
   testImplementation("net.javacrumbs.json-unit:json-unit-assertj:3.2.2")
   testImplementation("org.awaitility:awaitility-kotlin:4.2.0")
 
-  testImplementation("io.opentelemetry:opentelemetry-sdk-testing:1.31.0")
+  testImplementation("io.opentelemetry:opentelemetry-sdk-testing:1.30.1")
 }
 
 allOpen {
@@ -66,8 +66,6 @@ tasks {
     useJUnitPlatform {
       excludeTags("race-condition-test")
     }
-    // required for jjwt 0.12 - see https://github.com/jwtk/jjwt/issues/849
-    jvmArgs("--add-exports", "java.base/sun.security.util=ALL-UNNAMED")
   }
 
   task<Test>("testTargetAppScope") {
