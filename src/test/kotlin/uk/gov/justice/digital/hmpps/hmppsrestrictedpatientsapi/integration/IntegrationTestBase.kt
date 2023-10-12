@@ -107,14 +107,18 @@ abstract class IntegrationTestBase {
     flyway.migrate()
   }
 
-  fun setHeaders(contentType: MediaType = APPLICATION_JSON, username: String? = "ITAG_USER", roles: List<String> = listOf()): (HttpHeaders) -> Unit = {
+  fun setHeaders(
+    contentType: MediaType = APPLICATION_JSON,
+    username: String? = "ITAG_USER",
+    roles: List<String> = listOf("ROLE_RESTRICTED_PATIENT"),
+  ): (HttpHeaders) -> Unit = {
     it.setBearerAuth(jwtAuthHelper.createJwt(subject = username, roles = roles))
     it.contentType = contentType
   }
 
   fun loadResourceFile(fileName: String): String {
     val packageName = "uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.integration"
-    return javaClass.getResource("/$packageName/$fileName").readText()
+    return javaClass.getResource("/$packageName/$fileName")!!.readText()
   }
 
   fun getRestrictedPatient(prisonerNumber: String = "A12345"): WebTestClient.RequestHeadersSpec<*> =

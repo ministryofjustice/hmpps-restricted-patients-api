@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.controllers
 
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -15,6 +16,7 @@ import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.Re
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services.RestrictedPatientsService
 
 @RestController
+@PreAuthorize("hasRole('RESTRICTED_PATIENT')")
 class RestrictedPatientsController(private val restrictedPatientsService: RestrictedPatientsService) {
   @PostMapping(
     value = ["/discharge-to-hospital"],
@@ -32,9 +34,7 @@ class RestrictedPatientsController(private val restrictedPatientsService: Restri
   fun migrateInPatient(@RequestBody migrateIn: MigrateInRequest): RestrictedPatientDto =
     restrictedPatientsService.migrateInPatient(migrateIn)
 
-  @GetMapping(
-    value = ["/restricted-patient/prison-number/{prison-number}"],
-  )
+  @GetMapping(value = ["/restricted-patient/prison-number/{prison-number}"])
   fun getRestrictedPatientByPrisonNumber(@PathVariable(name = "prison-number") prisonNumber: String): RestrictedPatientDto =
     restrictedPatientsService.getRestrictedPatient(prisonNumber)
 

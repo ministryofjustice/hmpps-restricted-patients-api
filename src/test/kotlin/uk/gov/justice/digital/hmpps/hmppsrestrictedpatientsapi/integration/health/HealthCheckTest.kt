@@ -26,7 +26,7 @@ class HealthCheckTest : IntegrationTestBase() {
     fun `Queue health ok and dlq health ok, reports everything up`() {
       webTestClient.get()
         .uri("/health")
-        .headers(setHeaders())
+        .headers(setHeaders(roles = emptyList()))
         .exchange()
         .expectStatus().isOk
         .expectBody()
@@ -42,7 +42,7 @@ class HealthCheckTest : IntegrationTestBase() {
     fun `Queue health ok and dlq health ok, reports everything up`() {
       webTestClient.get()
         .uri("/health")
-        .headers(setHeaders())
+        .headers(setHeaders(roles = emptyList()))
         .exchange()
         .expectStatus().isOk
         .expectBody()
