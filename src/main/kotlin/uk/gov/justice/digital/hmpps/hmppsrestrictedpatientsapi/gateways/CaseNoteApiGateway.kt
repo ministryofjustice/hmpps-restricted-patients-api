@@ -12,7 +12,7 @@ class CaseNoteApiGateway(@Qualifier("caseNotesApiClientCreds")private val caseNo
     with(caseNoteRequest) {
       caseNoteApiClientCreds
         .post()
-        .uri("/case-notes/$offenderNumber")
+        .uri("/case-notes/{offenderNumber}", offenderNumber)
         .bodyValue(
           mapOf(
             "locationId" to locationId,

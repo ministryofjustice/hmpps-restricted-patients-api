@@ -10,7 +10,7 @@ class CommunityApiGateway(@Qualifier("communityApiClientCreds") private val comm
   fun updateNomsNumber(crn: String, nomsNumber: String): Unit? =
     communityApiClientCreds
       .put()
-      .uri("/offenders/crn/$crn/nomsNumber")
+      .uri("/offenders/crn/{crn}/nomsNumber", crn)
       .bodyValue(
         mapOf("nomsNumber" to nomsNumber),
       )

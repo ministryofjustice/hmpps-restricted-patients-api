@@ -19,7 +19,7 @@ class PrisonApiGateway(private val prisonApiClientCreds: WebClient) {
   fun dischargeToHospital(newRestrictedPatient: RestrictedPatient, noEventPropagation: Boolean = false): InmateDetail =
     prisonApiClientCreds
       .put()
-      .uri("/offenders/${newRestrictedPatient.prisonerNumber}/discharge-to-hospital")
+      .uri("/offenders/{prisonerNumber}/discharge-to-hospital", newRestrictedPatient.prisonerNumber)
       .header("no-event-propagation", noEventPropagation.toString())
       .bodyValue(
         mapOf(
@@ -49,7 +49,7 @@ class PrisonApiGateway(private val prisonApiClientCreds: WebClient) {
 
   fun getAgencyLocationsByType(type: String): List<Agency> = prisonApiClientCreds
     .get()
-    .uri("/agencies/type/$type")
+    .uri("/agencies/type/{type}", type)
     .retrieve()
     .bodyToMono(object : ParameterizedTypeReference<List<Agency>>() {})
     .block()!!
