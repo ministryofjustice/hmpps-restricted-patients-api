@@ -26,7 +26,7 @@ class ProcessUnknownPatientsIntTest : IntegrationTestBase() {
 
     @Test
     fun `should reject without any roles`() {
-      processUnknownPatientsWebClient(headers = setHeaders())
+      processUnknownPatientsWebClient(headers = setHeaders(roles = emptyList()))
         .exchange()
         .expectStatus().isForbidden
     }
@@ -108,7 +108,7 @@ class ProcessUnknownPatientsIntTest : IntegrationTestBase() {
         .expectStatus().isOk
         .expectBody()
         .jsonPath("$.mhcsReference").isEqualTo("3/6170")
-        .jsonPath("$.offenderNumber").isEqualTo(null)
+        .jsonPath("$.offenderNumber").doesNotExist()
         .jsonPath("$.success").isEqualTo("false")
         .jsonPath("$.errorMessage").isEqualTo("Date of birth 1965-02-33 invalid")
     }
@@ -122,7 +122,7 @@ class ProcessUnknownPatientsIntTest : IntegrationTestBase() {
         .expectStatus().isOk
         .expectBody()
         .jsonPath("$.mhcsReference").isEqualTo("3/6170")
-        .jsonPath("$.offenderNumber").isEqualTo(null)
+        .jsonPath("$.offenderNumber").doesNotExist()
         .jsonPath("$.success").isEqualTo("false")
         .jsonPath("$.errorMessage").value<String> { assertThat(it).contains("Create prisoner failed due to:").contains("Some user message") }
     }

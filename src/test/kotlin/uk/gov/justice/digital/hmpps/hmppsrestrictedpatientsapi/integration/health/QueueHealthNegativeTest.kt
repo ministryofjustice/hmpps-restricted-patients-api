@@ -42,7 +42,7 @@ class QueueHealthNegativeTest : IntegrationTestBase() {
   fun `Health page reports down`() {
     webTestClient.get()
       .uri("/health")
-      .headers(setHeaders())
+      .headers(setHeaders(roles = emptyList()))
       .exchange()
       .expectStatus().isEqualTo(HttpStatus.SERVICE_UNAVAILABLE)
       .expectBody()
