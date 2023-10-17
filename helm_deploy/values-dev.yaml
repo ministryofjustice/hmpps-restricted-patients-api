@@ -11,6 +11,7 @@ generic-service:
     APPLICATIONINSIGHTS_CONFIGURATION_FILE: applicationinsights.dev.json
     PRISON_API_ENDPOINT_URL: https://prison-api-dev.prison.service.justice.gov.uk
     PRISONER_SEARCH_API_ENDPOINT_URL: https://prisoner-search-dev.prison.service.justice.gov.uk
+    PRISONER_SEARCH_INDEXER_ENDPOINT_URL: https://prisoner-search-indexer-dev.prison.service.justice.gov.uk
     COMMUNITY_API_ENDPOINT_URL: https://community-api.test.probation.service.justice.gov.uk
     CASENOTES_API_ENDPOINT_URL: https://dev.offender-case-notes.service.justice.gov.uk
     OAUTH_ENDPOINT_URL: https://sign-in-dev.hmpps.service.justice.gov.uk/auth

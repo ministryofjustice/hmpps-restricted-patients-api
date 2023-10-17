@@ -10,7 +10,7 @@ import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.CaseNote
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.CommunityApiGateway
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.InmateDetail
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.PrisonApiGateway
-import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.PrisonerSearchApiGateway
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.PrisonerSearchIndexerGateway
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.entities.RestrictedPatient
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -23,7 +23,7 @@ class UnknownPatientService(
   private val restrictedPatientsService: RestrictedPatientsService,
   private val communityApiGateway: CommunityApiGateway,
   private val caseNotesApiGateway: CaseNoteApiGateway,
-  private val prisonerSearchApiGateway: PrisonerSearchApiGateway,
+  private val prisonerSearchIndexerGateway: PrisonerSearchIndexerGateway,
 ) {
 
   fun migrateInUnknownPatient(rawPatient: String, dryRun: Boolean = false): UnknownPatientResult =
@@ -89,7 +89,7 @@ class UnknownPatientService(
         "Historical hospital release added to NOMIS for addition to Restricted Patients",
       )
         .let { restrictedPatientsService.addRestrictedPatient(it, noEventPropagation = true) }
-        .also { prisonerSearchApiGateway.refreshPrisonerIndex(offenderNumber) }
+        .also { prisonerSearchIndexerGateway.refreshPrisonerIndex(offenderNumber) }
     }
       .getOrElse { handleApiError("Discharge to hospital failed due to", it, offenderNumber) }
 

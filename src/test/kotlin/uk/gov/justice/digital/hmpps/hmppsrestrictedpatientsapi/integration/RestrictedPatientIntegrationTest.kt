@@ -105,8 +105,8 @@ class RestrictedPatientIntegrationTest : IntegrationTestBase() {
         ).withHeader("Authorization", WireMock.containing("Bearer")),
     )
 
-    prisonerSearchApiMockServer.verify(
-      putRequestedFor(urlEqualTo("/prisoner-index/index/prisoner/A12345")),
+    prisonerSearchIndexerMockServer.verify(
+      putRequestedFor(urlEqualTo("/maintain-index/index-prisoner/A12345")),
     )
 
     val rpEntry = restrictedPatientRepository.findById("A12345")
@@ -168,7 +168,7 @@ class RestrictedPatientIntegrationTest : IntegrationTestBase() {
   @Test
   fun `remove restricted patient`() {
     prisonApiMockServer.stubCreateExternalMovement()
-    prisonerSearchApiMockServer.stubRefreshIndex("A12345")
+    prisonerSearchIndexerMockServer.stubRefreshIndex("A12345")
     prisonerSearchApiMockServer.stubSearchByPrisonNumber("A12345")
 
     dischargePrisonerWebClient(prisonerNumber = "A12345")
@@ -191,8 +191,8 @@ class RestrictedPatientIntegrationTest : IntegrationTestBase() {
         ),
     )
 
-    prisonerSearchApiMockServer.verify(
-      putRequestedFor(urlEqualTo("/prisoner-index/index/prisoner/A12345")),
+    prisonerSearchIndexerMockServer.verify(
+      putRequestedFor(urlEqualTo("/maintain-index/index-prisoner/A12345")),
     )
 
     getRestrictedPatient(prisonerNumber = "A12345")

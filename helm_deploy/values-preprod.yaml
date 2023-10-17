@@ -11,6 +11,7 @@ generic-service:
     APPLICATIONINSIGHTS_CONFIGURATION_FILE: applicationinsights.json
     PRISON_API_ENDPOINT_URL: https://api-preprod.prison.service.justice.gov.uk
     PRISONER_SEARCH_API_ENDPOINT_URL: https://prisoner-search-preprod.prison.service.justice.gov.uk
+    PRISONER_SEARCH_INDEXER_ENDPOINT_URL: https://prisoner-search-indexer-preprod.prison.service.justice.gov.uk
     COMMUNITY_API_ENDPOINT_URL: https://community-api.pre-prod.delius.probation.hmpps.dsd.io
     CASENOTES_API_ENDPOINT_URL: https://preprod.offender-case-notes.service.justice.gov.uk
     OAUTH_ENDPOINT_URL: https://sign-in-preprod.hmpps.service.justice.gov.uk/auth

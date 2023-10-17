@@ -20,11 +20,4 @@ class PrisonerSearchApiGateway(@Qualifier("prisonerSearchClientCreds") private v
     .retrieve()
     .bodyToMono(object : ParameterizedTypeReference<List<PrisonerResult>>() {})
     .block()!!
-
-  fun refreshPrisonerIndex(prisonerNumber: String): PrisonerResult = prisonerSearchClientCreds
-    .put()
-    .uri("/prisoner-index/index/prisoner/{prisonerNumber}", prisonerNumber)
-    .retrieve()
-    .bodyToMono(PrisonerResult::class.java)
-    .block()!!
 }

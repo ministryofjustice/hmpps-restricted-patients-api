@@ -28,6 +28,7 @@ import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.dataBuilders.make
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.dataBuilders.makeRestrictedPatient
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.PrisonApiGateway
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.PrisonerSearchApiGateway
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.PrisonerSearchIndexerGateway
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.entities.RestrictedPatient
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.request.CreateExternalMovement
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.Agency
@@ -45,6 +46,7 @@ class RestrictedPatientServiceTest {
 
   private val prisonApiGateway: PrisonApiGateway = mock()
   private val prisonerSearchApiGateway: PrisonerSearchApiGateway = mock()
+  private val prisonerSearchIndexerGateway: PrisonerSearchIndexerGateway = mock()
   private val restrictedPatientsRepository: RestrictedPatientsRepository = mock()
   private val domainEventPublisher: DomainEventPublisher = mock()
   private val telemetryClient: TelemetryClient = mock()
@@ -59,7 +61,15 @@ class RestrictedPatientServiceTest {
     commentText = "test",
   )
 
-  private lateinit var service: RestrictedPatientsService
+  private val service = RestrictedPatientsService(
+    prisonApiGateway,
+    prisonerSearchApiGateway,
+    prisonerSearchIndexerGateway,
+    restrictedPatientsRepository,
+    domainEventPublisher,
+    telemetryClient,
+    clock,
+  )
 
   @BeforeEach
   fun beforeEach() {
@@ -67,15 +77,6 @@ class RestrictedPatientServiceTest {
       Clock.fixed(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant(), ZoneId.systemDefault())
     whenever(clock.instant()).thenReturn(fixedClock.instant())
     whenever(clock.getZone()).thenReturn(fixedClock.getZone())
-
-    service = RestrictedPatientsService(
-      prisonApiGateway,
-      prisonerSearchApiGateway,
-      restrictedPatientsRepository,
-      domainEventPublisher,
-      telemetryClient,
-      clock,
-    )
   }
 
   @Nested
@@ -196,15 +197,15 @@ class RestrictedPatientServiceTest {
     fun `ensures that the restricted patient is removed before the prison api calls`() {
       whenever(restrictedPatientsRepository.findById(any())).thenReturn(Optional.of(makeRestrictedPatient()))
       whenever(prisonerSearchApiGateway.searchByPrisonNumber(anyString())).thenReturn(listOf(makePrisonerResult()))
-      whenever(prisonerSearchApiGateway.refreshPrisonerIndex(anyString())).thenReturn(makePrisonerResult())
+      whenever(prisonerSearchIndexerGateway.refreshPrisonerIndex(anyString())).thenReturn(makePrisonerResult())
 
       service.removeRestrictedPatient("A12345")
 
-      val inOrder = inOrder(restrictedPatientsRepository, prisonApiGateway, prisonerSearchApiGateway)
+      val inOrder = inOrder(restrictedPatientsRepository, prisonApiGateway, prisonerSearchIndexerGateway)
 
       inOrder.verify(restrictedPatientsRepository).delete(any())
       inOrder.verify(prisonApiGateway).createExternalMovement(any())
-      inOrder.verify(prisonerSearchApiGateway).refreshPrisonerIndex(any())
+      inOrder.verify(prisonerSearchIndexerGateway).refreshPrisonerIndex(any())
     }
 
     @Test
@@ -556,17 +557,17 @@ class RestrictedPatientServiceTest {
       fun `saves restricted patient data before the index is updated`() {
         service.migrateInPatient(makeMigrateInRequest())
 
-        val inOrder = inOrder(restrictedPatientsRepository, prisonerSearchApiGateway)
+        val inOrder = inOrder(restrictedPatientsRepository, prisonerSearchIndexerGateway)
 
         inOrder.verify(restrictedPatientsRepository).saveAndFlush(any())
-        inOrder.verify(prisonerSearchApiGateway).refreshPrisonerIndex(any())
+        inOrder.verify(prisonerSearchIndexerGateway).refreshPrisonerIndex(any())
       }
 
       @Test
       fun `ensure that the prisoner search index is updated before completion`() {
         service.migrateInPatient(makeMigrateInRequest())
 
-        verify(prisonerSearchApiGateway).refreshPrisonerIndex("A12345")
+        verify(prisonerSearchIndexerGateway).refreshPrisonerIndex("A12345")
       }
     }
 

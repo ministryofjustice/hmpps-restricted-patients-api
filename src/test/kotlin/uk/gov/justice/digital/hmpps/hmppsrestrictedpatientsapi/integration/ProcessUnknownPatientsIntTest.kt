@@ -85,7 +85,7 @@ class ProcessUnknownPatientsIntTest : IntegrationTestBase() {
       prisonApiMockServer.stubCreatePrisoner("A1234AA")
       stubDischargePrisoner("A1234AA")
       communityApiMockServer.stubUpdateNomsNumber("crn")
-      prisonerSearchApiMockServer.stubRefreshIndex("A1234AA")
+      prisonerSearchIndexerMockServer.stubRefreshIndex("A1234AA")
       caseNotesApiMockServer.stubCreateCaseNote("A1234AA")
     }
 
