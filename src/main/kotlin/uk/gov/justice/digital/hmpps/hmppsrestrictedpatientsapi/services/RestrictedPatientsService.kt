@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.config.BadRequestException
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.PrisonApiGateway
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.PrisonerSearchApiGateway
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.PrisonerSearchIndexerGateway
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.entities.RestrictedPatient
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.request.CreateExternalMovement
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.request.DischargeToHospitalRequest
@@ -28,6 +29,7 @@ data class ExistingDischargeData(
 class RestrictedPatientsService(
   private val prisonApiGateway: PrisonApiGateway,
   private val prisonerSearchApiGateway: PrisonerSearchApiGateway,
+  private val prisonerSearchIndexerGateway: PrisonerSearchIndexerGateway,
   private val restrictedPatientsRepository: RestrictedPatientsRepository,
   private val domainEventPublisher: DomainEventPublisher,
   private val telemetryClient: TelemetryClient,
@@ -73,7 +75,7 @@ class RestrictedPatientsService(
       commentText = "Historical discharge to hospital added to restricted patients",
     )
       .let { addRestrictedPatient(it) }
-      .also { prisonerSearchApiGateway.refreshPrisonerIndex(migrateIn.offenderNo) }
+      .also { prisonerSearchIndexerGateway.refreshPrisonerIndex(migrateIn.offenderNo) }
   }
 
   private fun checkNotExistingPatient(offenderNo: String) =
@@ -184,7 +186,7 @@ class RestrictedPatientsService(
         ),
       )
 
-      prisonerSearchApiGateway.refreshPrisonerIndex(prisonerNumber)
+      prisonerSearchIndexerGateway.refreshPrisonerIndex(prisonerNumber)
 
       domainEventPublisher.publishRestrictedPatientRemoved(prisonerNumber)
 

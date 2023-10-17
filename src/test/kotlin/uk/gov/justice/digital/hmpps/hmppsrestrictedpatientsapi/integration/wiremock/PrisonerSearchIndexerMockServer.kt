@@ -3,10 +3,10 @@ package uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.integration.wire
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock.aResponse
 import com.github.tomakehurst.wiremock.client.WireMock.get
-import com.github.tomakehurst.wiremock.client.WireMock.post
+import com.github.tomakehurst.wiremock.client.WireMock.put
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 
-class PrisonerSearchApiMockServer : WireMockServer(8100) {
+class PrisonerSearchIndexerMockServer : WireMockServer(8103) {
   fun stubHealth() {
     stubFor(
       get(urlEqualTo("/health/ping"))
@@ -25,16 +25,15 @@ class PrisonerSearchApiMockServer : WireMockServer(8100) {
     )
   }
 
-  fun stubSearchByPrisonNumber(prisonerNumber: String) {
+  fun stubRefreshIndex(prisonerNumber: String) {
     stubFor(
-      post(urlEqualTo("/prisoner-search/prisoner-numbers"))
+      put(urlEqualTo("/maintain-index/index-prisoner/$prisonerNumber"))
         .willReturn(
           aResponse()
             .withHeader("Content-Type", "application/json")
             .withStatus(200)
             .withBody(
-              """
-             [
+              """             
                 {
                   "prisonerNumber": "$prisonerNumber",
                   "pncNumber": "96/371915Q",
@@ -42,14 +41,8 @@ class PrisonerSearchApiMockServer : WireMockServer(8100) {
                   "pncNumberCanonicalLong": "1996/371915Q",
                   "croNumber": "177155/96K",
                   "bookingId": "1138058",
-                  "bookNumber": "W73895",
-                  "firstName": "EMANETTA",
-                  "middleNames": "PATES",
-                  "lastName": "ABOLD",
-                  "dateOfBirth": "1984-08-22",
-                  "legalStatus": "SENTENCED"
-                }
-               ]
+                  "legalStatus": "UNKNOWN"
+                }               
               """.trimIndent(),
             ),
         ),

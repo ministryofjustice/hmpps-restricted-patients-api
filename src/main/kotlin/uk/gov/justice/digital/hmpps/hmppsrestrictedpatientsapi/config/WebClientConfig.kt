@@ -26,6 +26,7 @@ import org.springframework.web.reactive.function.client.WebClient
 class WebClientConfig(
   @Value("\${prison.api.endpoint.url}") private val prisonApiUrl: String,
   @Value("\${prisoner.search.api.endpoint.url}") private val prisonerSearchApiUrl: String,
+  @Value("\${prisoner.search.indexer.endpoint.url}") private val prisonerSearchIndexerUrl: String,
   @Value("\${community.api.endpoint.url}") private val communityApiUrl: String,
   @Value("\${casenotes.api.endpoint.url}") private val caseNotesApiUrl: String,
 ) {
@@ -38,6 +39,11 @@ class WebClientConfig(
   @Bean
   fun prisonerSearchNoAuthWebClient(builder: WebClient.Builder): WebClient = builder
     .baseUrl(prisonerSearchApiUrl)
+    .build()
+
+  @Bean
+  fun prisonerSearchIndexerNoAuthWebClient(builder: WebClient.Builder): WebClient = builder
+    .baseUrl(prisonerSearchIndexerUrl)
     .build()
 
   @Bean
@@ -59,6 +65,17 @@ class WebClientConfig(
     authorizedClientRepository: OAuth2AuthorizedClientRepository,
   ): WebClient? = getClientCredsWebClient(
     prisonerSearchApiUrl,
+    authorizedClientManagerRequestScope(clientRegistrationRepository, authorizedClientRepository),
+  )
+
+  @Bean
+  @RequestScope
+  @Profile("!app-scope")
+  fun prisonerSearchIndexerClientCreds(
+    clientRegistrationRepository: ClientRegistrationRepository,
+    authorizedClientRepository: OAuth2AuthorizedClientRepository,
+  ): WebClient? = getClientCredsWebClient(
+    prisonerSearchIndexerUrl,
     authorizedClientManagerRequestScope(clientRegistrationRepository, authorizedClientRepository),
   )
 
@@ -92,6 +109,17 @@ class WebClientConfig(
     oAuth2AuthorizedClientService: OAuth2AuthorizedClientService?,
   ): WebClient? = getClientCredsWebClient(
     prisonerSearchApiUrl,
+    authorizedClientManagerAppScope(clientRegistrationRepository, oAuth2AuthorizedClientService),
+  )
+
+  @Bean
+  @Qualifier("prisonerSearchIndexerClientCreds")
+  @Profile("app-scope")
+  fun prisonerSearchIndexerClientCredsAppScope(
+    clientRegistrationRepository: ClientRegistrationRepository?,
+    oAuth2AuthorizedClientService: OAuth2AuthorizedClientService?,
+  ): WebClient? = getClientCredsWebClient(
+    prisonerSearchIndexerUrl,
     authorizedClientManagerAppScope(clientRegistrationRepository, oAuth2AuthorizedClientService),
   )
 
