@@ -129,7 +129,20 @@ class RestrictedPatientsService(
       Agency(agencyId = restrictedPatient.fromLocationId),
       Agency(agencyId = restrictedPatient.hospitalLocationCode),
       Agency(agencyId = restrictedPatient.supportingPrisonId),
-    )
+    ).also {
+      domainEventPublisher.publishRestrictedPatientAdded(restrictedPatient.prisonerNumber)
+      telemetryClient.trackEvent(
+        "restricted-patient-added",
+        mapOf(
+          "prisonerNumber" to restrictedPatient.prisonerNumber,
+          "fromLocationId" to restrictedPatient.fromLocationId,
+          "hospitalLocationCode" to restrictedPatient.hospitalLocationCode,
+          "supportingPrisonId" to restrictedPatient.supportingPrisonId,
+          "dischargeTime" to restrictedPatient.dischargeTime.toString(),
+        ),
+        null,
+      )
+    }
   }
 
   private fun dischargeOrRollBackAndThrow(
