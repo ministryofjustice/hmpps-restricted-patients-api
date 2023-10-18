@@ -202,6 +202,7 @@ class RestrictedPatientsService(
         null,
       )
     } catch (e: Exception) {
+      // this re-creates the restricted patient in the database - undoing the delete
       restrictedPatientsRepository.saveAndFlush(restrictedPatient)
       throw e
     }
