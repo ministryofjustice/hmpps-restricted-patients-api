@@ -8,8 +8,6 @@ management.endpoint:
 prison.api.endpoint.url: http://localhost:8989
 prisoner.search.api.endpoint.url: http://localhost:8100
 prisoner.search.indexer.endpoint.url: http://localhost:8103
-community.api.endpoint.url: http://localhost:8101
-casenotes.api.endpoint.url: http://localhost:8102
 oauth.endpoint.url: http://localhost:8090/auth
 
 spring:

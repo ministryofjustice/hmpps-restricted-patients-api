@@ -1,18 +1,13 @@
 package uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.controllers
 
 import io.swagger.v3.oas.annotations.Hidden
-import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services.BatchReleaseDateRemoval
-import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services.UnknownPatientResult
-import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services.UnknownPatientService
 
 @RestController
 class RestrictedPatientsBatchController(
   private val batchReleaseDateRemoval: BatchReleaseDateRemoval,
-  private val unknownPatientService: UnknownPatientService,
 ) {
   /**
    * Internal endpoint to find all restricted patients that have determinate sentences (non lifers) where the
@@ -22,22 +17,4 @@ class RestrictedPatientsBatchController(
   @PostMapping(value = ["/process-past-date-restricted-patients"])
   fun processPastDateRestrictedPatients(): Unit =
     batchReleaseDateRemoval.removeNonLifePrisonersPastRelevantDate()
-
-  /**
-   * Internal endpoint to migrate unknown patients into Nomis and add them to Restricted Patients
-   */
-  @Hidden
-  @PostMapping(value = ["/process-unknown-patient"])
-  @PreAuthorize("hasRole('RESTRICTED_PATIENT_MIGRATION')")
-  fun processUnknownPatient(@RequestBody patient: String): UnknownPatientResult =
-    unknownPatientService.migrateInUnknownPatient(patient)
-
-  /**
-   * DRY RUN version - this will validate input only but perform no actions
-   */
-  @Hidden
-  @PostMapping(value = ["/dryrun-unknown-patient"])
-  @PreAuthorize("hasRole('RESTRICTED_PATIENT_MIGRATION')")
-  fun dryRunProcessUnknownPatients(@RequestBody patient: String): UnknownPatientResult =
-    unknownPatientService.migrateInUnknownPatient(patient, true)
 }

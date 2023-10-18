@@ -11,21 +11,17 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT
 import org.springframework.boot.test.mock.mockito.MockBean
-import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.test.web.reactive.server.WebTestClient
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.JwtAuthHelper
-import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.integration.wiremock.CaseNotesApiMockServer
-import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.integration.wiremock.CommunityApiMockServer
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.integration.wiremock.OAuthMockServer
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.integration.wiremock.PrisonApiMockServer
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.integration.wiremock.PrisonerSearchApiMockServer
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.integration.wiremock.PrisonerSearchIndexerMockServer
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.entities.RestrictedPatient
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.repositories.RestrictedPatientsRepository
-import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services.UnknownPatientService
 import java.time.Clock
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -49,9 +45,6 @@ abstract class IntegrationTestBase {
   @MockBean
   lateinit var clock: Clock
 
-  @SpyBean
-  lateinit var unknownPatientsService: UnknownPatientService
-
   companion object {
     @JvmField
     internal val prisonApiMockServer = PrisonApiMockServer()
@@ -61,12 +54,6 @@ abstract class IntegrationTestBase {
 
     @JvmField
     internal val prisonerSearchIndexerMockServer = PrisonerSearchIndexerMockServer()
-
-    @JvmField
-    internal val communityApiMockServer = CommunityApiMockServer()
-
-    @JvmField
-    internal val caseNotesApiMockServer = CaseNotesApiMockServer()
 
     @JvmField
     internal val oAuthMockServer = OAuthMockServer()
@@ -80,8 +67,6 @@ abstract class IntegrationTestBase {
       prisonApiMockServer.start()
       prisonerSearchApiMockServer.start()
       prisonerSearchIndexerMockServer.start()
-      communityApiMockServer.start()
-      caseNotesApiMockServer.start()
     }
 
     @AfterAll
@@ -90,8 +75,6 @@ abstract class IntegrationTestBase {
       prisonApiMockServer.stop()
       prisonerSearchApiMockServer.stop()
       prisonerSearchIndexerMockServer.stop()
-      communityApiMockServer.stop()
-      caseNotesApiMockServer.stop()
       oAuthMockServer.stop()
     }
   }
