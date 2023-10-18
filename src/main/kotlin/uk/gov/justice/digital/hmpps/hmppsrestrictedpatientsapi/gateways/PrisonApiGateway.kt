@@ -15,11 +15,10 @@ import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.Of
 
 @Service
 class PrisonApiGateway(private val prisonApiClientCreds: WebClient) {
-  fun dischargeToHospital(newRestrictedPatient: RestrictedPatient, noEventPropagation: Boolean = false): InmateDetail =
+  fun dischargeToHospital(newRestrictedPatient: RestrictedPatient): InmateDetail =
     prisonApiClientCreds
       .put()
       .uri("/offenders/{prisonerNumber}/discharge-to-hospital", newRestrictedPatient.prisonerNumber)
-      .header("no-event-propagation", noEventPropagation.toString())
       .bodyValue(
         mapOf(
           "commentText" to newRestrictedPatient.commentText,

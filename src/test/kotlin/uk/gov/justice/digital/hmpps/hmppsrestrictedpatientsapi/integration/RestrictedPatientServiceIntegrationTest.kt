@@ -5,7 +5,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
-import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.kotlin.any
 import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.whenever
@@ -47,7 +46,7 @@ class RestrictedPatientServiceIntegrationTest : IntegrationTestBase() {
       doAnswer {
         getRestrictedPatient(prisonerNumber = "F12345").exchange().expectStatus().is2xxSuccessful
         throw BreakFlow()
-      }.whenever(prisonApiGateway).dischargeToHospital(any(), anyBoolean())
+      }.whenever(prisonApiGateway).dischargeToHospital(any())
 
       Assertions.assertThrows(BreakFlow::class.java) {
         restrictedPatientsService.dischargeToHospital(makeDischargeRequest().copy(offenderNo = "F12345"))
@@ -56,7 +55,7 @@ class RestrictedPatientServiceIntegrationTest : IntegrationTestBase() {
 
     @Test
     fun `the recently added restricted patient gets removed`() {
-      doAnswer { throw BreakFlow() }.whenever(prisonApiGateway).dischargeToHospital(any(), anyBoolean())
+      doAnswer { throw BreakFlow() }.whenever(prisonApiGateway).dischargeToHospital(any())
 
       Assertions.assertThrows(BreakFlow::class.java) {
         restrictedPatientsService.dischargeToHospital(makeDischargeRequest().copy(offenderNo = "F12345"))
