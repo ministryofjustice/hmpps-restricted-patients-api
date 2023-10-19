@@ -20,18 +20,30 @@ before you start running the tests. Once done you can run the tests by running `
 `./gradlew bootRun --args='--spring.profiles.active=dev,stdout,localstack'`
 
 ## HMPPS domain events
-This service publishes a `restricted-patients.patient.removed` domain event whenever a restricted patient 
-is removed from the service. 
+This service publishes two events- a `restricted-patients.patient.removed` domain event whenever a restricted patient 
+is removed from the service and a `restricted-patients.patient.added` domain event whenever they are added.
 
+### Publish -> restricted-patients.patient.added
+The message is published via amazon sns. The payload is defined below. 
+```json
+{
+   "eventType": "restricted-patients.patient.added",
+   "occurredAt": "2021-02-08T14:41:11.526762Z", // ISO offset date time when the restricted patient was added
+   "publishedAt": "2021-02-08T14:41:11.526762Z", // ISO offset date time when the event was published
+   "version": 1, 
+   "description": "Prisoner is now a restricted patient",   
+   "additionalInformation": { "prisonerNumber": "A12345"}     
+}
+```
 ### Publish -> restricted-patients.patient.removed
 The message is published via amazon sns. The payload is defined below. 
-```javascript
+```json
 {
    "eventType": "restricted-patients.patient.removed",
-   "occurredAt": "2021-02-08T14:41:11.526762Z", //ISO offset date time when the restricted patient was removed
-   "publishedAt": "2021-02-08T14:41:11.526762Z", //ISO offset date time when the event was published
+   "occurredAt": "2021-02-08T14:41:11.526762Z", // ISO offset date time when the restricted patient was removed
+   "publishedAt": "2021-02-08T14:41:11.526762Z", // ISO offset date time when the event was published
    "version": 1, 
-   "description": "Prisoner no longer a restricted patient"     
+   "description": "Prisoner no longer a restricted patient",    
    "additionalInformation": { "prisonerNumber": "A12345"}     
 }
 ```

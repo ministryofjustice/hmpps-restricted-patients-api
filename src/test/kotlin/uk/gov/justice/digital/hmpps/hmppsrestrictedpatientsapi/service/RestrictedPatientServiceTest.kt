@@ -337,6 +337,30 @@ class RestrictedPatientServiceTest {
         inOrder.verify(restrictedPatientsRepository).saveAndFlush(any())
         inOrder.verify(prisonApiGateway).dischargeToHospital(any())
       }
+
+      @Test
+      fun `publishes domain event for addition`() {
+        service.dischargeToHospital(makeDischargeRequest())
+
+        verify(domainEventPublisher).publishRestrictedPatientAdded("A12345")
+      }
+
+      @Test
+      fun `generates telemetry event`() {
+        service.dischargeToHospital(makeDischargeRequest())
+
+        verify(telemetryClient).trackEvent(
+          "restricted-patient-added",
+          mapOf(
+            "prisonerNumber" to "A12345",
+            "fromLocationId" to restrictedPatient.fromLocationId,
+            "hospitalLocationCode" to restrictedPatient.hospitalLocationCode,
+            "supportingPrisonId" to restrictedPatient.fromLocationId,
+            "dischargeTime" to LocalDateTime.now(clock).toString(),
+          ),
+          null,
+        )
+      }
     }
 
     @Nested
@@ -617,6 +641,30 @@ class RestrictedPatientServiceTest {
           newRestrictedPatient = check {
             assertThat(it.commentText).isEqualTo("comment saved to restricted patients")
           },
+        )
+      }
+
+      @Test
+      fun `publishes domain event for addition`() {
+        service.migrateInPatient(makeMigrateInRequest())
+
+        verify(domainEventPublisher).publishRestrictedPatientAdded("A12345")
+      }
+
+      @Test
+      fun `generates telemetry event`() {
+        service.migrateInPatient(makeMigrateInRequest())
+
+        verify(telemetryClient).trackEvent(
+          "restricted-patient-added",
+          mapOf(
+            "prisonerNumber" to "A12345",
+            "fromLocationId" to restrictedPatient.fromLocationId,
+            "hospitalLocationCode" to restrictedPatient.hospitalLocationCode,
+            "supportingPrisonId" to restrictedPatient.fromLocationId,
+            "dischargeTime" to migratedRestrictedPatient.dischargeTime.toString(),
+          ),
+          null,
         )
       }
     }
