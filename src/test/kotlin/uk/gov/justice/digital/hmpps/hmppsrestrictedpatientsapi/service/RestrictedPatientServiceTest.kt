@@ -8,11 +8,9 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.mockito.ArgumentCaptor
-import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.kotlin.any
 import org.mockito.kotlin.check
-import org.mockito.kotlin.eq
 import org.mockito.kotlin.inOrder
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
@@ -258,7 +256,7 @@ class RestrictedPatientServiceTest {
         whenever(prisonApiGateway.getOffenderBooking(any())).thenReturn(
           OffenderBookingResponse(1234567, "A1234AA", true),
         )
-        whenever(prisonApiGateway.dischargeToHospital(any(), anyBoolean())).thenThrow(WebClientResponseException::class.java)
+        whenever(prisonApiGateway.dischargeToHospital(any())).thenThrow(WebClientResponseException::class.java)
 
         assertThrows(WebClientResponseException::class.java) {
           service.dischargeToHospital(makeDischargeRequest())
@@ -307,7 +305,7 @@ class RestrictedPatientServiceTest {
       }
 
       @Test
-      fun `default to from prison id for supporting prison when not suppled`() {
+      fun `default to from prison id for supporting prison when not supplied`() {
         service.dischargeToHospital(makeDischargeRequest())
 
         verify(prisonApiGateway).dischargeToHospital(restrictedPatient)
@@ -337,7 +335,7 @@ class RestrictedPatientServiceTest {
         val inOrder = inOrder(restrictedPatientsRepository, prisonApiGateway)
 
         inOrder.verify(restrictedPatientsRepository).saveAndFlush(any())
-        inOrder.verify(prisonApiGateway).dischargeToHospital(any(), eq(false))
+        inOrder.verify(prisonApiGateway).dischargeToHospital(any())
       }
     }
 
@@ -466,7 +464,7 @@ class RestrictedPatientServiceTest {
       fun `removes recently persisted restricted patient on prison api discharge error`() {
         whenever(restrictedPatientsRepository.saveAndFlush(any())).thenReturn(makeRestrictedPatient())
         whenever(prisonApiGateway.getLatestMovements(any())).thenReturn(listOf(makeLatestMovementReturn()))
-        whenever(prisonApiGateway.dischargeToHospital(any(), anyBoolean())).thenThrow(WebClientResponseException::class.java)
+        whenever(prisonApiGateway.dischargeToHospital(any())).thenThrow(WebClientResponseException::class.java)
 
         assertThrows(WebClientResponseException::class.java) {
           service.migrateInPatient(makeMigrateInRequest())
@@ -619,7 +617,6 @@ class RestrictedPatientServiceTest {
           newRestrictedPatient = check {
             assertThat(it.commentText).isEqualTo("comment saved to restricted patients")
           },
-          noEventPropagation = eq(false),
         )
       }
     }
