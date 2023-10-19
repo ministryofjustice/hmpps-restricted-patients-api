@@ -119,10 +119,10 @@ class RestrictedPatientsService(
     }
   }
 
-  fun addRestrictedPatient(restrictedPatient: RestrictedPatient, noEventPropagation: Boolean = false): RestrictedPatientDto {
+  private fun addRestrictedPatient(restrictedPatient: RestrictedPatient): RestrictedPatientDto {
     val newRestrictedPatient = restrictedPatientsRepository.saveAndFlush(restrictedPatient)
 
-    dischargeOrRollBackAndThrow(newRestrictedPatient, noEventPropagation)
+    dischargeOrRollBackAndThrow(newRestrictedPatient)
 
     return transform(
       newRestrictedPatient,
@@ -145,15 +145,13 @@ class RestrictedPatientsService(
     }
   }
 
-  private fun dischargeOrRollBackAndThrow(
-    newRestrictedPatient: RestrictedPatient,
-    noEventPropagation: Boolean = false,
-  ) {
+  private fun dischargeOrRollBackAndThrow(newRestrictedPatient: RestrictedPatient) {
     try {
-      prisonApiGateway.dischargeToHospital(newRestrictedPatient, noEventPropagation)
+      prisonApiGateway.dischargeToHospital(newRestrictedPatient)
     } catch (e: Exception) {
-      // We manually roll back because the Prisoner Offender Search
-      // will call the API to get RP information before the transaction completes
+      // We have to operate out of a transaction because we want the prisoner to be added to the database immediately.
+      // Prisoner Search listens to any external movements so may call restricted patients before this service ends.
+      // We therefore have to delete the patient manually if the call to Prison API fails
       restrictedPatientsRepository.delete(newRestrictedPatient)
       throw e
     }
