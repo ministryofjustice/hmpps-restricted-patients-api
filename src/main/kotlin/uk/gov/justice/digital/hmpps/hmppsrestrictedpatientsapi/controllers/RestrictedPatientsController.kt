@@ -43,7 +43,6 @@ class RestrictedPatientsController(
     }
 
   private fun RestrictedPatientDto.publishAndTrackAdd(type: String) {
-    domainEventPublisher.publishRestrictedPatientAdded(prisonerNumber)
     telemetryClient.trackEvent(
       "restricted-patient-added-$type",
       mapOf(
@@ -55,6 +54,7 @@ class RestrictedPatientsController(
       ),
       null,
     )
+    domainEventPublisher.publishRestrictedPatientAdded(prisonerNumber)
   }
 
   @GetMapping(value = ["/restricted-patient/prison-number/{prison-number}"])
@@ -64,7 +64,6 @@ class RestrictedPatientsController(
   @DeleteMapping(value = ["/restricted-patient/prison-number/{prison-number}"])
   fun removeRestrictedPatient(@PathVariable(name = "prison-number") prisonNumber: String) =
     restrictedPatientsService.removeRestrictedPatient(prisonNumber).also {
-      domainEventPublisher.publishRestrictedPatientRemoved(it.prisonerNumber)
       telemetryClient.trackEvent(
         "restricted-patient-removed",
         mapOf(
@@ -76,5 +75,6 @@ class RestrictedPatientsController(
         ),
         null,
       )
+      domainEventPublisher.publishRestrictedPatientRemoved(it.prisonerNumber)
     }
 }

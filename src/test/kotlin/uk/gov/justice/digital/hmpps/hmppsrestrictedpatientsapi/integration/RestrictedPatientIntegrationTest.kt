@@ -10,13 +10,14 @@ import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 import com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo
 import com.microsoft.applicationinsights.TelemetryClient
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.mockito.kotlin.any
+import org.mockito.kotlin.doThrow
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.test.context.ActiveProfiles
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services.DomainEventPublisher
@@ -114,6 +115,31 @@ class RestrictedPatientIntegrationTest : IntegrationTestBase() {
 
         assertThat(restrictedPatientRepository.findById("A12345")).isEmpty
       }
+
+      @Test
+      fun `should commit service transaction before publishing event`() {
+        assertThat(restrictedPatientRepository.findById("A12345")).isNotPresent
+
+        doThrow(RuntimeException()).whenever(domainEventPublisher).publishRestrictedPatientAdded(any())
+
+        dischargePrisonerWebClient(prisonerNumber = "A12345")
+          .exchange()
+          .expectStatus().is5xxServerError
+
+        assertThat(restrictedPatientRepository.findById("A12345")).isPresent
+
+        verify(telemetryClient).trackEvent(
+          "restricted-patient-added-discharge",
+          mapOf(
+            "prisonerNumber" to "A12345",
+            "fromLocationId" to "MDI",
+            "hospitalLocationCode" to "HAZLWD",
+            "supportingPrisonId" to "MDI",
+            "dischargeTime" to "2020-10-10T00:00",
+          ),
+          null,
+        )
+      }
     }
   }
 
@@ -122,8 +148,7 @@ class RestrictedPatientIntegrationTest : IntegrationTestBase() {
   inner class MigrateInPatient {
     @Test
     fun `migrate in a patient that has been moved out using NOMIS only`() {
-      val rpEntryBeforeTest = restrictedPatientRepository.findById("A12345")
-      assertFalse(rpEntryBeforeTest.isPresent)
+      assertThat(restrictedPatientRepository.findById("A12345")).isNotPresent
 
       migrateInRestrictedPatientWebClient(prisonerNumber = "A12345")
         .exchange()
@@ -143,8 +168,7 @@ class RestrictedPatientIntegrationTest : IntegrationTestBase() {
           ).withHeader("Authorization", WireMock.containing("Bearer")),
       )
 
-      val rpEntry = restrictedPatientRepository.findById("A12345")
-      assertTrue(rpEntry.isPresent)
+      assertThat(restrictedPatientRepository.findById("A12345")).isPresent
 
       verify(domainEventPublisher).publishRestrictedPatientAdded("A12345")
 
@@ -197,6 +221,31 @@ class RestrictedPatientIntegrationTest : IntegrationTestBase() {
           .jsonPath("$.errorCode").isEqualTo("UPSTREAM_ERROR")
 
         assertThat(restrictedPatientRepository.findById("A12345")).isEmpty
+      }
+
+      @Test
+      fun `should commit service transaction before publishing event`() {
+        assertThat(restrictedPatientRepository.findById("A12345")).isNotPresent
+
+        doThrow(RuntimeException()).whenever(domainEventPublisher).publishRestrictedPatientAdded(any())
+
+        migrateInRestrictedPatientWebClient(prisonerNumber = "A12345")
+          .exchange()
+          .expectStatus().is5xxServerError
+
+        assertThat(restrictedPatientRepository.findById("A12345")).isPresent
+
+        verify(telemetryClient).trackEvent(
+          "restricted-patient-added-migrate",
+          mapOf(
+            "prisonerNumber" to "A12345",
+            "fromLocationId" to "MDI",
+            "hospitalLocationCode" to "HAZLWD",
+            "supportingPrisonId" to "MDI",
+            "dischargeTime" to "2022-05-20T14:36:13",
+          ),
+          null,
+        )
       }
     }
   }
@@ -305,6 +354,36 @@ class RestrictedPatientIntegrationTest : IntegrationTestBase() {
           .jsonPath("$.errorCode").isEqualTo("UPSTREAM_ERROR")
 
         assertThat(restrictedPatientRepository.findById("A12345")).isNotEmpty
+      }
+
+      @Test
+      fun `should commit service transaction before publishing event`() {
+        saveRestrictedPatient(prisonerNumber = "A12345")
+        prisonerSearchApiMockServer.stubSearchByPrisonNumber("A12345")
+        prisonApiMockServer.stubCreateExternalMovement()
+
+        assertThat(restrictedPatientRepository.findById("A12345")).isPresent
+
+        doThrow(RuntimeException()).whenever(domainEventPublisher).publishRestrictedPatientRemoved(any())
+
+        webTestClient.delete().uri("/restricted-patient/prison-number/A12345")
+          .headers(setHeaders())
+          .exchange()
+          .expectStatus().is5xxServerError
+
+        assertThat(restrictedPatientRepository.findById("A12345")).isNotPresent
+
+        verify(telemetryClient).trackEvent(
+          "restricted-patient-removed",
+          mapOf(
+            "prisonerNumber" to "A12345",
+            "fromLocationId" to "MDI",
+            "hospitalLocationCode" to "HAZLWD",
+            "supportingPrisonId" to "MDI",
+            "dischargeTime" to "2020-10-09T00:00",
+          ),
+          null,
+        )
       }
     }
   }
