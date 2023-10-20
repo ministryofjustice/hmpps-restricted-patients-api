@@ -36,7 +36,6 @@ class QueueHealthNegativeTest : IntegrationTestBase() {
     prisonApiMockServer.resetMappings()
     prisonApiMockServer.stubHealth()
     prisonerSearchApiMockServer.stubHealth()
-    prisonerSearchIndexerMockServer.stubHealth()
   }
 
   @Test

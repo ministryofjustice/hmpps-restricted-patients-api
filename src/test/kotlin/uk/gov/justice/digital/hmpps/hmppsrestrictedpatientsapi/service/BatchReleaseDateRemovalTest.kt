@@ -23,6 +23,7 @@ import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.Prisoner
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.entities.RestrictedPatient
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.repositories.RestrictedPatientsRepository
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services.BatchReleaseDateRemoval
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services.DomainEventPublisher
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services.RestrictedPatientsService
 import java.time.Clock
 import java.time.LocalDate
@@ -34,6 +35,7 @@ class BatchReleaseDateRemovalTest {
   private val restrictedPatientsRepository: RestrictedPatientsRepository = mock()
   private val restrictedPatientsService: RestrictedPatientsService = mock()
   private val telemetryClient: TelemetryClient = mock()
+  private val domainEventPublisher: DomainEventPublisher = mock()
   private val clock: Clock = mock()
 
   private val fixedClock =
@@ -53,6 +55,7 @@ class BatchReleaseDateRemovalTest {
     prisonerSearchApiGateway,
     restrictedPatientsService,
     telemetryClient,
+    domainEventPublisher,
     clock,
   )
 
@@ -161,7 +164,6 @@ class BatchReleaseDateRemovalTest {
         ),
       )
       doThrow(WebClientResponseException::class)
-        .doNothing()
         .whenever(restrictedPatientsService).removeRestrictedPatient(anyString())
 
       service.removeNonLifePrisonersPastRelevantDate()
@@ -169,6 +171,26 @@ class BatchReleaseDateRemovalTest {
       verify(telemetryClient).trackEvent("restricted-patient-batch-removal", mapOf("prisonerNumbers" to "YESTERDAY_RECALL_DETERMINATE, YESTERDAY_NONRECALL_DETERMINATE"), null)
       verify(restrictedPatientsService).removeRestrictedPatient("YESTERDAY_RECALL_DETERMINATE")
       verify(restrictedPatientsService).removeRestrictedPatient("YESTERDAY_NONRECALL_DETERMINATE")
+    }
+
+    @Test
+    fun `publishes domain event for removal`() {
+      whenever(restrictedPatientsRepository.findAll()).thenReturn(listOf(restrictedPatient))
+      whenever(prisonerSearchApiGateway.findByPrisonNumbers(any())).thenReturn(
+        listOf(
+          makePrisonerResult(
+            prisonerNumber = "YESTERDAY_RECALL_DETERMINATE",
+            sentenceExpiryDate = LocalDate.now().minusDays(1),
+            recall = true,
+            indeterminateSentence = false,
+            legalStatus = "RECALL",
+          ),
+        ),
+      )
+      service.removeNonLifePrisonersPastRelevantDate()
+
+      verify(telemetryClient).trackEvent("restricted-patient-batch-removal", mapOf("prisonerNumbers" to "YESTERDAY_RECALL_DETERMINATE"), null)
+      verify(domainEventPublisher).publishRestrictedPatientRemoved("YESTERDAY_RECALL_DETERMINATE")
     }
   }
 }

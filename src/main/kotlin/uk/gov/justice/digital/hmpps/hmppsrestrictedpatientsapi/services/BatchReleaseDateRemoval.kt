@@ -14,6 +14,7 @@ class BatchReleaseDateRemoval(
   private val prisonerSearchApiGateway: PrisonerSearchApiGateway,
   private val restrictedPatientsService: RestrictedPatientsService,
   private val telemetryClient: TelemetryClient,
+  private val domainEventPublisher: DomainEventPublisher,
   private val clock: Clock,
 ) {
 
@@ -39,6 +40,7 @@ class BatchReleaseDateRemoval(
       toBeDeleted.forEach {
         try {
           restrictedPatientsService.removeRestrictedPatient(it)
+          domainEventPublisher.publishRestrictedPatientRemoved(it)
         } catch (ex: Exception) {
           log.error("restricted-patient-batch-removal failed for offender $it", ex)
         }
@@ -46,7 +48,7 @@ class BatchReleaseDateRemoval(
     }
   }
 
-  companion object {
-    val log = LoggerFactory.getLogger(this::class.java)
+  private companion object {
+    private val log = LoggerFactory.getLogger(this::class.java)
   }
 }
