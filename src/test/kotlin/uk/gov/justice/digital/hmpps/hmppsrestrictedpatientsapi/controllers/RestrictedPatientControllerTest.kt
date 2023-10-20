@@ -76,7 +76,7 @@ class RestrictedPatientControllerTest : ControllerTestBase() {
       }.andExpect { status { isCreated() } }
 
       verify(telemetryClient).trackEvent(
-        "restricted-patient-added",
+        "restricted-patient-added-discharge",
         mapOf(
           "prisonerNumber" to "A12345",
           "fromLocationId" to "MDI",

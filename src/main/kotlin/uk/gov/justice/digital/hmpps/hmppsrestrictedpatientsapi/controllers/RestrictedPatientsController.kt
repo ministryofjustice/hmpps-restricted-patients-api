@@ -29,7 +29,7 @@ class RestrictedPatientsController(
   @ResponseStatus(code = HttpStatus.CREATED)
   fun dischargeToHospital(@RequestBody dischargeToHospital: DischargeToHospitalRequest): RestrictedPatientDto =
     restrictedPatientsService.dischargeToHospital(dischargeToHospital).also {
-      it.publishAndTrackAdd()
+      it.publishAndTrackAdd("discharge")
     }
 
   @PostMapping(
@@ -39,13 +39,13 @@ class RestrictedPatientsController(
   @ResponseStatus(code = HttpStatus.CREATED)
   fun migrateInPatient(@RequestBody migrateIn: MigrateInRequest): RestrictedPatientDto =
     restrictedPatientsService.migrateInPatient(migrateIn).also {
-      it.publishAndTrackAdd()
+      it.publishAndTrackAdd("migrate")
     }
 
-  private fun RestrictedPatientDto.publishAndTrackAdd() {
+  private fun RestrictedPatientDto.publishAndTrackAdd(type: String) {
     domainEventPublisher.publishRestrictedPatientAdded(prisonerNumber)
     telemetryClient.trackEvent(
-      "restricted-patient-added",
+      "restricted-patient-added-$type",
       mapOf(
         "prisonerNumber" to prisonerNumber,
         "fromLocationId" to fromLocation?.agencyId,

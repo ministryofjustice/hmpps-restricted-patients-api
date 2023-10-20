@@ -69,7 +69,7 @@ class RestrictedPatientIntegrationTest : IntegrationTestBase() {
       verify(domainEventPublisher).publishRestrictedPatientAdded("A12345")
 
       verify(telemetryClient).trackEvent(
-        "restricted-patient-added",
+        "restricted-patient-added-discharge",
         mapOf(
           "prisonerNumber" to "A12345",
           "fromLocationId" to "MDI",
@@ -149,7 +149,7 @@ class RestrictedPatientIntegrationTest : IntegrationTestBase() {
       verify(domainEventPublisher).publishRestrictedPatientAdded("A12345")
 
       verify(telemetryClient).trackEvent(
-        "restricted-patient-added",
+        "restricted-patient-added-migrate",
         mapOf(
           "prisonerNumber" to "A12345",
           "fromLocationId" to "MDI",
