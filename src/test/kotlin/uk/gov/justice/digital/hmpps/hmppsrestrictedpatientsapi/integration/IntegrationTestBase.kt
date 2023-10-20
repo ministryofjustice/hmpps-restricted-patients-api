@@ -19,7 +19,6 @@ import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.JwtAuthHelper
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.integration.wiremock.OAuthMockServer
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.integration.wiremock.PrisonApiMockServer
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.integration.wiremock.PrisonerSearchApiMockServer
-import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.integration.wiremock.PrisonerSearchIndexerMockServer
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.entities.RestrictedPatient
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.repositories.RestrictedPatientsRepository
 import java.time.Clock
@@ -53,9 +52,6 @@ abstract class IntegrationTestBase {
     internal val prisonerSearchApiMockServer = PrisonerSearchApiMockServer()
 
     @JvmField
-    internal val prisonerSearchIndexerMockServer = PrisonerSearchIndexerMockServer()
-
-    @JvmField
     internal val oAuthMockServer = OAuthMockServer()
 
     @BeforeAll
@@ -66,7 +62,6 @@ abstract class IntegrationTestBase {
 
       prisonApiMockServer.start()
       prisonerSearchApiMockServer.start()
-      prisonerSearchIndexerMockServer.start()
     }
 
     @AfterAll
@@ -74,7 +69,6 @@ abstract class IntegrationTestBase {
     fun stopMocks() {
       prisonApiMockServer.stop()
       prisonerSearchApiMockServer.stop()
-      prisonerSearchIndexerMockServer.stop()
       oAuthMockServer.stop()
     }
   }
@@ -172,7 +166,6 @@ abstract class IntegrationTestBase {
   ): WebTestClient.RequestHeadersSpec<*> {
     prisonApiMockServer.stubGetLatestMovementsReleased(prisonerNumber, hospitalLocationCode)
     prisonApiMockServer.stubDischargeToPrison(prisonerNumber)
-    prisonerSearchIndexerMockServer.stubRefreshIndex(prisonerNumber)
 
     return webTestClient
       .post()

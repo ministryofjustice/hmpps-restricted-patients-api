@@ -1,13 +1,11 @@
 package uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services
 
-import com.microsoft.applicationinsights.TelemetryClient
 import jakarta.persistence.EntityNotFoundException
-import jakarta.transaction.Transactional
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.config.BadRequestException
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.PrisonApiGateway
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.PrisonerSearchApiGateway
-import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.PrisonerSearchIndexerGateway
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.entities.RestrictedPatient
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.request.CreateExternalMovement
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.request.DischargeToHospitalRequest
@@ -26,17 +24,15 @@ data class ExistingDischargeData(
 )
 
 @Service
+@Transactional(readOnly = true)
 class RestrictedPatientsService(
   private val prisonApiGateway: PrisonApiGateway,
   private val prisonerSearchApiGateway: PrisonerSearchApiGateway,
-  private val prisonerSearchIndexerGateway: PrisonerSearchIndexerGateway,
   private val restrictedPatientsRepository: RestrictedPatientsRepository,
-  private val domainEventPublisher: DomainEventPublisher,
-  private val telemetryClient: TelemetryClient,
   private val clock: Clock,
 ) {
 
-  @Transactional(value = Transactional.TxType.NOT_SUPPORTED)
+  @Transactional
   fun dischargeToHospital(dischargeToHospital: DischargeToHospitalRequest): RestrictedPatientDto {
     checkNotExistingPatient(dischargeToHospital.offenderNo)
 
@@ -58,7 +54,7 @@ class RestrictedPatientsService(
     return addRestrictedPatient(restrictedPatient)
   }
 
-  @Transactional(value = Transactional.TxType.NOT_SUPPORTED)
+  @Transactional
   fun migrateInPatient(migrateIn: MigrateInRequest): RestrictedPatientDto {
     checkNotExistingPatient(migrateIn.offenderNo)
 
@@ -75,22 +71,30 @@ class RestrictedPatientsService(
       commentText = "Historical discharge to hospital added to restricted patients",
     )
       .let { addRestrictedPatient(it) }
-      .also { prisonerSearchIndexerGateway.refreshPrisonerIndex(migrateIn.offenderNo) }
   }
 
   private fun checkNotExistingPatient(offenderNo: String) =
     restrictedPatientsRepository.findById(offenderNo).map {
-      throw BadRequestException(errorCode = "EXISTING_PATIENT", message = "Prisoner ($offenderNo) is already a restricted patient")
+      throw BadRequestException(
+        errorCode = "EXISTING_PATIENT",
+        message = "Prisoner ($offenderNo) is already a restricted patient",
+      )
     }
 
   private fun getLatestMovement(offenderNo: String): MovementResponse {
     val movements = prisonApiGateway.getLatestMovements(offenderNo)
 
     if (movements.isEmpty()) {
-      throw BadRequestException(errorCode = "NO_MOVEMENTS", message = "Prisoner ($offenderNo) does not have the correct latest movements to migrate")
+      throw BadRequestException(
+        errorCode = "NO_MOVEMENTS",
+        message = "Prisoner ($offenderNo) does not have the correct latest movements to migrate",
+      )
     }
     if (movements.size > 1) {
-      throw BadRequestException(errorCode = "MULTIPLE_MOVEMENTS", message = "Prisoner ($offenderNo) has multiple latest movements")
+      throw BadRequestException(
+        errorCode = "MULTIPLE_MOVEMENTS",
+        message = "Prisoner ($offenderNo) has multiple latest movements",
+      )
     }
     return movements[0]
   }
@@ -99,11 +103,18 @@ class RestrictedPatientsService(
     if ("REL" != latestMovement.movementType) {
       throw BadRequestException(errorCode = "LAST_MOVE_NOT_REL", message = "Prisoner ($offenderNo) was not released")
     }
-    latestMovement.fromAgency ?: throw BadRequestException(errorCode = "LAST_MOVE_NO_FROM_AGENCY", message = "Prisoner ($offenderNo) does not have an agency id associated with the last movement")
+    latestMovement.fromAgency ?: throw BadRequestException(
+      errorCode = "LAST_MOVE_NO_FROM_AGENCY",
+      message = "Prisoner ($offenderNo) does not have an agency id associated with the last movement",
+    )
   }
 
-  private fun getExistingRestrictedPatientDischargeData(latestMovement: MovementResponse, offenderNo: String): ExistingDischargeData {
-    val dischargeDateTime = calculateDischargeDateTime(offenderNo, latestMovement.movementDate, latestMovement.movementTime)
+  private fun getExistingRestrictedPatientDischargeData(
+    latestMovement: MovementResponse,
+    offenderNo: String,
+  ): ExistingDischargeData {
+    val dischargeDateTime =
+      calculateDischargeDateTime(offenderNo, latestMovement.movementDate, latestMovement.movementTime)
     return ExistingDischargeData(
       dischargeTime = dischargeDateTime,
       fromLocationId = latestMovement.fromAgency!!,
@@ -111,51 +122,31 @@ class RestrictedPatientsService(
     )
   }
 
-  private fun calculateDischargeDateTime(offenderNo: String, movementDate: String?, movementTime: String?): LocalDateTime {
+  private fun calculateDischargeDateTime(
+    offenderNo: String,
+    movementDate: String?,
+    movementTime: String?,
+  ): LocalDateTime {
     try {
       return LocalDateTime.parse("${movementDate}T$movementTime")
     } catch (e: Exception) {
-      throw BadRequestException(errorCode = "DISCHARGE_TIME_INVALID", message = "Prisoner ($offenderNo) does not have a valid movement date/time")
-    }
-  }
-
-  private fun addRestrictedPatient(restrictedPatient: RestrictedPatient): RestrictedPatientDto {
-    val newRestrictedPatient = restrictedPatientsRepository.saveAndFlush(restrictedPatient)
-
-    dischargeOrRollBackAndThrow(newRestrictedPatient)
-
-    return transform(
-      newRestrictedPatient,
-      Agency(agencyId = restrictedPatient.fromLocationId),
-      Agency(agencyId = restrictedPatient.hospitalLocationCode),
-      Agency(agencyId = restrictedPatient.supportingPrisonId),
-    ).also {
-      domainEventPublisher.publishRestrictedPatientAdded(restrictedPatient.prisonerNumber)
-      telemetryClient.trackEvent(
-        "restricted-patient-added",
-        mapOf(
-          "prisonerNumber" to restrictedPatient.prisonerNumber,
-          "fromLocationId" to restrictedPatient.fromLocationId,
-          "hospitalLocationCode" to restrictedPatient.hospitalLocationCode,
-          "supportingPrisonId" to restrictedPatient.supportingPrisonId,
-          "dischargeTime" to restrictedPatient.dischargeTime.toString(),
-        ),
-        null,
+      throw BadRequestException(
+        errorCode = "DISCHARGE_TIME_INVALID",
+        message = "Prisoner ($offenderNo) does not have a valid movement date/time",
       )
     }
   }
 
-  private fun dischargeOrRollBackAndThrow(newRestrictedPatient: RestrictedPatient) {
-    try {
-      prisonApiGateway.dischargeToHospital(newRestrictedPatient)
-    } catch (e: Exception) {
-      // We have to operate out of a transaction because we want the prisoner to be added to the database immediately.
-      // Prisoner Search listens to any external movements so may call restricted patients before this service ends.
-      // We therefore have to delete the patient manually if the call to Prison API fails
-      restrictedPatientsRepository.delete(newRestrictedPatient)
-      throw e
+  private fun addRestrictedPatient(restrictedPatient: RestrictedPatient): RestrictedPatientDto =
+    restrictedPatientsRepository.save(restrictedPatient).run {
+      prisonApiGateway.dischargeToHospital(this)
+      transform(
+        this,
+        Agency(agencyId = fromLocationId),
+        Agency(agencyId = hospitalLocationCode),
+        Agency(agencyId = supportingPrisonId),
+      )
     }
-  }
 
   fun getRestrictedPatient(prisonerNumber: String): RestrictedPatientDto {
     val restrictedPatient = restrictedPatientsRepository.findById(prisonerNumber)
@@ -172,19 +163,17 @@ class RestrictedPatientsService(
     return transform(restrictedPatient, prisonSentFrom, hospitalSentTo, supportingPrison)
   }
 
-  @Transactional(value = Transactional.TxType.NOT_SUPPORTED)
-  fun removeRestrictedPatient(prisonerNumber: String) {
+  @Transactional
+  fun removeRestrictedPatient(prisonerNumber: String): RestrictedPatient {
     val restrictedPatient = restrictedPatientsRepository.findById(prisonerNumber)
       .orElseThrow { throw EntityNotFoundException("No restricted patient record found for prison number $prisonerNumber") }
 
-    val prisonerSearchResponse = prisonerSearchApiGateway.searchByPrisonNumber(prisonerNumber)
-
-    val prisonerResult = prisonerSearchResponse.firstOrNull()
+    val prisonerResult = prisonerSearchApiGateway.searchByPrisonNumber(prisonerNumber).firstOrNull()
       ?: throw EntityNotFoundException("No prisoner search results returned for $prisonerNumber")
 
     restrictedPatientsRepository.delete(restrictedPatient)
 
-    try {
+    return restrictedPatient.also {
       prisonApiGateway.createExternalMovement(
         CreateExternalMovement(
           bookingId = prisonerResult.bookingId,
@@ -196,30 +185,10 @@ class RestrictedPatientsService(
           directionCode = "OUT",
         ),
       )
-
-      prisonerSearchIndexerGateway.refreshPrisonerIndex(prisonerNumber)
-
-      domainEventPublisher.publishRestrictedPatientRemoved(prisonerNumber)
-
-      telemetryClient.trackEvent(
-        "restricted-patient-removed",
-        mapOf(
-          "prisonerNumber" to prisonerNumber,
-          "fromLocationId" to restrictedPatient.fromLocationId,
-          "hospitalLocationCode" to restrictedPatient.hospitalLocationCode,
-          "supportingPrisonId" to restrictedPatient.supportingPrisonId,
-          "dischargeTime" to restrictedPatient.dischargeTime.toString(),
-        ),
-        null,
-      )
-    } catch (e: Exception) {
-      // this re-creates the restricted patient in the database - undoing the delete
-      restrictedPatientsRepository.saveAndFlush(restrictedPatient)
-      throw e
     }
   }
 
-  fun transform(
+  private fun transform(
     restrictedPatient: RestrictedPatient,
     fromAgency: Agency? = null,
     toAgency: Agency? = null,

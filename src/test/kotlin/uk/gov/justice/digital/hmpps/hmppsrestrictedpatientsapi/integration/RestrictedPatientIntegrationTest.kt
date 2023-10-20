@@ -8,6 +8,7 @@ import com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor
 import com.github.tomakehurst.wiremock.client.WireMock.putRequestedFor
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 import com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo
+import com.microsoft.applicationinsights.TelemetryClient
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -15,14 +16,22 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.mockito.kotlin.verify
+import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.test.context.ActiveProfiles
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services.DomainEventPublisher
 
 @ActiveProfiles("test")
 class RestrictedPatientIntegrationTest : IntegrationTestBase() {
+  @SpyBean
+  private lateinit var domainEventPublisher: DomainEventPublisher
+
+  @SpyBean
+  private lateinit var telemetryClient: TelemetryClient
+
   @BeforeEach
   fun resetMocks() {
     prisonApiMockServer.resetAll()
-    prisonerSearchIndexerMockServer.resetAll()
     prisonerSearchApiMockServer.resetAll()
   }
 
@@ -55,6 +64,20 @@ class RestrictedPatientIntegrationTest : IntegrationTestBase() {
           .withQueryParam("extraInfo", equalTo("false"))
           .withQueryParam("csraSummary", equalTo("false"))
           .withHeader("Authorization", WireMock.containing("Bearer")),
+      )
+
+      verify(domainEventPublisher).publishRestrictedPatientAdded("A12345")
+
+      verify(telemetryClient).trackEvent(
+        "restricted-patient-added",
+        mapOf(
+          "prisonerNumber" to "A12345",
+          "fromLocationId" to "MDI",
+          "hospitalLocationCode" to "HAZLWD",
+          "supportingPrisonId" to "MDI",
+          "dischargeTime" to "2020-10-10T00:00",
+        ),
+        null,
       )
     }
 
@@ -120,12 +143,22 @@ class RestrictedPatientIntegrationTest : IntegrationTestBase() {
           ).withHeader("Authorization", WireMock.containing("Bearer")),
       )
 
-      prisonerSearchIndexerMockServer.verify(
-        putRequestedFor(urlEqualTo("/maintain-index/index-prisoner/A12345")),
-      )
-
       val rpEntry = restrictedPatientRepository.findById("A12345")
       assertTrue(rpEntry.isPresent)
+
+      verify(domainEventPublisher).publishRestrictedPatientAdded("A12345")
+
+      verify(telemetryClient).trackEvent(
+        "restricted-patient-added",
+        mapOf(
+          "prisonerNumber" to "A12345",
+          "fromLocationId" to "MDI",
+          "hospitalLocationCode" to "HAZLWD",
+          "supportingPrisonId" to "MDI",
+          "dischargeTime" to "2022-05-20T14:36:13",
+        ),
+        null,
+      )
     }
 
     @Nested
@@ -191,7 +224,6 @@ class RestrictedPatientIntegrationTest : IntegrationTestBase() {
     @Test
     fun `remove restricted patient`() {
       prisonApiMockServer.stubCreateExternalMovement()
-      prisonerSearchIndexerMockServer.stubRefreshIndex("A12345")
       prisonerSearchApiMockServer.stubSearchByPrisonNumber("A12345")
 
       dischargePrisonerWebClient(prisonerNumber = "A12345")
@@ -214,13 +246,23 @@ class RestrictedPatientIntegrationTest : IntegrationTestBase() {
           ),
       )
 
-      prisonerSearchIndexerMockServer.verify(
-        putRequestedFor(urlEqualTo("/maintain-index/index-prisoner/A12345")),
-      )
-
       getRestrictedPatient(prisonerNumber = "A12345")
         .exchange()
         .expectStatus().isNotFound
+
+      verify(domainEventPublisher).publishRestrictedPatientRemoved("A12345")
+
+      verify(telemetryClient).trackEvent(
+        "restricted-patient-removed",
+        mapOf(
+          "prisonerNumber" to "A12345",
+          "fromLocationId" to "MDI",
+          "hospitalLocationCode" to "HAZLWD",
+          "supportingPrisonId" to "MDI",
+          "dischargeTime" to "2020-10-10T00:00",
+        ),
+        null,
+      )
     }
 
     @Nested

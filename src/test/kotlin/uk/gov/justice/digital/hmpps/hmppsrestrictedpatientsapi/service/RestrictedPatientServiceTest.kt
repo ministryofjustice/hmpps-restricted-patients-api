@@ -1,6 +1,5 @@
 package uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.service
 
-import com.microsoft.applicationinsights.TelemetryClient
 import jakarta.persistence.EntityNotFoundException
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertThrows
@@ -15,7 +14,6 @@ import org.mockito.kotlin.inOrder
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import org.springframework.web.reactive.function.client.WebClientResponseException
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.config.BadRequestException
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.dataBuilders.HOSPITAL
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.dataBuilders.PRISON
@@ -26,13 +24,11 @@ import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.dataBuilders.make
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.dataBuilders.makeRestrictedPatient
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.PrisonApiGateway
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.PrisonerSearchApiGateway
-import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.PrisonerSearchIndexerGateway
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.entities.RestrictedPatient
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.request.CreateExternalMovement
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.Agency
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.OffenderBookingResponse
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.repositories.RestrictedPatientsRepository
-import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services.DomainEventPublisher
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services.RestrictedPatientsService
 import java.time.Clock
 import java.time.LocalDate
@@ -44,10 +40,7 @@ class RestrictedPatientServiceTest {
 
   private val prisonApiGateway: PrisonApiGateway = mock()
   private val prisonerSearchApiGateway: PrisonerSearchApiGateway = mock()
-  private val prisonerSearchIndexerGateway: PrisonerSearchIndexerGateway = mock()
   private val restrictedPatientsRepository: RestrictedPatientsRepository = mock()
-  private val domainEventPublisher: DomainEventPublisher = mock()
-  private val telemetryClient: TelemetryClient = mock()
   private val clock: Clock = mock()
 
   private val restrictedPatient = RestrictedPatient(
@@ -62,10 +55,7 @@ class RestrictedPatientServiceTest {
   private val service = RestrictedPatientsService(
     prisonApiGateway,
     prisonerSearchApiGateway,
-    prisonerSearchIndexerGateway,
     restrictedPatientsRepository,
-    domainEventPublisher,
-    telemetryClient,
     clock,
   )
 
@@ -172,48 +162,16 @@ class RestrictedPatientServiceTest {
     }
 
     @Test
-    fun `triggers a telemetry event`() {
-      whenever(restrictedPatientsRepository.findById(anyString())).thenReturn(Optional.of(makeRestrictedPatient()))
-      whenever(prisonerSearchApiGateway.searchByPrisonNumber(anyString())).thenReturn(listOf(makePrisonerResult()))
-
-      service.removeRestrictedPatient("A12345")
-
-      verify(telemetryClient).trackEvent(
-        "restricted-patient-removed",
-        mapOf(
-          "prisonerNumber" to "A12345",
-          "fromLocationId" to "MDI",
-          "hospitalLocationCode" to "HAZLWD",
-          "supportingPrisonId" to "MDI",
-          "dischargeTime" to LocalDateTime.parse("2020-10-10T20:00:01").toString(),
-        ),
-        null,
-      )
-    }
-
-    @Test
     fun `ensures that the restricted patient is removed before the prison api calls`() {
       whenever(restrictedPatientsRepository.findById(any())).thenReturn(Optional.of(makeRestrictedPatient()))
       whenever(prisonerSearchApiGateway.searchByPrisonNumber(anyString())).thenReturn(listOf(makePrisonerResult()))
-      whenever(prisonerSearchIndexerGateway.refreshPrisonerIndex(anyString())).thenReturn(makePrisonerResult())
 
       service.removeRestrictedPatient("A12345")
 
-      val inOrder = inOrder(restrictedPatientsRepository, prisonApiGateway, prisonerSearchIndexerGateway)
+      val inOrder = inOrder(restrictedPatientsRepository, prisonApiGateway)
 
       inOrder.verify(restrictedPatientsRepository).delete(any())
       inOrder.verify(prisonApiGateway).createExternalMovement(any())
-      inOrder.verify(prisonerSearchIndexerGateway).refreshPrisonerIndex(any())
-    }
-
-    @Test
-    fun `publish a restricted patient remove event`() {
-      whenever(restrictedPatientsRepository.findById(any())).thenReturn(Optional.of(makeRestrictedPatient()))
-      whenever(prisonerSearchApiGateway.searchByPrisonNumber(anyString())).thenReturn(listOf(makePrisonerResult()))
-
-      service.removeRestrictedPatient("A12345")
-
-      verify(domainEventPublisher).publishRestrictedPatientRemoved("A12345")
     }
   }
 
@@ -249,30 +207,6 @@ class RestrictedPatientServiceTest {
           service.dischargeToHospital(makeDischargeRequest())
         }
       }
-
-      @Test
-      fun `removes recently persisted restricted patient on prison api discharge error`() {
-        whenever(restrictedPatientsRepository.saveAndFlush(any())).thenReturn(makeRestrictedPatient())
-        whenever(prisonApiGateway.getOffenderBooking(any())).thenReturn(
-          OffenderBookingResponse(1234567, "A1234AA", true),
-        )
-        whenever(prisonApiGateway.dischargeToHospital(any())).thenThrow(WebClientResponseException::class.java)
-
-        assertThrows(WebClientResponseException::class.java) {
-          service.dischargeToHospital(makeDischargeRequest())
-        }
-
-        val argumentCaptor = ArgumentCaptor.forClass(RestrictedPatient::class.java)
-
-        verify(restrictedPatientsRepository).delete(argumentCaptor.capture())
-
-        assertThat(argumentCaptor.value).extracting(
-          "fromLocationId",
-          "supportingPrisonId",
-          "hospitalLocationCode",
-          "commentText",
-        ).contains("MDI", "MDI", "HAZLWD", "test")
-      }
     }
 
     @Nested
@@ -282,14 +216,16 @@ class RestrictedPatientServiceTest {
         whenever(prisonApiGateway.getOffenderBooking(any())).thenReturn(
           OffenderBookingResponse(1234567, "A1234AA", true),
         )
-        whenever(restrictedPatientsRepository.saveAndFlush(any())).thenReturn(makeRestrictedPatient())
+        whenever(restrictedPatientsRepository.save(any())).thenReturn(makeRestrictedPatient())
       }
 
       @Test
       fun `make a call to prison api to discharge a prisoner to hospital`() {
+        val patient = makeRestrictedPatient(supportingPrisonId = "LEI")
+        whenever(restrictedPatientsRepository.save(any())).thenReturn(patient)
         val response = service.dischargeToHospital(makeDischargeRequest().copy(supportingPrisonId = "LEI"))
 
-        verify(prisonApiGateway).dischargeToHospital(restrictedPatient)
+        verify(prisonApiGateway).dischargeToHospital(patient)
 
         assertThat(response.fromLocation).isEqualTo(Agency(agencyId = "MDI"))
         assertThat(response.supportingPrison).isEqualTo(Agency(agencyId = "LEI"))
@@ -317,7 +253,7 @@ class RestrictedPatientServiceTest {
         val now = LocalDate.now().atStartOfDay()
         service.dischargeToHospital(makeDischargeRequest())
 
-        verify(restrictedPatientsRepository).saveAndFlush(argumentCaptor.capture())
+        verify(restrictedPatientsRepository).save(argumentCaptor.capture())
 
         assertThat(argumentCaptor.value).extracting(
           "fromLocationId",
@@ -334,32 +270,8 @@ class RestrictedPatientServiceTest {
 
         val inOrder = inOrder(restrictedPatientsRepository, prisonApiGateway)
 
-        inOrder.verify(restrictedPatientsRepository).saveAndFlush(any())
+        inOrder.verify(restrictedPatientsRepository).save(any())
         inOrder.verify(prisonApiGateway).dischargeToHospital(any())
-      }
-
-      @Test
-      fun `publishes domain event for addition`() {
-        service.dischargeToHospital(makeDischargeRequest())
-
-        verify(domainEventPublisher).publishRestrictedPatientAdded("A12345")
-      }
-
-      @Test
-      fun `generates telemetry event`() {
-        service.dischargeToHospital(makeDischargeRequest())
-
-        verify(telemetryClient).trackEvent(
-          "restricted-patient-added",
-          mapOf(
-            "prisonerNumber" to "A12345",
-            "fromLocationId" to restrictedPatient.fromLocationId,
-            "hospitalLocationCode" to restrictedPatient.hospitalLocationCode,
-            "supportingPrisonId" to restrictedPatient.fromLocationId,
-            "dischargeTime" to LocalDateTime.now(clock).toString(),
-          ),
-          null,
-        )
       }
     }
 
@@ -483,28 +395,6 @@ class RestrictedPatientServiceTest {
           service.migrateInPatient(makeMigrateInRequest())
         }
       }
-
-      @Test
-      fun `removes recently persisted restricted patient on prison api discharge error`() {
-        whenever(restrictedPatientsRepository.saveAndFlush(any())).thenReturn(makeRestrictedPatient())
-        whenever(prisonApiGateway.getLatestMovements(any())).thenReturn(listOf(makeLatestMovementReturn()))
-        whenever(prisonApiGateway.dischargeToHospital(any())).thenThrow(WebClientResponseException::class.java)
-
-        assertThrows(WebClientResponseException::class.java) {
-          service.migrateInPatient(makeMigrateInRequest())
-        }
-
-        val argumentCaptor = ArgumentCaptor.forClass(RestrictedPatient::class.java)
-
-        verify(restrictedPatientsRepository).delete(argumentCaptor.capture())
-
-        assertThat(argumentCaptor.value).extracting(
-          "fromLocationId",
-          "supportingPrisonId",
-          "hospitalLocationCode",
-          "commentText",
-        ).contains("MDI", "MDI", "HAZLWD", "test")
-      }
     }
 
     @Nested
@@ -525,7 +415,7 @@ class RestrictedPatientServiceTest {
 
       @BeforeEach
       fun beforeEach() {
-        whenever(restrictedPatientsRepository.saveAndFlush(any())).thenReturn(
+        whenever(restrictedPatientsRepository.save(any())).thenReturn(
           makeRestrictedPatient(
             dischargeTime = dischargeDateTime,
             commentText = testComment,
@@ -566,7 +456,7 @@ class RestrictedPatientServiceTest {
         val argumentCaptor = ArgumentCaptor.forClass(RestrictedPatient::class.java)
         service.migrateInPatient(makeMigrateInRequest())
 
-        verify(restrictedPatientsRepository).saveAndFlush(argumentCaptor.capture())
+        verify(restrictedPatientsRepository).save(argumentCaptor.capture())
 
         assertThat(argumentCaptor.value.fromLocationId).isEqualTo("MDI")
         assertThat(argumentCaptor.value.supportingPrisonId).isEqualTo("MDI")
@@ -578,18 +468,7 @@ class RestrictedPatientServiceTest {
       @Test
       fun `saves restricted patient data before the index is updated`() {
         service.migrateInPatient(makeMigrateInRequest())
-
-        val inOrder = inOrder(restrictedPatientsRepository, prisonerSearchIndexerGateway)
-
-        inOrder.verify(restrictedPatientsRepository).saveAndFlush(any())
-        inOrder.verify(prisonerSearchIndexerGateway).refreshPrisonerIndex(any())
-      }
-
-      @Test
-      fun `ensure that the prisoner search index is updated before completion`() {
-        service.migrateInPatient(makeMigrateInRequest())
-
-        verify(prisonerSearchIndexerGateway).refreshPrisonerIndex("A12345")
+        verify(restrictedPatientsRepository).save(any())
       }
     }
 
@@ -611,7 +490,7 @@ class RestrictedPatientServiceTest {
 
       @BeforeEach
       fun beforeEach() {
-        whenever(restrictedPatientsRepository.saveAndFlush(any())).thenReturn(
+        whenever(restrictedPatientsRepository.save(any())).thenReturn(
           makeRestrictedPatient(
             dischargeTime = dischargeDateTime,
             commentText = "comment saved to restricted patients",
@@ -632,7 +511,7 @@ class RestrictedPatientServiceTest {
       fun `it makes a call to prison api to update discharge record`() {
         val response = service.migrateInPatient(makeMigrateInRequest())
         assertThat(response.commentText).isEqualTo("comment saved to restricted patients")
-        verify(restrictedPatientsRepository).saveAndFlush(
+        verify(restrictedPatientsRepository).save(
           check {
             assertThat(it.commentText).isEqualTo("Historical discharge to hospital added to restricted patients")
           },
@@ -641,30 +520,6 @@ class RestrictedPatientServiceTest {
           newRestrictedPatient = check {
             assertThat(it.commentText).isEqualTo("comment saved to restricted patients")
           },
-        )
-      }
-
-      @Test
-      fun `publishes domain event for addition`() {
-        service.migrateInPatient(makeMigrateInRequest())
-
-        verify(domainEventPublisher).publishRestrictedPatientAdded("A12345")
-      }
-
-      @Test
-      fun `generates telemetry event`() {
-        service.migrateInPatient(makeMigrateInRequest())
-
-        verify(telemetryClient).trackEvent(
-          "restricted-patient-added",
-          mapOf(
-            "prisonerNumber" to "A12345",
-            "fromLocationId" to restrictedPatient.fromLocationId,
-            "hospitalLocationCode" to restrictedPatient.hospitalLocationCode,
-            "supportingPrisonId" to restrictedPatient.fromLocationId,
-            "dischargeTime" to migratedRestrictedPatient.dischargeTime.toString(),
-          ),
-          null,
         )
       }
     }
