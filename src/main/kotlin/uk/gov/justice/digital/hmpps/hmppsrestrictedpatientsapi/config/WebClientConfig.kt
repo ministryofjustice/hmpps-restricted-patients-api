@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Profile
+import org.springframework.http.client.reactive.ReactorClientHttpConnector
 import org.springframework.http.codec.ClientCodecConfigurer
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContextHolder
@@ -21,22 +22,23 @@ import org.springframework.security.oauth2.client.web.reactive.function.client.S
 import org.springframework.web.context.annotation.RequestScope
 import org.springframework.web.reactive.function.client.ExchangeStrategies
 import org.springframework.web.reactive.function.client.WebClient
+import reactor.netty.http.client.HttpClient
+import java.time.Duration
+import kotlin.apply as kotlinApply
 
 @Configuration
 class WebClientConfig(
   @Value("\${prison.api.endpoint.url}") private val prisonApiUrl: String,
   @Value("\${prisoner.search.api.endpoint.url}") private val prisonerSearchApiUrl: String,
+  @Value("\${api.health-timeout:2s}") val healthTimeout: Duration,
+  @Value("\${api.timeout:20s}") val timeout: Duration,
 ) {
 
   @Bean
-  fun prisonApiNoAuthWebClient(builder: WebClient.Builder): WebClient = builder
-    .baseUrl(prisonApiUrl)
-    .build()
+  fun prisonApiHealthWebClient(builder: WebClient.Builder): WebClient = builder.healthWebClient(prisonApiUrl, healthTimeout)
 
   @Bean
-  fun prisonerSearchNoAuthWebClient(builder: WebClient.Builder): WebClient = builder
-    .baseUrl(prisonerSearchApiUrl)
-    .build()
+  fun prisonerSearchHealthWebClient(builder: WebClient.Builder): WebClient = builder.healthWebClient(prisonerSearchApiUrl, healthTimeout)
 
   @Bean
   @RequestScope
@@ -44,9 +46,12 @@ class WebClientConfig(
   fun prisonApiClientCreds(
     clientRegistrationRepository: ClientRegistrationRepository,
     authorizedClientRepository: OAuth2AuthorizedClientRepository,
-  ): WebClient? = getClientCredsWebClient(
-    "$prisonApiUrl/api",
+    builder: WebClient.Builder,
+  ): WebClient = builder.authorisedWebClient(
     authorizedClientManagerRequestScope(clientRegistrationRepository, authorizedClientRepository),
+    registrationId = "restricted-patients-api",
+    url = "$prisonApiUrl/api",
+    timeout,
   )
 
   @Bean
@@ -55,61 +60,39 @@ class WebClientConfig(
   fun prisonerSearchClientCreds(
     clientRegistrationRepository: ClientRegistrationRepository,
     authorizedClientRepository: OAuth2AuthorizedClientRepository,
-  ): WebClient? = getClientCredsWebClient(
-    prisonerSearchApiUrl,
+    builder: WebClient.Builder,
+  ): WebClient = builder.authorisedWebClient(
     authorizedClientManagerRequestScope(clientRegistrationRepository, authorizedClientRepository),
+    registrationId = "restricted-patients-api",
+    url = prisonerSearchApiUrl,
+    timeout,
   )
 
   @Bean
   @Qualifier("prisonApiClientCreds")
   @Profile("app-scope")
   fun prisonApiClientCredsAppScope(
-    clientRegistrationRepository: ClientRegistrationRepository?,
-    oAuth2AuthorizedClientService: OAuth2AuthorizedClientService?,
-  ): WebClient? = getClientCredsWebClient(
-    "$prisonApiUrl/api",
-    authorizedClientManagerAppScope(clientRegistrationRepository, oAuth2AuthorizedClientService),
-  )
+    @Qualifier("authorizedClientManagerAppScope") authorizedClientManager: OAuth2AuthorizedClientManager,
+    builder: WebClient.Builder,
+  ): WebClient = builder.authorisedWebClient(authorizedClientManager, registrationId = "restricted-patients-api", url = "$prisonApiUrl/api", timeout)
 
   @Bean
   @Qualifier("prisonerSearchClientCreds")
   @Profile("app-scope")
   fun prisonerSearchClientCredsAppScope(
-    clientRegistrationRepository: ClientRegistrationRepository?,
-    oAuth2AuthorizedClientService: OAuth2AuthorizedClientService?,
-  ): WebClient? = getClientCredsWebClient(
-    prisonerSearchApiUrl,
-    authorizedClientManagerAppScope(clientRegistrationRepository, oAuth2AuthorizedClientService),
-  )
+    @Qualifier("authorizedClientManagerAppScope") authorizedClientManager: OAuth2AuthorizedClientManager,
+    builder: WebClient.Builder,
+  ): WebClient = builder.authorisedWebClient(authorizedClientManager, registrationId = "restricted-patients-api", url = prisonerSearchApiUrl, timeout)
 
-  private fun getClientCredsWebClient(
-    url: String,
-    authorizedClientManager: OAuth2AuthorizedClientManager,
-    registrationId: String = "restricted-patients-api",
-  ): WebClient? {
-    val oauth2Client = ServletOAuth2AuthorizedClientExchangeFilterFunction(authorizedClientManager)
-    oauth2Client.setDefaultClientRegistrationId(registrationId)
-
-    val exchangeStrategies = ExchangeStrategies.builder()
-      .codecs { configurer: ClientCodecConfigurer -> configurer.defaultCodecs().maxInMemorySize(-1) }
-      .build()
-
-    return WebClient.builder()
-      .baseUrl(url)
-      .apply(oauth2Client.oauth2Configuration())
-      .exchangeStrategies(exchangeStrategies)
-      .build()
-  }
-
+  @Bean
   fun authorizedClientManagerAppScope(
     clientRegistrationRepository: ClientRegistrationRepository?,
     oAuth2AuthorizedClientService: OAuth2AuthorizedClientService?,
-  ): OAuth2AuthorizedClientManager {
-    val authorizedClientProvider = OAuth2AuthorizedClientProviderBuilder.builder().clientCredentials().build()
-    val authorizedClientManager =
-      AuthorizedClientServiceOAuth2AuthorizedClientManager(clientRegistrationRepository, oAuth2AuthorizedClientService)
-    authorizedClientManager.setAuthorizedClientProvider(authorizedClientProvider)
-    return authorizedClientManager
+  ): OAuth2AuthorizedClientManager = AuthorizedClientServiceOAuth2AuthorizedClientManager(
+    clientRegistrationRepository,
+    oAuth2AuthorizedClientService,
+  ).kotlinApply {
+    setAuthorizedClientProvider(OAuth2AuthorizedClientProviderBuilder.builder().clientCredentials().build())
   }
 
   private fun authorizedClientManagerRequestScope(
@@ -131,9 +114,33 @@ class WebClientConfig(
         )
       }
       .build()
-    val authorizedClientManager =
-      DefaultOAuth2AuthorizedClientManager(clientRegistrationRepository, authorizedClientRepository)
-    authorizedClientManager.setAuthorizedClientProvider(authorizedClientProvider)
-    return authorizedClientManager
+    return DefaultOAuth2AuthorizedClientManager(clientRegistrationRepository, authorizedClientRepository).kotlinApply {
+      setAuthorizedClientProvider(authorizedClientProvider)
+    }
   }
 }
+
+fun WebClient.Builder.authorisedWebClient(
+  authorizedClientManager: OAuth2AuthorizedClientManager,
+  registrationId: String,
+  url: String,
+  timeout: Duration,
+): WebClient =
+  baseUrl(url)
+    .clientConnector(ReactorClientHttpConnector(HttpClient.create().responseTimeout(timeout)))
+    .exchangeStrategies(
+      ExchangeStrategies.builder()
+        .codecs { configurer: ClientCodecConfigurer -> configurer.defaultCodecs().maxInMemorySize(-1) }
+        .build(),
+    )
+    .filter(
+      ServletOAuth2AuthorizedClientExchangeFilterFunction(authorizedClientManager).kotlinApply {
+        setDefaultClientRegistrationId(registrationId)
+      },
+    )
+    .build()
+
+fun WebClient.Builder.healthWebClient(url: String, healthTimeout: Duration): WebClient =
+  baseUrl(url)
+    .clientConnector(ReactorClientHttpConnector(HttpClient.create().responseTimeout(healthTimeout)))
+    .build()
