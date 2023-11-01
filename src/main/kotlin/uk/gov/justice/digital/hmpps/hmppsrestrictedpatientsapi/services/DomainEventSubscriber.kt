@@ -25,7 +25,7 @@ class DomainEventSubscriber(
 ) {
 
   @SqsListener("domainevents", factory = "hmppsQueueContainerFactoryProxy")
-  @WithSpan(value = "Digital-Prison-Services-rp_queue_for_domain_events", kind = SpanKind.SERVER)
+  @WithSpan(value = "dps-core-rp_queue_for_domain_events", kind = SpanKind.SERVER)
   fun handleEvents(requestJson: String?) {
     val event = gson.fromJson(requestJson, Event::class.java)
     with(gson.fromJson(event.Message, HmppsDomainEvent::class.java)) {

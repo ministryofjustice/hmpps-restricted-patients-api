@@ -34,7 +34,7 @@ generic-prometheus-alerts:
   sqsAlertsQueueNames:
     - "dps-core-prod-restricted_patients_queue"
     - "dps-core-prod-restricted_patients_queue_dl"
-    - "Digital-Prison-Services-prod-rp_queue_for_domain_events"
-    - "Digital-Prison-Services-prod-rp_queue_for_domain_events_dl"
+    - "dps-core-prod-rp_queue_for_domain_events"
+    - "dps-core-prod-rp_queue_for_domain_events_dl"
 
 environment: prod
