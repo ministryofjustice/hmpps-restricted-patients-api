@@ -22,7 +22,7 @@ class OffenderEventSubscriber(
 ) {
 
   @SqsListener("offenderevents", factory = "hmppsQueueContainerFactoryProxy")
-  @WithSpan(value = "Digital-Prison-Services-restricted_patients_queue", kind = SpanKind.SERVER)
+  @WithSpan(value = "dps-core-restricted_patients_queue", kind = SpanKind.SERVER)
   fun handleEvents(requestJson: String?) {
     val event = gson.fromJson(requestJson, Event::class.java)
     val offenderMovementReception = gson.fromJson(event.Message, OffenderMovementReception::class.java)
