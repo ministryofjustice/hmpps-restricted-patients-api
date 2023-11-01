@@ -20,7 +20,7 @@ generic-prometheus-alerts:
   sqsAlertsQueueNames:
     - "dps-core-preprod-restricted_patients_queue"
     - "dps-core-preprod-restricted_patients_queue_dl"
-    - "Digital-Prison-Services-preprod-rp_queue_for_domain_events"
-    - "Digital-Prison-Services-preprod-rp_queue_for_domain_events_dl"
+    - "dps-core-preprod-rp_queue_for_domain_events"
+    - "dps-core-preprod-rp_queue_for_domain_events_dl"
 
 environment: preprod
