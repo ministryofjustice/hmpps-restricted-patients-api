@@ -19,10 +19,8 @@ import org.mockito.kotlin.doThrow
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.boot.test.mock.mockito.SpyBean
-import org.springframework.test.context.ActiveProfiles
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services.DomainEventPublisher
 
-@ActiveProfiles("test")
 class RestrictedPatientIntegrationTest : IntegrationTestBase() {
   @SpyBean
   private lateinit var domainEventPublisher: DomainEventPublisher

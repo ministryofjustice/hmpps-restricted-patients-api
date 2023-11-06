@@ -2,12 +2,10 @@ package uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.integration.heal
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import org.springframework.test.context.ActiveProfiles
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.integration.IntegrationTestBase
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-@ActiveProfiles("test")
 class InfoTest : IntegrationTestBase() {
 
   @Test

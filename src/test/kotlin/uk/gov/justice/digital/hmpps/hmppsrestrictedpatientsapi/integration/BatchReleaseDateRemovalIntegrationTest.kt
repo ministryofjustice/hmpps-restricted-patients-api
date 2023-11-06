@@ -1,11 +1,9 @@
 package uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.integration
 
 import org.junit.jupiter.api.Test
-import org.springframework.test.context.ActiveProfiles
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.entities.RestrictedPatient
 import java.time.LocalDateTime
 
-@ActiveProfiles("test")
 class BatchReleaseDateRemovalIntegrationTest : IntegrationTestBase() {
 
   @Test
