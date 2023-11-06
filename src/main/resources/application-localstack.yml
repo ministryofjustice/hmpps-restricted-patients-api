@@ -2,12 +2,12 @@ hmpps.sqs:
   provider: localstack
   queues:
     offenderevents:
-      queueName: rp_api_queue
-      dlqName: rp_api_dlq
+      queueName: oe_rp_api_queue
+      dlqName: oe_rp_api_dlq
       subscribeTopicId: offendereventsqueue
     domainevents:
-      queueName: rp_api_queue
-      dlqName: rp_api_dlq
+      queueName: de_rp_api_queue
+      dlqName: de_rp_api_dlq
       subscribeTopicId: domaineventsqueue
   topics:
     offendereventsqueue:

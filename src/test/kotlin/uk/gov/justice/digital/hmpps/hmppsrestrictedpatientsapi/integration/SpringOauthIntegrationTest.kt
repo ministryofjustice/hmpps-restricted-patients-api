@@ -3,9 +3,7 @@ package uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.integration
 import com.github.tomakehurst.wiremock.client.WireMock
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.springframework.test.context.ActiveProfiles
 
-@ActiveProfiles("test")
 class SpringOauthIntegrationTest : IntegrationTestBase() {
 
   @BeforeEach

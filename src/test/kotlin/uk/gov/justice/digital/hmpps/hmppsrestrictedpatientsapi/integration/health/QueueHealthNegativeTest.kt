@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import org.springframework.http.HttpStatus
-import org.springframework.test.context.ActiveProfiles
 import software.amazon.awssdk.auth.credentials.AnonymousCredentialsProvider
 import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.sqs.SqsAsyncClient
@@ -15,7 +14,6 @@ import uk.gov.justice.hmpps.sqs.HmppsQueueHealth
 import uk.gov.justice.hmpps.sqs.HmppsSqsProperties
 import java.net.URI
 
-@ActiveProfiles("test")
 class QueueHealthNegativeTest : IntegrationTestBase() {
 
   @TestConfiguration
