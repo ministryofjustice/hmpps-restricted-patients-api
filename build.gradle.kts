@@ -40,9 +40,10 @@ dependencies {
   testImplementation("org.springframework.security:spring-security-test")
   testImplementation("net.javacrumbs.json-unit:json-unit-assertj:3.2.2")
   testImplementation("org.awaitility:awaitility-kotlin:4.2.0")
-  testImplementation("io.swagger.parser.v3:swagger-parser:2.1.18")
-  testImplementation("javax.xml.bind:jaxb-api:2.3.1")
-
+  testImplementation("io.swagger.parser.v3:swagger-parser:2.1.18") {
+    exclude(group = "io.swagger.core.v3")
+  }
+  testImplementation("io.swagger.core.v3:swagger-core-jakarta:2.2.18")
   testImplementation("io.opentelemetry:opentelemetry-sdk-testing:1.31.0")
 }
 
