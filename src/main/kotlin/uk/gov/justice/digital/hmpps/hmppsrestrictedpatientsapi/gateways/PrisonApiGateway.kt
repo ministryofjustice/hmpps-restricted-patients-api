@@ -21,7 +21,6 @@ class PrisonApiGateway(private val prisonApiClientCreds: WebClient) {
       .uri("/offenders/{prisonerNumber}/discharge-to-hospital", newRestrictedPatient.prisonerNumber)
       .bodyValue(
         mapOf(
-          "commentText" to newRestrictedPatient.commentText,
           "dischargeTime" to newRestrictedPatient.dischargeTime.toString(),
           "fromLocationId" to newRestrictedPatient.fromLocationId,
           "hospitalLocationCode" to newRestrictedPatient.hospitalLocationCode,
