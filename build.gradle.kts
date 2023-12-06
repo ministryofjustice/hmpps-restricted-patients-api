@@ -1,5 +1,5 @@
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "5.10.0"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "5.10.1"
   kotlin("plugin.spring") version "1.9.21"
   kotlin("plugin.jpa") version "1.9.21"
 }
@@ -22,7 +22,7 @@ dependencies {
 
   implementation("org.apache.commons:commons-text:1.11.0")
   implementation("io.swagger:swagger-annotations:1.6.12")
-  implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0")
+  implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0")
   implementation("org.springframework:spring-jms")
   implementation("com.google.code.gson:gson:2.10.1")
   implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:2.1.1")
