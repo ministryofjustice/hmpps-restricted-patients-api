@@ -8,8 +8,10 @@ data class PrisonerResult(
   val conditionalReleaseDate: LocalDate?,
   val sentenceExpiryDate: LocalDate?,
   val recall: Boolean?,
-  val indeterminateSentence: Boolean?, // will be null if no sentences set
-  val legalStatus: String?, // can be null for some reason
+  // will be null if no sentences set
+  val indeterminateSentence: Boolean?,
+  // can be null for some reason
+  val legalStatus: String?,
   val lastMovementTypeCode: String?,
   val lastMovementReasonCode: String?,
 ) {
