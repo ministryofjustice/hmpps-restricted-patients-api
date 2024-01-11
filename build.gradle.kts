@@ -1,5 +1,5 @@
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "5.13.0"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "5.14.0"
   kotlin("plugin.spring") version "1.9.22"
   kotlin("plugin.jpa") version "1.9.22"
 }
@@ -25,7 +25,7 @@ dependencies {
   implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0")
   implementation("org.springframework:spring-jms")
   implementation("com.google.code.gson:gson:2.10.1")
-  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:2.1.1")
+  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:2.2.1")
   implementation("org.apache.commons:commons-csv:1.10.0")
   implementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:1.32.0")
 
@@ -44,14 +44,14 @@ dependencies {
     exclude(group = "io.swagger.core.v3")
   }
   testImplementation("io.swagger.core.v3:swagger-core-jakarta:2.2.20")
-  testImplementation("io.opentelemetry:opentelemetry-sdk-testing:1.32.0")
+  testImplementation("io.opentelemetry:opentelemetry-sdk-testing:1.34.0")
 }
 
 allOpen {
   annotations(
     "javax.persistence.Entity",
     "javax.persistence.MappedSuperclass",
-    "javax.persistence.Embeddable"
+    "javax.persistence.Embeddable",
   )
 }
 
