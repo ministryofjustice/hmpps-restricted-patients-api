@@ -328,6 +328,48 @@ class PrisonApiMockServer : WireMockServer(8989) {
     )
   }
 
+  fun stubGetAgency(agencyId: String) {
+    stubFor(
+      get(urlPathEqualTo("/api/agencies/$agencyId"))
+        .willReturn(
+          aResponse()
+            .withHeader("Content-Type", "application/json")
+            .withStatus(200)
+            .withBody(
+              """
+              {
+                  "agencyId": "$agencyId",
+                  "description": "$agencyId description",
+                  "longDescription": "$agencyId long description",
+                  "agencyType": "INST",
+                  "active": true
+              }
+              """.trimIndent(),
+            ),
+        ),
+    )
+  }
+
+  fun stubGetAgencyNotFound(agencyId: String) {
+    stubFor(
+      get(urlPathEqualTo("/api/agencies/$agencyId"))
+        .willReturn(
+          aResponse()
+            .withHeader("Content-Type", "application/json")
+            .withStatus(404)
+            .withBody(
+              """
+              {
+                  "status": 404,
+                  "userMessage": "Agency not found",
+                  "developerMessage": "Agency not found"
+              }
+              """.trimIndent(),
+            ),
+        ),
+    )
+  }
+
   fun stubServerError(method: (urlPattern: UrlPattern) -> MappingBuilder, urlMatch: String = "/api/.*") {
     stubFor(
       method(urlMatching(urlMatch))

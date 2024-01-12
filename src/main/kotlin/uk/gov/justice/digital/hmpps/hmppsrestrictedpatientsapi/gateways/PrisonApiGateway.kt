@@ -51,6 +51,16 @@ class PrisonApiGateway(private val prisonApiClientCreds: WebClient) {
     .bodyToMono(object : ParameterizedTypeReference<List<Agency>>() {})
     .block()!!
 
+  fun getAgency(agencyId: String): Agency? = prisonApiClientCreds
+    .get()
+    .uri("/agencies/{agencyId}", agencyId)
+    .retrieve()
+    .bodyToMono<Agency>()
+    .onErrorResume(WebClientResponseException.NotFound::class.java) {
+      Mono.empty()
+    }
+    .block()
+
   fun createExternalMovement(createExternalMovement: CreateExternalMovement) {
     prisonApiClientCreds
       .post()
