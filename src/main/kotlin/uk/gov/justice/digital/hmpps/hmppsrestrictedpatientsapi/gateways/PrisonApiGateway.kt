@@ -51,6 +51,13 @@ class PrisonApiGateway(private val prisonApiClientCreds: WebClient) {
     .bodyToMono(object : ParameterizedTypeReference<List<Agency>>() {})
     .block()!!
 
+  fun getAgencyLocation(agencyId: String): Agency? = prisonApiClientCreds
+    .get()
+    .uri("/agencies/{agencyId}", agencyId)
+    .retrieve()
+    .bodyToMono<Agency>()
+    .block()!!
+
   fun createExternalMovement(createExternalMovement: CreateExternalMovement) {
     prisonApiClientCreds
       .post()

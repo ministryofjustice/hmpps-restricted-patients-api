@@ -146,6 +146,7 @@ fun makeLatestMovementReturn(
   movementType: String = "REL",
   commentText: String? = "Released for some reason",
   toAgency: String? = null,
+  movementReasonCode: String = "HP ",
 ): MovementResponse = MovementResponse(
   fromAgency,
   movementDate,
@@ -153,4 +154,5 @@ fun makeLatestMovementReturn(
   movementType,
   commentText,
   toAgency,
+  movementReasonCode,
 )
