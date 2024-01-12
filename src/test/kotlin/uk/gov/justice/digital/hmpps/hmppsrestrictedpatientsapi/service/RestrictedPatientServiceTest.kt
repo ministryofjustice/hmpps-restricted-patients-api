@@ -524,8 +524,38 @@ class RestrictedPatientServiceTest {
 
   @Nested
   inner class PrisonerReleased {
+    @BeforeEach
+    fun beforeEach() {
+      whenever(restrictedPatientsRepository.existsById(anyString())).thenReturn(false)
+      whenever(prisonApiGateway.getLatestMovements(any())).thenReturn(
+        listOf(
+          makeLatestMovementReturn(
+            movementType = "REL",
+            movementReasonCode = "HP",
+            toAgency = "HAZLWD",
+          ),
+        ),
+      )
+      whenever(prisonApiGateway.getAgencyLocation(any())).thenReturn(
+        Agency(agencyId = "HAZLWD", description = "Hazelwood Hospital", agencyType = "HSHOSP"),
+      )
+      whenever(restrictedPatientsRepository.save(any())).thenReturn(makeRestrictedPatient())
+    }
+
     @Nested
     inner class Failures {
+
+      @Test
+      fun `should do nothing if prisoner is already a restricted patient`() {
+        whenever(restrictedPatientsRepository.existsById(anyString())).thenReturn(true)
+
+        service.prisonerReleased("A1234AA")
+
+        verify(restrictedPatientsRepository).existsById("A1234AA")
+        verify(restrictedPatientsRepository, never()).save(any())
+        verify(domainEventPublisher, never()).publishRestrictedPatientAdded(any())
+      }
+
       @Test
       fun `should throw when get movements fails with error`() {
         whenever(prisonApiGateway.getLatestMovements(any())).thenThrow(WebClientResponseException.BadGateway::class.java)
@@ -535,6 +565,8 @@ class RestrictedPatientServiceTest {
         }
 
         verify(prisonApiGateway).getLatestMovements("A1234AA")
+        verify(restrictedPatientsRepository, never()).save(any())
+        verify(domainEventPublisher, never()).publishRestrictedPatientAdded(any())
       }
 
       @Test
@@ -568,42 +600,24 @@ class RestrictedPatientServiceTest {
 
       @Test
       fun `should throw if get agency location fails with error`() {
-        whenever(prisonApiGateway.getLatestMovements(any())).thenReturn(
-          listOf(
-            makeLatestMovementReturn(
-              movementType = "REL",
-              movementReasonCode = "HP",
-              toAgency = "UNKNOWN",
-            ),
-          ),
-        )
         whenever(prisonApiGateway.getAgencyLocation(any())).thenThrow(WebClientResponseException.BadRequest::class.java)
 
         assertThrows(WebClientResponseException.BadRequest::class.java) {
           service.prisonerReleased("A1234AA")
         }
 
-        verify(prisonApiGateway).getAgencyLocation("UNKNOWN")
+        verify(prisonApiGateway).getAgencyLocation("HAZLWD")
         verify(restrictedPatientsRepository, never()).save(any())
         verify(domainEventPublisher, never()).publishRestrictedPatientAdded(any())
       }
 
       @Test
       fun `should do nothing if to agency is not found`() {
-        whenever(prisonApiGateway.getLatestMovements(any())).thenReturn(
-          listOf(
-            makeLatestMovementReturn(
-              movementType = "REL",
-              movementReasonCode = "HP",
-              toAgency = "UNKNOWN",
-            ),
-          ),
-        )
         whenever(prisonApiGateway.getAgencyLocation(any())).thenReturn(null)
 
         service.prisonerReleased("A1234AA")
 
-        verify(prisonApiGateway).getAgencyLocation("UNKNOWN")
+        verify(prisonApiGateway).getAgencyLocation("HAZLWD")
         verify(restrictedPatientsRepository, never()).save(any())
         verify(domainEventPublisher, never()).publishRestrictedPatientAdded(any())
       }
@@ -628,51 +642,10 @@ class RestrictedPatientServiceTest {
         verify(restrictedPatientsRepository, never()).save(any())
         verify(domainEventPublisher, never()).publishRestrictedPatientAdded(any())
       }
-
-      @Test
-      fun `should do nothing if prisoner is already a restricted patient`() {
-        whenever(prisonApiGateway.getLatestMovements(any())).thenReturn(
-          listOf(
-            makeLatestMovementReturn(
-              movementType = "REL",
-              movementReasonCode = "HP",
-              toAgency = "HAZLWD",
-            ),
-          ),
-        )
-        whenever(prisonApiGateway.getAgencyLocation(any())).thenReturn(
-          Agency(agencyId = "HAZLWD", description = "Hazelwood Hospital", agencyType = "HSHOSP"),
-        )
-        whenever(restrictedPatientsRepository.existsById(anyString())).thenReturn(true)
-
-        service.prisonerReleased("A1234AA")
-
-        verify(restrictedPatientsRepository).existsById("A1234AA")
-        verify(restrictedPatientsRepository, never()).save(any())
-        verify(domainEventPublisher, never()).publishRestrictedPatientAdded(any())
-      }
     }
 
     @Nested
     inner class Success {
-
-      @BeforeEach
-      fun beforeEach() {
-        whenever(prisonApiGateway.getLatestMovements(any())).thenReturn(
-          listOf(
-            makeLatestMovementReturn(
-              movementType = "REL",
-              movementReasonCode = "HP",
-              toAgency = "HAZLWD",
-            ),
-          ),
-        )
-        whenever(prisonApiGateway.getAgencyLocation(any())).thenReturn(
-          Agency(agencyId = "HAZLWD", description = "Hazelwood Hospital", agencyType = "HSHOSP"),
-        )
-        whenever(restrictedPatientsRepository.existsById(anyString())).thenReturn(false)
-        whenever(restrictedPatientsRepository.save(any())).thenReturn(makeRestrictedPatient())
-      }
 
       @AfterEach
       fun afterEach() {

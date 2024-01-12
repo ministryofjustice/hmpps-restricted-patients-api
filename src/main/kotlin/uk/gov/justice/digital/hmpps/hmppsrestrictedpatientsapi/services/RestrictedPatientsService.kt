@@ -77,6 +77,11 @@ class RestrictedPatientsService(
 
   @Transactional
   fun prisonerReleased(offenderNo: String) {
+    if (restrictedPatientsRepository.existsById(offenderNo)) {
+      log.info("Ignoring release of prisoner $offenderNo as they are already a restricted patient")
+      return
+    }
+
     val lastMovement = getReleaseToHospitalMovement(offenderNo)
     if (lastMovement == null) {
       log.info("Ignoring release of prisoner $offenderNo as they are not being released to a hospital")
@@ -86,11 +91,6 @@ class RestrictedPatientsService(
     val hospital = getHospital(lastMovement)
     if (hospital == null) {
       log.info("Ignoring release of prisoner $offenderNo due to unrecognised hospital ${lastMovement.toAgency}")
-      return
-    }
-
-    if (restrictedPatientsRepository.existsById(offenderNo)) {
-      log.info("Ignoring release of prisoner $offenderNo as they are already a restricted patient")
       return
     }
 
