@@ -1,6 +1,7 @@
 package uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services
 
 import jakarta.persistence.EntityNotFoundException
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.config.BadRequestException
@@ -29,6 +30,7 @@ class RestrictedPatientsService(
   private val prisonApiGateway: PrisonApiGateway,
   private val prisonerSearchApiGateway: PrisonerSearchApiGateway,
   private val restrictedPatientsRepository: RestrictedPatientsRepository,
+  private val domainEventPublisher: DomainEventPublisher,
   private val clock: Clock,
 ) {
 
@@ -72,6 +74,49 @@ class RestrictedPatientsService(
     )
       .let { addRestrictedPatient(it) }
   }
+
+  @Transactional
+  fun prisonerReleased(offenderNo: String) {
+    if (restrictedPatientsRepository.existsById(offenderNo)) {
+      log.info("Ignoring release of prisoner $offenderNo as they are already a restricted patient")
+      return
+    }
+
+    val lastMovement = getReleaseToHospitalMovement(offenderNo)
+    if (lastMovement == null) {
+      log.info("Ignoring release of prisoner $offenderNo as they are not being released to a hospital")
+      return
+    }
+
+    val hospital = getHospital(lastMovement)
+    if (hospital == null) {
+      log.info("Ignoring release of prisoner $offenderNo due to unrecognised hospital ${lastMovement.toAgency}")
+      return
+    }
+
+    restrictedPatientsRepository.save(
+      RestrictedPatient(
+        prisonerNumber = offenderNo,
+        fromLocationId = lastMovement.fromAgency!!,
+        hospitalLocationCode = hospital.agencyId,
+        supportingPrisonId = lastMovement.fromAgency,
+        dischargeTime = calculateDischargeDateTime(offenderNo, lastMovement.movementDate, lastMovement.movementTime),
+        commentText = lastMovement.commentText,
+      ),
+    )
+    domainEventPublisher.publishRestrictedPatientAdded(offenderNo)
+  }
+
+  private fun getHospital(lastMovement: MovementResponse): Agency? =
+    lastMovement
+      .takeIf { it.toAgency != null }
+      ?.let { prisonApiGateway.getAgency(it.toAgency!!) }
+      ?.takeIf { agency -> listOf("HOSPITAL", "HSHOSP").contains(agency.agencyType) }
+
+  private fun getReleaseToHospitalMovement(offenderNo: String): MovementResponse? =
+    prisonApiGateway.getLatestMovements(offenderNo)
+      .lastOrNull()
+      ?.takeIf { it.movementType == "REL" && it.movementReasonCode == "HP" }
 
   private fun checkNotExistingPatient(offenderNo: String) =
     restrictedPatientsRepository.findById(offenderNo).map {
@@ -203,4 +248,8 @@ class RestrictedPatientsService(
     createUserId = restrictedPatient.createUserId,
     createDateTime = restrictedPatient.createDateTime,
   )
+
+  companion object {
+    private val log = LoggerFactory.getLogger(this::class.java)
+  }
 }
