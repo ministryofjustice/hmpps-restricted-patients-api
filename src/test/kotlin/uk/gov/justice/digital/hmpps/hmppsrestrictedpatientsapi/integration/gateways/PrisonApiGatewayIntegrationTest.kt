@@ -32,7 +32,7 @@ class PrisonApiGatewayIntegrationTest {
   inner class GetAgency {
     @Test
     fun `should return agency`() {
-      prisonApiMockServer.stubGetAgency("MDI")
+      prisonApiMockServer.stubGetAgency("MDI", "INST")
 
       val agency = prisonApiGateway.getAgency("MDI")!!
 

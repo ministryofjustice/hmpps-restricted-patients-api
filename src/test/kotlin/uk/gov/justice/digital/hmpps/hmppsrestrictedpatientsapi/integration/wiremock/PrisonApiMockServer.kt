@@ -127,6 +127,7 @@ class PrisonApiMockServer : WireMockServer(8989) {
                  "movementDate": "2022-05-20",
                  "movementTime": "14:36:13",
                  "movementReason": "Final Discharge To Hospital-Psychiatric",
+                 "movementReasonCode": "HP",
                  "commentText": "Psychiatric Hospital Discharge to Avesbury House, Care UK"
                 }
               ]
@@ -328,7 +329,7 @@ class PrisonApiMockServer : WireMockServer(8989) {
     )
   }
 
-  fun stubGetAgency(agencyId: String) {
+  fun stubGetAgency(agencyId: String, agencyType: String) {
     stubFor(
       get(urlPathEqualTo("/api/agencies/$agencyId"))
         .willReturn(
@@ -341,7 +342,7 @@ class PrisonApiMockServer : WireMockServer(8989) {
                   "agencyId": "$agencyId",
                   "description": "$agencyId description",
                   "longDescription": "$agencyId long description",
-                  "agencyType": "INST",
+                  "agencyType": "$agencyType",
                   "active": true
               }
               """.trimIndent(),

@@ -24,6 +24,7 @@ hmpps.sqs:
       queueName: ${random.uuid}
       dlqName: ${random.uuid}
       subscribeTopicId: domaineventsqueue
+      dlqMaxReceiveCount: 1
     offenderevents:
       queueName: ${random.uuid}
       dlqName: ${random.uuid}

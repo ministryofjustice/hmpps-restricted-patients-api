@@ -8,7 +8,6 @@ import com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor
 import com.github.tomakehurst.wiremock.client.WireMock.putRequestedFor
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 import com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo
-import com.microsoft.applicationinsights.TelemetryClient
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
@@ -18,15 +17,8 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.doThrow
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import org.springframework.boot.test.mock.mockito.SpyBean
-import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services.DomainEventPublisher
 
 class RestrictedPatientIntegrationTest : IntegrationTestBase() {
-  @SpyBean
-  private lateinit var domainEventPublisher: DomainEventPublisher
-
-  @SpyBean
-  private lateinit var telemetryClient: TelemetryClient
 
   @BeforeEach
   fun resetMocks() {
