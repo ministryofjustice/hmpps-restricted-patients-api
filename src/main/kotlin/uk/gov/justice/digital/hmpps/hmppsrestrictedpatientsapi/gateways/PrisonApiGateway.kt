@@ -13,6 +13,10 @@ import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.Ag
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.MovementResponse
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.OffenderBookingResponse
 
+// Use this to get a WebClient when we are not in a web scope so have no Principal, e.g. for handling events
+@Service
+class PrisonApiApplicationGateway(prisonApiClientCredsAppScope: WebClient) : PrisonApiGateway(prisonApiClientCredsAppScope)
+
 @Service
 class PrisonApiGateway(private val prisonApiClientCreds: WebClient) {
   fun dischargeToHospital(newRestrictedPatient: RestrictedPatient): InmateDetail =
