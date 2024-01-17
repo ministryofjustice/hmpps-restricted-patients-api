@@ -9,11 +9,9 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.test.context.ActiveProfiles
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.dataBuilders.makeDischargeRequest
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.dataBuilders.makeRestrictedPatient
-import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.PrisonApiGateway
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.OffenderBookingResponse
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.repositories.RestrictedPatientsRepository
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services.RestrictedPatientsService
@@ -23,9 +21,6 @@ class BreakFlow : RuntimeException()
 @ActiveProfiles("test")
 @Tag("race-condition-test")
 class RestrictedPatientServiceIntegrationTest : IntegrationTestBase() {
-
-  @MockBean
-  lateinit var prisonApiGateway: PrisonApiGateway
 
   @Autowired
   lateinit var restrictedPatientsService: RestrictedPatientsService
@@ -38,7 +33,7 @@ class RestrictedPatientServiceIntegrationTest : IntegrationTestBase() {
 
     @BeforeEach
     fun beforeEach() {
-      whenever(prisonApiGateway.getOffenderBooking("F12345")).thenReturn(OffenderBookingResponse(1235467, "F12345", true))
+      whenever(prisonApiApplicationGateway.getOffenderBooking("F12345")).thenReturn(OffenderBookingResponse(1235467, "F12345", true))
     }
 
     @Test
@@ -46,7 +41,7 @@ class RestrictedPatientServiceIntegrationTest : IntegrationTestBase() {
       doAnswer {
         getRestrictedPatient(prisonerNumber = "F12345").exchange().expectStatus().is2xxSuccessful
         throw BreakFlow()
-      }.whenever(prisonApiGateway).dischargeToHospital(any())
+      }.whenever(prisonApiApplicationGateway).dischargeToHospital(any())
 
       Assertions.assertThrows(BreakFlow::class.java) {
         restrictedPatientsService.dischargeToHospital(makeDischargeRequest().copy(offenderNo = "F12345"))
@@ -55,7 +50,7 @@ class RestrictedPatientServiceIntegrationTest : IntegrationTestBase() {
 
     @Test
     fun `the recently added restricted patient gets removed`() {
-      doAnswer { throw BreakFlow() }.whenever(prisonApiGateway).dischargeToHospital(any())
+      doAnswer { throw BreakFlow() }.whenever(prisonApiApplicationGateway).dischargeToHospital(any())
 
       Assertions.assertThrows(BreakFlow::class.java) {
         restrictedPatientsService.dischargeToHospital(makeDischargeRequest().copy(offenderNo = "F12345"))
@@ -79,7 +74,7 @@ class RestrictedPatientServiceIntegrationTest : IntegrationTestBase() {
       doAnswer {
         getRestrictedPatient(prisonerNumber = "Z123456").exchange().expectStatus().isNotFound
         throw BreakFlow()
-      }.whenever(prisonApiGateway).createExternalMovement(any())
+      }.whenever(prisonApiApplicationGateway).createExternalMovement(any())
 
       Assertions.assertThrows(BreakFlow::class.java) {
         restrictedPatientsService.removeRestrictedPatient(prisonerNumber = "Z123456")
@@ -88,7 +83,7 @@ class RestrictedPatientServiceIntegrationTest : IntegrationTestBase() {
 
     @Test
     fun `the recently deleted restricted patient gets re added`() {
-      doAnswer { throw BreakFlow() }.whenever(prisonApiGateway).createExternalMovement(any())
+      doAnswer { throw BreakFlow() }.whenever(prisonApiApplicationGateway).createExternalMovement(any())
 
       Assertions.assertThrows(BreakFlow::class.java) {
         restrictedPatientsService.removeRestrictedPatient(prisonerNumber = "Z123456")

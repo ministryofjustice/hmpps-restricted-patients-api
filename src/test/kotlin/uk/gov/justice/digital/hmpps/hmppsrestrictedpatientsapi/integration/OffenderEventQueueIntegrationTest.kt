@@ -4,18 +4,13 @@ import org.awaitility.kotlin.await
 import org.awaitility.kotlin.matches
 import org.awaitility.kotlin.untilCallTo
 import org.junit.jupiter.api.Test
-import org.springframework.beans.factory.annotation.Autowired
 import software.amazon.awssdk.services.sqs.model.GetQueueAttributesRequest
 import software.amazon.awssdk.services.sqs.model.QueueAttributeName
 import software.amazon.awssdk.services.sqs.model.SendMessageRequest
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.dataBuilders.makeOffenderMovementReceptionEvent
 import uk.gov.justice.hmpps.sqs.HmppsQueue
-import uk.gov.justice.hmpps.sqs.HmppsQueueService
 
 class OffenderEventQueueIntegrationTest : IntegrationTestBase() {
-  @Autowired
-  lateinit var hmppsQueueService: HmppsQueueService
-
   @Test
   fun `will remove restricted patient from the system`() {
     dischargePrisonerWebClient(prisonerNumber = "A12346")
@@ -26,7 +21,7 @@ class OffenderEventQueueIntegrationTest : IntegrationTestBase() {
       .exchange()
       .expectStatus().is2xxSuccessful
 
-    hmppsQueueService.findByQueueId("offenderevents")!!.let {
+    offenderEventQueue.let {
       it.sqsClient.sendMessage(
         SendMessageRequest.builder().queueUrl(it.queueUrl).messageBody(makeOffenderMovementReceptionEvent("A12346")).build(),
       ).get()

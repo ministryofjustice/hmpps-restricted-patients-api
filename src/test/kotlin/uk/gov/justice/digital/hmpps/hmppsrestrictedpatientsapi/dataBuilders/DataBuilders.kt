@@ -139,6 +139,22 @@ fun makeOffenderMovementReceptionEvent(prisonerNumber: String) =
     }
   """.trimIndent()
 
+fun makeOutboundPrisonerSearchReleasedEvent(prisonerNumber: String) =
+  """
+    {
+      "Message" : "{
+          \"additionalInformation\": {
+              \"nomsNumber\":\"$prisonerNumber\",
+              \"reason\":\"RELEASED\",
+              \"prisonId\":\"MDI\"},
+              \"occurredAt\":\"2024-01-12T17:06:09.878529083Z\",
+              \"eventType\":\"prisoner-offender-search.prisoner.released\",
+              \"version\":1,\"description\":\"A prisoner has been released from a prison with reason: released from prison\",
+              \"detailUrl\":\"https://prisoner-search.prison.service.justice.gov.uk/prisoner/$prisonerNumber\"
+          }"
+    }
+  """.trimIndent()
+
 fun makeLatestMovementReturn(
   fromAgency: String? = "MDI",
   movementDate: String? = "2022-05-01",

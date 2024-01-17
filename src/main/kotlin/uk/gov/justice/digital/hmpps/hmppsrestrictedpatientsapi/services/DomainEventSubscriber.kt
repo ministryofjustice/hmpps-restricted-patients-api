@@ -22,6 +22,7 @@ data class AdditionalInformation(
 class DomainEventSubscriber(
   private val gson: Gson,
   private val restrictedPatientCleanup: RestrictedPatientCleanup,
+  private val restrictedPatientEventService: RestrictedPatientEventService,
 ) {
 
   @SqsListener("domainevents", factory = "hmppsQueueContainerFactoryProxy")
@@ -35,6 +36,8 @@ class DomainEventSubscriber(
             additionalInformation.removedNomsNumber,
             additionalInformation.nomsNumber,
           )
+        "prisoner-offender-search.prisoner.released" ->
+          restrictedPatientEventService.prisonerReleased(additionalInformation.nomsNumber)
         else -> log.warn("Unexpected domain event received: {}", eventType)
       }
     }

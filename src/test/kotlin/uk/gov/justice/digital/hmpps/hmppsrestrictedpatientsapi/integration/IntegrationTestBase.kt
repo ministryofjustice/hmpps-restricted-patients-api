@@ -1,32 +1,40 @@
 package uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.integration
 
 import com.github.tomakehurst.wiremock.client.WireMock
+import com.microsoft.applicationinsights.TelemetryClient
 import org.flywaydb.core.Flyway
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT
 import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.boot.test.mock.mockito.SpyBean
+import org.springframework.boot.test.system.OutputCaptureExtension
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.reactive.server.WebTestClient
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.JwtAuthHelper
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.PrisonApiApplicationGateway
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.integration.wiremock.OAuthMockServer
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.integration.wiremock.PrisonApiMockServer
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.integration.wiremock.PrisonerSearchApiMockServer
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.entities.RestrictedPatient
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.repositories.RestrictedPatientsRepository
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services.DomainEventPublisher
+import uk.gov.justice.hmpps.sqs.HmppsQueueService
 import java.time.Clock
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
 
+@ExtendWith(OutputCaptureExtension::class)
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 @ActiveProfiles("test")
 abstract class IntegrationTestBase {
@@ -42,6 +50,25 @@ abstract class IntegrationTestBase {
 
   @Autowired
   lateinit var restrictedPatientRepository: RestrictedPatientsRepository
+
+  @Autowired
+  lateinit var hmppsQueueService: HmppsQueueService
+
+  @SpyBean
+  lateinit var domainEventPublisher: DomainEventPublisher
+
+  @SpyBean
+  lateinit var telemetryClient: TelemetryClient
+
+  @SpyBean
+  lateinit var prisonApiApplicationGateway: PrisonApiApplicationGateway
+
+  val offenderEventQueue by lazy {
+    hmppsQueueService.findByQueueId("offenderevents") ?: throw (RuntimeException("Queue offenderevents not found"))
+  }
+  val domainEventQueue by lazy {
+    hmppsQueueService.findByQueueId("domainevents") ?: throw (RuntimeException("Queue domainevents not found"))
+  }
 
   @MockBean
   lateinit var clock: Clock
@@ -84,6 +111,14 @@ abstract class IntegrationTestBase {
       )
     whenever(clock.instant()).thenReturn(fixedClock.instant())
     whenever(clock.getZone()).thenReturn(fixedClock.getZone())
+  }
+
+  @AfterEach
+  fun resetQueues() {
+    offenderEventQueue.sqsClient.purgeQueue { it.queueUrl(offenderEventQueue.queueUrl) }
+    offenderEventQueue.sqsClient.purgeQueue { it.queueUrl(offenderEventQueue.dlqUrl) }
+    domainEventQueue.sqsClient.purgeQueue { it.queueUrl(domainEventQueue.queueUrl) }
+    domainEventQueue.sqsClient.purgeQueue { it.queueUrl(domainEventQueue.dlqUrl) }
   }
 
   @AfterEach
