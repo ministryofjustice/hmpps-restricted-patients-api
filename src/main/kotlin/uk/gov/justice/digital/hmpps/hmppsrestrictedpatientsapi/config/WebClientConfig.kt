@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.context.annotation.Profile
 import org.springframework.http.client.reactive.ReactorClientHttpConnector
 import org.springframework.http.codec.ClientCodecConfigurer
 import org.springframework.security.core.Authentication
@@ -42,7 +41,6 @@ class WebClientConfig(
 
   @Bean
   @RequestScope
-  @Profile("!app-scope")
   fun prisonApiClientCreds(
     clientRegistrationRepository: ClientRegistrationRepository,
     authorizedClientRepository: OAuth2AuthorizedClientRepository,
@@ -56,7 +54,6 @@ class WebClientConfig(
 
   @Bean
   @RequestScope
-  @Profile("!app-scope")
   fun prisonerSearchClientCreds(
     clientRegistrationRepository: ClientRegistrationRepository,
     authorizedClientRepository: OAuth2AuthorizedClientRepository,
@@ -69,16 +66,12 @@ class WebClientConfig(
   )
 
   @Bean
-  @Qualifier("prisonApiClientCreds")
-  @Profile("app-scope")
   fun prisonApiClientCredsAppScope(
     @Qualifier("authorizedClientManagerAppScope") authorizedClientManager: OAuth2AuthorizedClientManager,
     builder: WebClient.Builder,
   ): WebClient = builder.authorisedWebClient(authorizedClientManager, registrationId = "restricted-patients-api", url = "$prisonApiUrl/api", timeout)
 
   @Bean
-  @Qualifier("prisonerSearchClientCreds")
-  @Profile("app-scope")
   fun prisonerSearchClientCredsAppScope(
     @Qualifier("authorizedClientManagerAppScope") authorizedClientManager: OAuth2AuthorizedClientManager,
     builder: WebClient.Builder,

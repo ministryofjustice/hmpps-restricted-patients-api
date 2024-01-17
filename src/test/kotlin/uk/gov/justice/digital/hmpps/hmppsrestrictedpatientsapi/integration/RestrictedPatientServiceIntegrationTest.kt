@@ -20,7 +20,7 @@ import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services.Restrict
 
 class BreakFlow : RuntimeException()
 
-@ActiveProfiles("test", "app-scope")
+@ActiveProfiles("test")
 @Tag("race-condition-test")
 class RestrictedPatientServiceIntegrationTest : IntegrationTestBase() {
 

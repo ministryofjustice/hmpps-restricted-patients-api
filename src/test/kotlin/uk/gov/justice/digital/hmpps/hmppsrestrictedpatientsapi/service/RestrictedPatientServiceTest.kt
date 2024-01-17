@@ -2,7 +2,6 @@ package uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.service
 
 import jakarta.persistence.EntityNotFoundException
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -13,10 +12,8 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.check
 import org.mockito.kotlin.inOrder
 import org.mockito.kotlin.mock
-import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import org.springframework.web.reactive.function.client.WebClientResponseException
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.config.BadRequestException
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.dataBuilders.HOSPITAL
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.dataBuilders.PRISON
@@ -32,7 +29,6 @@ import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.request.Cre
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.Agency
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.OffenderBookingResponse
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.repositories.RestrictedPatientsRepository
-import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services.DomainEventPublisher
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services.RestrictedPatientsService
 import java.time.Clock
 import java.time.LocalDate
@@ -45,7 +41,6 @@ class RestrictedPatientServiceTest {
   private val prisonApiGateway: PrisonApiGateway = mock()
   private val prisonerSearchApiGateway: PrisonerSearchApiGateway = mock()
   private val restrictedPatientsRepository: RestrictedPatientsRepository = mock()
-  private val domainEventPublisher: DomainEventPublisher = mock()
   private val clock: Clock = mock()
 
   private val restrictedPatient = RestrictedPatient(
@@ -61,7 +56,6 @@ class RestrictedPatientServiceTest {
     prisonApiGateway,
     prisonerSearchApiGateway,
     restrictedPatientsRepository,
-    domainEventPublisher,
     clock,
   )
 
@@ -518,180 +512,6 @@ class RestrictedPatientServiceTest {
             assertThat(it.commentText).isEqualTo("comment saved to restricted patients")
           },
         )
-      }
-    }
-  }
-
-  @Nested
-  inner class PrisonerReleased {
-    @BeforeEach
-    fun beforeEach() {
-      whenever(restrictedPatientsRepository.existsById(anyString())).thenReturn(false)
-      whenever(prisonApiGateway.getLatestMovements(any())).thenReturn(
-        listOf(
-          makeLatestMovementReturn(
-            movementType = "REL",
-            movementReasonCode = "HP",
-            toAgency = "HAZLWD",
-          ),
-        ),
-      )
-      whenever(prisonApiGateway.getAgency(any())).thenReturn(
-        Agency(agencyId = "HAZLWD", description = "Hazelwood Hospital", agencyType = "HSHOSP"),
-      )
-      whenever(restrictedPatientsRepository.save(any())).thenReturn(makeRestrictedPatient())
-    }
-
-    @Nested
-    inner class Failures {
-
-      @Test
-      fun `should do nothing if prisoner is already a restricted patient`() {
-        whenever(restrictedPatientsRepository.existsById(anyString())).thenReturn(true)
-
-        service.prisonerReleased("A1234AA")
-
-        verify(restrictedPatientsRepository).existsById("A1234AA")
-        verify(restrictedPatientsRepository, never()).save(any())
-        verify(domainEventPublisher, never()).publishRestrictedPatientAdded(any())
-      }
-
-      @Test
-      fun `should throw when get movements fails with error`() {
-        whenever(prisonApiGateway.getLatestMovements(any())).thenThrow(WebClientResponseException.BadGateway::class.java)
-
-        assertThrows(WebClientResponseException.BadGateway::class.java) {
-          service.prisonerReleased("A1234AA")
-        }
-
-        verify(prisonApiGateway).getLatestMovements("A1234AA")
-        verify(restrictedPatientsRepository, never()).save(any())
-        verify(domainEventPublisher, never()).publishRestrictedPatientAdded(any())
-      }
-
-      @Test
-      fun `should do nothing if movements not found`() {
-        whenever(prisonApiGateway.getLatestMovements(any())).thenReturn(emptyList())
-
-        service.prisonerReleased("A1234AA")
-
-        verify(prisonApiGateway).getLatestMovements("A1234AA")
-        verify(restrictedPatientsRepository, never()).save(any())
-        verify(domainEventPublisher, never()).publishRestrictedPatientAdded(any())
-      }
-
-      @Test
-      fun `should do nothing if latest movement not release to hospital`() {
-        whenever(prisonApiGateway.getLatestMovements(any())).thenReturn(
-          listOf(
-            makeLatestMovementReturn(
-              movementType = "REL",
-              movementReasonCode = "CR",
-              toAgency = "OUT",
-            ),
-          ),
-        )
-
-        service.prisonerReleased("A1234AA")
-
-        verify(restrictedPatientsRepository, never()).save(any())
-        verify(domainEventPublisher, never()).publishRestrictedPatientAdded(any())
-      }
-
-      @Test
-      fun `should throw if get agency location fails with error`() {
-        whenever(prisonApiGateway.getAgency(any())).thenThrow(WebClientResponseException.BadRequest::class.java)
-
-        assertThrows(WebClientResponseException.BadRequest::class.java) {
-          service.prisonerReleased("A1234AA")
-        }
-
-        verify(prisonApiGateway).getAgency("HAZLWD")
-        verify(restrictedPatientsRepository, never()).save(any())
-        verify(domainEventPublisher, never()).publishRestrictedPatientAdded(any())
-      }
-
-      @Test
-      fun `should do nothing if to agency is not found`() {
-        whenever(prisonApiGateway.getAgency(any())).thenReturn(null)
-
-        service.prisonerReleased("A1234AA")
-
-        verify(prisonApiGateway).getAgency("HAZLWD")
-        verify(restrictedPatientsRepository, never()).save(any())
-        verify(domainEventPublisher, never()).publishRestrictedPatientAdded(any())
-      }
-
-      @Test
-      fun `should do nothing if agency is not a hospital`() {
-        whenever(prisonApiGateway.getLatestMovements(any())).thenReturn(
-          listOf(
-            makeLatestMovementReturn(
-              movementType = "REL",
-              movementReasonCode = "HP",
-              toAgency = "MDI",
-            ),
-          ),
-        )
-        whenever(prisonApiGateway.getAgency(any())).thenReturn(
-          Agency(agencyId = "MDI", description = "MDI", agencyType = "INST"),
-        )
-
-        service.prisonerReleased("A1234AA")
-
-        verify(restrictedPatientsRepository, never()).save(any())
-        verify(domainEventPublisher, never()).publishRestrictedPatientAdded(any())
-      }
-    }
-
-    @Nested
-    inner class Success {
-
-      @AfterEach
-      fun afterEach() {
-        verify(prisonApiGateway).getLatestMovements("A1234AA")
-        verify(prisonApiGateway).getAgency("HAZLWD")
-        verify(restrictedPatientsRepository).existsById("A1234AA")
-      }
-
-      @Test
-      fun `should create restricted patient`() {
-        service.prisonerReleased("A1234AA")
-
-        verify(restrictedPatientsRepository).save(
-          check {
-            with(it) {
-              assertThat(prisonerNumber).isEqualTo("A1234AA")
-              assertThat(fromLocationId).isEqualTo("MDI")
-              assertThat(hospitalLocationCode).isEqualTo("HAZLWD")
-              assertThat(supportingPrisonId).isEqualTo("MDI")
-              assertThat(dischargeTime).isEqualTo(LocalDateTime.parse("2022-05-01T15:33:11"))
-              assertThat(commentText).isEqualTo("Released for some reason")
-            }
-          },
-        )
-      }
-
-      @Test
-      fun `should also allow release to agency type HOSPITAL`() {
-        whenever(prisonApiGateway.getAgency(any())).thenReturn(
-          Agency(agencyId = "HAZLWD", description = "Hazelwood Hospital", agencyType = "HOSPITAL"),
-        )
-
-        service.prisonerReleased("A1234AA")
-
-        verify(restrictedPatientsRepository).save(
-          check {
-            assertThat(it.hospitalLocationCode).isEqualTo("HAZLWD")
-          },
-        )
-      }
-
-      @Test
-      fun `should publish domain event`() {
-        service.prisonerReleased("A1234AA")
-
-        verify(domainEventPublisher).publishRestrictedPatientAdded("A1234AA")
       }
     }
   }
