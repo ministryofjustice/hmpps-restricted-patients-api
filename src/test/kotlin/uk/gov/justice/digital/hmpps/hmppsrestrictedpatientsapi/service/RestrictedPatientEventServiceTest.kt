@@ -55,10 +55,18 @@ class RestrictedPatientEventServiceTest {
     inner class Failures {
 
       @Test
+      fun `should do nothing if event reason is not released to hospital`() {
+        service.prisonerReleased("A1234AA", "RELEASED")
+
+        verify(restrictedPatientsRepository, never()).save(any())
+        verify(domainEventPublisher, never()).publishRestrictedPatientAdded(any())
+      }
+
+      @Test
       fun `should do nothing if prisoner is already a restricted patient`() {
         whenever(restrictedPatientsRepository.existsById(ArgumentMatchers.anyString())).thenReturn(true)
 
-        service.prisonerReleased("A1234AA")
+        service.prisonerReleased("A1234AA", "RELEASED_TO_HOSPITAL")
 
         verify(restrictedPatientsRepository).existsById("A1234AA")
         verify(restrictedPatientsRepository, never()).save(any())
@@ -70,7 +78,7 @@ class RestrictedPatientEventServiceTest {
         whenever(prisonApiApplicationGateway.getLatestMovements(any())).thenThrow(WebClientResponseException.BadGateway::class.java)
 
         Assertions.assertThrows(WebClientResponseException.BadGateway::class.java) {
-          service.prisonerReleased("A1234AA")
+          service.prisonerReleased("A1234AA", "RELEASED_TO_HOSPITAL")
         }
 
         verify(prisonApiApplicationGateway).getLatestMovements("A1234AA")
@@ -82,7 +90,7 @@ class RestrictedPatientEventServiceTest {
       fun `should do nothing if movements not found`() {
         whenever(prisonApiApplicationGateway.getLatestMovements(any())).thenReturn(emptyList())
 
-        service.prisonerReleased("A1234AA")
+        service.prisonerReleased("A1234AA", "RELEASED_TO_HOSPITAL")
 
         verify(prisonApiApplicationGateway).getLatestMovements("A1234AA")
         verify(restrictedPatientsRepository, never()).save(any())
@@ -101,7 +109,7 @@ class RestrictedPatientEventServiceTest {
           ),
         )
 
-        service.prisonerReleased("A1234AA")
+        service.prisonerReleased("A1234AA", "RELEASED_TO_HOSPITAL")
 
         verify(restrictedPatientsRepository, never()).save(any())
         verify(domainEventPublisher, never()).publishRestrictedPatientAdded(any())
@@ -112,7 +120,7 @@ class RestrictedPatientEventServiceTest {
         whenever(prisonApiApplicationGateway.getAgency(any())).thenThrow(WebClientResponseException.BadRequest::class.java)
 
         Assertions.assertThrows(WebClientResponseException.BadRequest::class.java) {
-          service.prisonerReleased("A1234AA")
+          service.prisonerReleased("A1234AA", "RELEASED_TO_HOSPITAL")
         }
 
         verify(prisonApiApplicationGateway).getAgency("HAZLWD")
@@ -124,7 +132,7 @@ class RestrictedPatientEventServiceTest {
       fun `should do nothing if to agency is not found`() {
         whenever(prisonApiApplicationGateway.getAgency(any())).thenReturn(null)
 
-        service.prisonerReleased("A1234AA")
+        service.prisonerReleased("A1234AA", "RELEASED_TO_HOSPITAL")
 
         verify(prisonApiApplicationGateway).getAgency("HAZLWD")
         verify(restrictedPatientsRepository, never()).save(any())
@@ -146,7 +154,7 @@ class RestrictedPatientEventServiceTest {
           Agency(agencyId = "MDI", description = "MDI", agencyType = "INST"),
         )
 
-        service.prisonerReleased("A1234AA")
+        service.prisonerReleased("A1234AA", "RELEASED_TO_HOSPITAL")
 
         verify(restrictedPatientsRepository, never()).save(any())
         verify(domainEventPublisher, never()).publishRestrictedPatientAdded(any())
@@ -165,7 +173,7 @@ class RestrictedPatientEventServiceTest {
 
       @Test
       fun `should create restricted patient`() {
-        service.prisonerReleased("A1234AA")
+        service.prisonerReleased("A1234AA", "RELEASED_TO_HOSPITAL")
 
         verify(restrictedPatientsRepository).save(
           org.mockito.kotlin.check {
@@ -188,7 +196,7 @@ class RestrictedPatientEventServiceTest {
           Agency(agencyId = "HAZLWD", description = "Hazelwood Hospital", agencyType = "HOSPITAL"),
         )
 
-        service.prisonerReleased("A1234AA")
+        service.prisonerReleased("A1234AA", "RELEASED_TO_HOSPITAL")
 
         verify(restrictedPatientsRepository).save(
           org.mockito.kotlin.check {
@@ -199,7 +207,7 @@ class RestrictedPatientEventServiceTest {
 
       @Test
       fun `should publish domain event`() {
-        service.prisonerReleased("A1234AA")
+        service.prisonerReleased("A1234AA", "RELEASED_TO_HOSPITAL")
 
         verify(domainEventPublisher).publishRestrictedPatientAdded("A1234AA")
       }
