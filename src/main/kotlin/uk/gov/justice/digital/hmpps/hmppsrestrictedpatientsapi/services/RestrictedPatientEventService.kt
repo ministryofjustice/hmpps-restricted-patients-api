@@ -17,9 +17,16 @@ class RestrictedPatientEventService(
 ) {
 
   @Transactional
-  fun prisonerReleased(offenderNo: String) {
-    // Failure is expected - most releases won't be to a hospital so can be ignored
-    val lastMovement = getReleaseToHospitalMovement(offenderNo) ?: return
+  fun prisonerReleased(offenderNo: String, reason: String) {
+    if (reason != "RELEASED_TO_HOSPITAL") {
+      return
+    }
+
+    val lastMovement = getReleaseToHospitalMovement(offenderNo)
+    if (lastMovement == null) {
+      log.info("Ignoring release of prisoner {} as last movement not to a hospital", offenderNo)
+      return
+    }
 
     val hospital = getHospital(lastMovement)
     if (hospital == null) {

@@ -25,6 +25,6 @@ class DomainEventSubscriberTest {
   @Test
   fun `calls prisoner released when prisoner released message received`() {
     domainEventSubscriber.handleEvents(makeOutboundPrisonerSearchReleasedEvent("A12345"))
-    verify(restrictedPatientsEventService).prisonerReleased("A12345")
+    verify(restrictedPatientsEventService).prisonerReleased("A12345", "RELEASED_TO_HOSPITAL")
   }
 }

@@ -145,7 +145,7 @@ fun makeOutboundPrisonerSearchReleasedEvent(prisonerNumber: String) =
       "Message" : "{
           \"additionalInformation\": {
               \"nomsNumber\":\"$prisonerNumber\",
-              \"reason\":\"RELEASED\",
+              \"reason\":\"RELEASED_TO_HOSPITAL\",
               \"prisonId\":\"MDI\"},
               \"occurredAt\":\"2024-01-12T17:06:09.878529083Z\",
               \"eventType\":\"prisoner-offender-search.prisoner.released\",

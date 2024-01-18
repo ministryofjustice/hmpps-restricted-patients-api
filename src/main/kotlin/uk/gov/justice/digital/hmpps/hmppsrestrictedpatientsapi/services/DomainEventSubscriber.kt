@@ -16,6 +16,7 @@ data class HmppsDomainEvent(
 data class AdditionalInformation(
   val nomsNumber: String,
   val removedNomsNumber: String? = null,
+  val reason: String? = null,
 )
 
 @Service
@@ -37,7 +38,7 @@ class DomainEventSubscriber(
             additionalInformation.nomsNumber,
           )
         "prisoner-offender-search.prisoner.released" ->
-          restrictedPatientEventService.prisonerReleased(additionalInformation.nomsNumber)
+          restrictedPatientEventService.prisonerReleased(additionalInformation.nomsNumber, additionalInformation.reason!!)
         else -> log.warn("Unexpected domain event received: {}", eventType)
       }
     }
