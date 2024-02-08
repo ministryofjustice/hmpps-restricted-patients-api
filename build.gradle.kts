@@ -13,10 +13,9 @@ repositories {
   mavenCentral()
 }
 dependencies {
-  implementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter:0.0.2")
+  implementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter:0.0.3")
   implementation("org.springframework.boot:spring-boot-starter-webflux")
   implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-  implementation("org.springframework.boot:spring-boot-starter-cache")
 
   implementation("org.apache.commons:commons-text:1.11.0")
   implementation("io.swagger:swagger-annotations:1.6.12")
