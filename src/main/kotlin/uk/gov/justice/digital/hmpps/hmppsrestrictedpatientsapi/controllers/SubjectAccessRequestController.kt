@@ -48,6 +48,7 @@ class SubjectAccessRequestController(private val service: SubjectAccessRequestSe
       ApiResponse(
         responseCode = "204",
         description = "Request successfully processed - no content found",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
       ),
       ApiResponse(
         responseCode = "209",
@@ -72,16 +73,16 @@ class SubjectAccessRequestController(private val service: SubjectAccessRequestSe
     ],
   )
   fun getSarContentByReference(
-    @RequestParam(name = "prn", required = false)
+    @RequestParam(name = "prn")
     @Parameter(description = "NOMIS Prison Reference Number")
     prn: String?,
-    @RequestParam(name = "crn", required = false)
+    @RequestParam(name = "crn")
     @Parameter(description = "nDelius Case Reference Number")
     crn: String?,
-    @RequestParam(value = "fromDate", required = false)
+    @RequestParam(value = "fromDate")
     @Parameter(description = "Optional parameter denoting minimum date of event occurrence which should be returned in the response")
     fromDate: LocalDate?,
-    @RequestParam(value = "toDate", required = false)
+    @RequestParam(value = "toDate")
     @Parameter(description = "Optional parameter denoting maximum date of event occurrence which should be returned in the response")
     toDate: LocalDate?,
   ): ResponseEntity<Any> {
