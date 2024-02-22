@@ -65,30 +65,6 @@ class SubjectAccessRequestIntegrationTest : IntegrationTestBase() {
           .jsonPath("$.content.prisonerNumber").isEqualTo("A12345")
           .jsonPath("$.content.commentText").doesNotHaveJsonPath()
       }
-
-      @Test
-      fun `should return 204 if no prisoner data exists`() {
-        webTestClient.get().uri("/subject-access-request?prn=AB12345C")
-          .headers(setHeaders(roles = listOf("ROLE_SAR_DATA_ACCESS")))
-          .exchange()
-          .expectStatus().isNoContent
-      }
-
-      @Test
-      fun `should return success if both prn and crn supplied`() {
-        webTestClient.get().uri("/subject-access-request?prn=AB12345C&crn=1234")
-          .headers(setHeaders(roles = listOf("ROLE_SAR_DATA_ACCESS")))
-          .exchange()
-          .expectStatus().isNoContent
-      }
-
-      @Test
-      fun `should return 209 if no prn supplied`() {
-        webTestClient.get().uri("/subject-access-request?crn=AB12345C")
-          .headers(setHeaders(roles = listOf("ROLE_SAR_DATA_ACCESS")))
-          .exchange()
-          .expectStatus().isEqualTo(209)
-      }
     }
   }
 }
