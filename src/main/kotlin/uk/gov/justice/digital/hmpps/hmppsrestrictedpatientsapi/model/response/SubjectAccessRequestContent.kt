@@ -1,5 +1,7 @@
 package uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response
 
+import com.fasterxml.jackson.annotation.JsonInclude
+import com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL
 import io.swagger.v3.oas.annotations.media.Schema
 import java.time.LocalDateTime
 
@@ -8,6 +10,7 @@ data class SubjectAccessRequestContent(
   val content: RestrictedPatientContent,
 )
 
+@JsonInclude(NON_NULL)
 data class RestrictedPatientContent(
   @Schema(description = "The prisoner number (Nomis ID)", example = "A1234AA")
   val prisonerNumber: String,
