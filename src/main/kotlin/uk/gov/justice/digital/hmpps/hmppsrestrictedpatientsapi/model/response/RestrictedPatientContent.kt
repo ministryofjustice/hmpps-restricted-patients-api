@@ -5,11 +5,6 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL
 import io.swagger.v3.oas.annotations.media.Schema
 import java.time.LocalDateTime
 
-data class SubjectAccessRequestContent(
-  @Schema(description = "The content of the subject access request response")
-  val content: RestrictedPatientContent,
-)
-
 @JsonInclude(NON_NULL)
 data class RestrictedPatientContent(
   @Schema(description = "The prisoner number (Nomis ID)", example = "A1234AA")

@@ -25,7 +25,7 @@ class SubjectAccessRequestServiceTest {
     fun `throws entity not found`() {
       whenever(restrictedPatientsRepository.findById(any())).thenReturn(Optional.empty())
 
-      assertThat(service.getContentFor("A12345", null, null)).isNull()
+      assertThat(service.getPrisonContentFor("A12345", null, null)).isNull()
     }
 
     @Test
@@ -34,13 +34,13 @@ class SubjectAccessRequestServiceTest {
         Optional.of(makeRestrictedPatient()),
       )
 
-      val restrictedPatient = service.getContentFor("A12345", null, null)?.content
+      val restrictedPatient = service.getPrisonContentFor("A12345", null, null)?.content
 
-      assertThat(restrictedPatient?.prisonerNumber).isEqualTo("A12345")
-      assertThat(restrictedPatient?.supportingPrisonId).isEqualTo(PRISON.agencyId)
-      assertThat(restrictedPatient?.hospitalLocationCode).isEqualTo(HOSPITAL.agencyId)
-      assertThat(restrictedPatient?.commentText).isEqualTo("test")
-      assertThat(restrictedPatient?.dischargeTime).isEqualTo(LocalDateTime.parse("2020-10-10T20:00:01"))
+      assertThat(restrictedPatient).extracting("prisonerNumber").isEqualTo("A12345")
+      assertThat(restrictedPatient).extracting("supportingPrisonId").isEqualTo(PRISON.agencyId)
+      assertThat(restrictedPatient).extracting("hospitalLocationCode").isEqualTo(HOSPITAL.agencyId)
+      assertThat(restrictedPatient).extracting("commentText").isEqualTo("test")
+      assertThat(restrictedPatient).extracting("dischargeTime").isEqualTo(LocalDateTime.parse("2020-10-10T20:00:01"))
     }
   }
 }
