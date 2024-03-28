@@ -21,4 +21,12 @@ spec:
                 - /bin/sh
                 - -c
                 - curl --retry 2 -XPOST http://hmpps-restricted-patients-api/process-past-date-restricted-patients
+              securityContext:
+                capabilities:
+                  drop:
+                  - ALL
+                runAsNonRoot: true
+                allowPrivilegeEscalation: false
+                seccompProfile:
+                  type: RuntimeDefault
           restartPolicy: Never
