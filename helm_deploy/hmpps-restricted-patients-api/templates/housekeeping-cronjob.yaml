@@ -20,4 +20,12 @@ spec:
                 - /bin/sh
                 - -c
                 - curl --retry 2 -XPUT http://hmpps-restricted-patients-api/queue-admin/retry-all-dlqs
+              securityContext:
+                capabilities:
+                  drop:
+                  - ALL
+                runAsNonRoot: true
+                allowPrivilegeEscalation: false
+                seccompProfile:
+                  type: RuntimeDefault
           restartPolicy: Never
