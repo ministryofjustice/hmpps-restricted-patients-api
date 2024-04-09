@@ -72,3 +72,7 @@ generic-prometheus-alerts:
   targetApplication: hmpps-restricted-patients-api
   sqsAlertsOldestThreshold: 10
   sqsAlertsTotalMessagesThreshold: 1
+
+cron:
+  retry_dlqs_schedule: "*/10 * * * *"
+  past_date_check_schedule: "0 3 * * *"

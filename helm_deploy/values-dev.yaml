@@ -13,6 +13,11 @@ generic-service:
     PRISONER_SEARCH_API_ENDPOINT_URL: https://prisoner-search-dev.prison.service.justice.gov.uk
     OAUTH_ENDPOINT_URL: https://sign-in-dev.hmpps.service.justice.gov.uk/auth
 
+  scheduledDowntime:
+    enabled: true
+    startup: '24 6 * * 1-5' # Start at 6.24am UTC Monday-Friday
+    shutdown: '48 21 * * 1-5' # Stop at 9.48`pm UTC Monday-Friday
+
   allowlist: null
 
 # CloudPlatform AlertManager receiver to route prometheus alerts to slack
@@ -26,3 +31,7 @@ generic-prometheus-alerts:
     - "dos-core-dev-rp_queue_for_domain_events_dl"
 
 environment: dev
+
+cron:
+  retry_dlqs_schedule: "*/10 7-20 * * 1-5"
+  past_date_check_schedule: "0 13 * * *"

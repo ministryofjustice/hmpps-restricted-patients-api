@@ -3,7 +3,7 @@ kind: CronJob
 metadata:
   name: hmppps-restricted-patients-api-past-date-check
 spec:
-  schedule: "0 3 * * *"
+  schedule: "{{ .Values.cron.past_date_check_schedule }}"
   suspend: true
   concurrencyPolicy: Forbid
   failedJobsHistoryLimit: 5
