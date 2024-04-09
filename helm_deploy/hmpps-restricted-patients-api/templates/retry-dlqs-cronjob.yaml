@@ -1,9 +1,9 @@
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: hmppps-restricted-patients-api-queue-housekeeping
+  name: hmppps-restricted-patients-api-dlq-retry
 spec:
-  schedule: "*/10 * * * *"
+  schedule: "{{ .Values.cron.retry_dlqs_schedule }}"
   concurrencyPolicy: Forbid
   failedJobsHistoryLimit: 5
   startingDeadlineSeconds: 600
