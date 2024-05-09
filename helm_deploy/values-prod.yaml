@@ -31,7 +31,7 @@ generic-prometheus-alerts:
   alertSeverity: digital-prison-service
   rdsAlertsDatabases:
     cloud-platform-d43cc21ae1d14deb: "Restricted Patients API"
-  sqsAlertsQueueNames:
+  sqsNumberAlertQueueNames:
     - "dps-core-prod-restricted_patients_queue"
     - "dps-core-prod-restricted_patients_queue_dl"
     - "dps-core-prod-rp_queue_for_domain_events"
