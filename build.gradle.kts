@@ -23,7 +23,7 @@ dependencies {
   implementation("org.springframework:spring-jms")
   implementation("com.google.code.gson:gson:2.10.1")
   implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:3.1.3")
-  implementation("org.apache.commons:commons-csv:1.10.0")
+  implementation("org.apache.commons:commons-csv:1.11.0")
   implementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:1.33.1")
 
   runtimeOnly("com.h2database:h2:2.2.224")
