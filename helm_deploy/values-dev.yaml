@@ -24,7 +24,7 @@ generic-service:
 generic-prometheus-alerts:
   businessHoursOnly: true
   alertSeverity: digital-prison-service-dev
-  sqsAlertsQueueNames:
+  sqsNumberAlertQueueNames:
     - "dps-core-dev-restricted_patients_queue"
     - "dps-core-dev-restricted_patients_queue_dl"
     - "dos-core-dev-rp_queue_for_domain_events"

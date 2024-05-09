@@ -70,7 +70,6 @@ generic-service:
 
 generic-prometheus-alerts:
   targetApplication: hmpps-restricted-patients-api
-  sqsAlertsOldestThreshold: 10
   sqsAlertsTotalMessagesThreshold: 1
 
 cron:
