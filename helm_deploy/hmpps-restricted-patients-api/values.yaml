@@ -70,7 +70,7 @@ generic-service:
 
 generic-prometheus-alerts:
   targetApplication: hmpps-restricted-patients-api
-  sqsAlertsTotalMessagesThreshold: 1
+  sqsAlertsTotalMessagesThreshold: 0
 
 cron:
   retry_dlqs_schedule: "*/10 * * * *"
