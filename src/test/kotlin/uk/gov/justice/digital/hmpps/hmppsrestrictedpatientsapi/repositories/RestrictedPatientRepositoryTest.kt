@@ -4,6 +4,8 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace.NONE
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager
 import org.springframework.context.annotation.Import
@@ -18,6 +20,7 @@ import java.time.LocalDateTime
 @ActiveProfiles("test")
 @Import(AuditConfiguration::class, UserSecurityUtils::class)
 @DataJpaTest
+@AutoConfigureTestDatabase(replace = NONE)
 class RestrictedPatientRepositoryTest {
 
   @Autowired
