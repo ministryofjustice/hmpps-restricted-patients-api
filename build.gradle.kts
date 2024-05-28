@@ -9,9 +9,9 @@ configurations {
 }
 
 repositories {
-  maven { url = uri("https://repo.spring.io/milestone") }
   mavenCentral()
 }
+
 dependencies {
   implementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter:0.2.4")
   implementation("org.springframework.boot:spring-boot-starter-webflux")
@@ -26,8 +26,8 @@ dependencies {
   implementation("org.apache.commons:commons-csv:1.11.0")
   implementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:1.33.3")
 
-  runtimeOnly("com.h2database:h2:2.2.224")
   runtimeOnly("org.flywaydb:flyway-core")
+  runtimeOnly("org.flywaydb:flyway-database-postgresql")
   runtimeOnly("org.postgresql:postgresql:42.7.3")
 
   testImplementation("org.flywaydb:flyway-core")
