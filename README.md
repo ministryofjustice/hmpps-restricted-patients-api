@@ -1,7 +1,8 @@
 # Hmpps restricted patients API
+[![repo standards badge](https://img.shields.io/badge/endpoint.svg?&style=flat&logo=github&url=https%3A%2F%2Foperations-engineering-reports.cloud-platform.service.justice.gov.uk%2Fapi%2Fv1%2Fcompliant_public_repositories%2Fhmpps-restricted-patients-api)](https://operations-engineering-reports.cloud-platform.service.justice.gov.uk/public-report/hmpps-restricted-patients-api "Link to report")
 [![CircleCI](https://circleci.com/gh/ministryofjustice/hmpps-restricted-patients-api/tree/main.svg?style=svg)](https://circleci.com/gh/ministryofjustice/hmpps-restricted-patients-api)
-[![Docker](https://quay.io/repository/hmpps/hmpps-restricted-patients-api/status)](https://quay.io/repository/hmpps-restricted-patients-api/status)
-[![API docs](https://img.shields.io/badge/API_docs_-view-85EA2D.svg?logo=swagger)](https://restricted-patients-api-dev.hmpps.service.justice.gov.uk/swagger-ui.html)
+[![Docker Repository on Quay](https://img.shields.io/badge/quay.io-repository-2496ED.svg?logo=docker)](https://quay.io/repository/hmpps/hmpps-restricted-patients-api)
+[![API docs](https://img.shields.io/badge/API_docs_-view-85EA2D.svg?logo=swagger)](https://restricted-patients-api-dev.hmpps.service.justice.gov.uk/swagger-ui/index.html)
 
 # Features
 * Discharge a prisoner to hospital 
