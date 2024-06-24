@@ -73,3 +73,4 @@ helm_deploy/hmpps-restricted-patients-api/charts
 
 # localstack
 volume
+.kotlin
