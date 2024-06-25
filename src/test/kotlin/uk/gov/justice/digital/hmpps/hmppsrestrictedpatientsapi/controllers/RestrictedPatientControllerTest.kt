@@ -13,7 +13,6 @@ import org.springframework.boot.autoconfigure.security.oauth2.resource.servlet.O
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.boot.test.mock.mockito.MockBean
-import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.web.servlet.post
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
@@ -22,6 +21,7 @@ import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.dataBuilders.make
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.dataBuilders.makeRestrictedPatientDto
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services.DomainEventPublisher
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services.RestrictedPatientsService
+import uk.gov.justice.hmpps.test.kotlin.auth.WithMockAuthUser
 
 @WebMvcTest(
   RestrictedPatientsController::class,
@@ -40,7 +40,7 @@ class RestrictedPatientControllerTest : ControllerTestBase() {
   @Nested
   inner class DischargeToHospital {
     @Test
-    @WithMockUser(username = "ITAG_USER")
+    @WithMockAuthUser(username = "ITAG_USER")
     fun `call the service with the correct parameters`() {
       whenever(restrictedPatientsService.dischargeToHospital(any())).thenReturn(makeRestrictedPatientDto())
 
@@ -53,7 +53,7 @@ class RestrictedPatientControllerTest : ControllerTestBase() {
     }
 
     @Test
-    @WithMockUser(username = "ITAG_USER")
+    @WithMockAuthUser(username = "ITAG_USER")
     fun `will publish add domain event`() {
       whenever(restrictedPatientsService.dischargeToHospital(any())).thenReturn(makeRestrictedPatientDto())
 
@@ -66,7 +66,7 @@ class RestrictedPatientControllerTest : ControllerTestBase() {
     }
 
     @Test
-    @WithMockUser(username = "ITAG_USER")
+    @WithMockAuthUser(username = "ITAG_USER")
     fun `will publish add telemetry event`() {
       whenever(restrictedPatientsService.dischargeToHospital(any())).thenReturn(makeRestrictedPatientDto())
 
@@ -89,7 +89,7 @@ class RestrictedPatientControllerTest : ControllerTestBase() {
     }
 
     @Test
-    @WithMockUser(username = "ITAG_USER")
+    @WithMockAuthUser(username = "ITAG_USER")
     fun `handle internal exceptions`() {
       doThrow(RuntimeException()).whenever(restrictedPatientsService).dischargeToHospital(any())
 
@@ -107,7 +107,7 @@ class RestrictedPatientControllerTest : ControllerTestBase() {
     }
 
     @Test
-    @WithMockUser(username = "ITAG_USER")
+    @WithMockAuthUser(username = "ITAG_USER")
     fun `handle missing fields`() {
       mockMvc
         .perform(
@@ -125,7 +125,7 @@ class RestrictedPatientControllerTest : ControllerTestBase() {
     }
 
     @Test
-    @WithMockUser(username = "ITAG_USER")
+    @WithMockAuthUser(username = "ITAG_USER")
     fun `handle no results found exceptions`() {
       whenever(restrictedPatientsService.dischargeToHospital(any())).thenThrow(EntityNotFoundException::class.java)
 
@@ -142,7 +142,7 @@ class RestrictedPatientControllerTest : ControllerTestBase() {
   }
 
   @Nested
-  @WithMockUser(username = "ITAG_USER")
+  @WithMockAuthUser(username = "ITAG_USER")
   inner class RetrieveRestrictedPatient {
     @Test
     fun `restricted patient not found by prison number`() {
@@ -176,7 +176,7 @@ class RestrictedPatientControllerTest : ControllerTestBase() {
   }
 
   @Nested
-  @WithMockUser(username = "ITAG_USER")
+  @WithMockAuthUser(username = "ITAG_USER")
   inner class RemoveRestrictedPatients {
     @Test
     fun `remove restricted patient from the service`() {
@@ -190,7 +190,7 @@ class RestrictedPatientControllerTest : ControllerTestBase() {
     }
 
     @Test
-    @WithMockUser(username = "ITAG_USER")
+    @WithMockAuthUser(username = "ITAG_USER")
     fun `will publish remove domain event`() {
       whenever(restrictedPatientsService.removeRestrictedPatient(any())).thenReturn(makeRestrictedPatient())
 
@@ -203,7 +203,7 @@ class RestrictedPatientControllerTest : ControllerTestBase() {
     }
 
     @Test
-    @WithMockUser(username = "ITAG_USER")
+    @WithMockAuthUser(username = "ITAG_USER")
     fun `will publish add telemetry event`() {
       whenever(restrictedPatientsService.removeRestrictedPatient(any())).thenReturn(makeRestrictedPatient())
 

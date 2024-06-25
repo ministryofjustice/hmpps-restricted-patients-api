@@ -1,7 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.repositories
 
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase
@@ -9,18 +8,18 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager
 import org.springframework.context.annotation.Import
-import org.springframework.security.authentication.TestingAuthenticationToken
-import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.test.context.ActiveProfiles
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.config.AuditConfiguration
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.entities.RestrictedPatient
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.security.UserSecurityUtils
+import uk.gov.justice.hmpps.test.kotlin.auth.WithMockAuthUser
 import java.time.LocalDateTime
 
 @ActiveProfiles("test")
 @Import(AuditConfiguration::class, UserSecurityUtils::class)
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = NONE)
+@WithMockAuthUser("user")
 class RestrictedPatientRepositoryTest {
 
   @Autowired
@@ -28,11 +27,6 @@ class RestrictedPatientRepositoryTest {
 
   @Autowired
   lateinit var repository: RestrictedPatientsRepository
-
-  @BeforeEach
-  fun beforeEach() {
-    SecurityContextHolder.getContext().authentication = TestingAuthenticationToken("user", "pw")
-  }
 
   @Test
   fun `retrieve restricted patient`() {
