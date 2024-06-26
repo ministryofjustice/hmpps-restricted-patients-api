@@ -20,7 +20,6 @@ import org.springframework.http.MediaType
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.reactive.server.WebTestClient
-import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.JwtAuthHelper
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.PrisonApiApplicationGateway
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.integration.wiremock.OAuthMockServer
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.integration.wiremock.PrisonApiMockServer
@@ -29,6 +28,7 @@ import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.entities.Re
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.repositories.RestrictedPatientsRepository
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services.DomainEventPublisher
 import uk.gov.justice.hmpps.sqs.HmppsQueueService
+import uk.gov.justice.hmpps.test.kotlin.auth.JwtAuthorisationHelper
 import java.time.Clock
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -46,7 +46,7 @@ abstract class IntegrationTestBase {
   lateinit var flyway: Flyway
 
   @Autowired
-  lateinit var jwtAuthHelper: JwtAuthHelper
+  lateinit var jwtAuthHelper: JwtAuthorisationHelper
 
   @Autowired
   lateinit var restrictedPatientRepository: RestrictedPatientsRepository
@@ -128,7 +128,7 @@ abstract class IntegrationTestBase {
   }
 
   fun setHeaders(contentType: MediaType = APPLICATION_JSON, username: String? = "ITAG_USER", roles: List<String> = listOf()): (HttpHeaders) -> Unit = {
-    it.setBearerAuth(jwtAuthHelper.createJwt(subject = username, roles = roles))
+    jwtAuthHelper.setAuthorisationHeader(username = username, roles = roles)(it)
     it.contentType = contentType
   }
 
@@ -250,19 +250,6 @@ abstract class IntegrationTestBase {
           "hospitalLocationCode" to hospitalLocationCode,
         ),
       )
-  }
-
-  fun processUnknownPatientsWebClient(
-    csvData: String = "any",
-    headers: (HttpHeaders) -> Unit = {},
-  ): WebTestClient.RequestHeadersSpec<*> {
-    return webTestClient
-      .post()
-      .uri("/process-unknown-patient")
-      .contentType(APPLICATION_JSON)
-      .accept(APPLICATION_JSON)
-      .headers(headers)
-      .bodyValue(csvData)
   }
 
   fun saveRestrictedPatient(
