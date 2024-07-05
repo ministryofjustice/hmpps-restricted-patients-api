@@ -11,12 +11,12 @@ import org.springframework.context.annotation.Import
 import org.springframework.test.context.ActiveProfiles
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.config.AuditConfiguration
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.entities.RestrictedPatient
-import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.security.UserSecurityUtils
+import uk.gov.justice.hmpps.kotlin.auth.HmppsAuthenticationHolder
 import uk.gov.justice.hmpps.test.kotlin.auth.WithMockAuthUser
 import java.time.LocalDateTime
 
 @ActiveProfiles("test")
-@Import(AuditConfiguration::class, UserSecurityUtils::class)
+@Import(AuditConfiguration::class, HmppsAuthenticationHolder::class)
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = NONE)
 @WithMockAuthUser("user")

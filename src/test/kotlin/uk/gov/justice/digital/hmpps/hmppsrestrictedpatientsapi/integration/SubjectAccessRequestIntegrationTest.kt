@@ -3,7 +3,9 @@ package uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.integration
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import uk.gov.justice.hmpps.test.kotlin.auth.WithMockAuthUser
 
+@WithMockAuthUser
 class SubjectAccessRequestIntegrationTest : IntegrationTestBase() {
   @Nested
   @DisplayName("/subject-access-request")
@@ -38,6 +40,7 @@ class SubjectAccessRequestIntegrationTest : IntegrationTestBase() {
     @Nested
     inner class HappyPath {
       @Test
+      @WithMockAuthUser
       fun `should return data if prisoner exists`() {
         saveRestrictedPatient(prisonerNumber = "A12345", commentText = "Prisoner was released to hospital")
 
@@ -54,6 +57,7 @@ class SubjectAccessRequestIntegrationTest : IntegrationTestBase() {
       }
 
       @Test
+      @WithMockAuthUser
       fun `should omit data if none exists`() {
         saveRestrictedPatient(prisonerNumber = "A12345")
 

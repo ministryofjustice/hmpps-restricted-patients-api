@@ -2,8 +2,10 @@ package uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.integration
 
 import org.junit.jupiter.api.Test
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.entities.RestrictedPatient
+import uk.gov.justice.hmpps.test.kotlin.auth.WithMockAuthUser
 import java.time.LocalDateTime
 
+@WithMockAuthUser
 class BatchReleaseDateRemovalIntegrationTest : IntegrationTestBase() {
 
   @Test
