@@ -17,6 +17,7 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.doThrow
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import uk.gov.justice.hmpps.test.kotlin.auth.WithMockAuthUser
 
 class RestrictedPatientIntegrationTest : IntegrationTestBase() {
 
@@ -84,6 +85,7 @@ class RestrictedPatientIntegrationTest : IntegrationTestBase() {
       }
 
       @Test
+      @WithMockAuthUser
       fun `should error if offender is already a restricted patient`() {
         saveRestrictedPatient(prisonerNumber = "A12345")
         dischargePrisonerWebClient(prisonerNumber = "A12345")
@@ -179,6 +181,7 @@ class RestrictedPatientIntegrationTest : IntegrationTestBase() {
     inner class MigrateInPatientErrors {
 
       @Test
+      @WithMockAuthUser
       fun `should error if offender is already a restricted patient`() {
         saveRestrictedPatient(prisonerNumber = "A12345")
         migrateInRestrictedPatientWebClient(prisonerNumber = "A12345")
@@ -315,6 +318,7 @@ class RestrictedPatientIntegrationTest : IntegrationTestBase() {
       }
 
       @Test
+      @WithMockAuthUser
       fun `should error if prison-api errors`() {
         saveRestrictedPatient(prisonerNumber = "A12345")
         prisonerSearchApiMockServer.stubSearchByPrisonNumber("A12345")
@@ -332,6 +336,7 @@ class RestrictedPatientIntegrationTest : IntegrationTestBase() {
       }
 
       @Test
+      @WithMockAuthUser
       fun `should error if prisoner search api errors`() {
         saveRestrictedPatient(prisonerNumber = "A12345")
 
@@ -347,6 +352,7 @@ class RestrictedPatientIntegrationTest : IntegrationTestBase() {
       }
 
       @Test
+      @WithMockAuthUser
       fun `should commit service transaction before publishing event`() {
         saveRestrictedPatient(prisonerNumber = "A12345")
         prisonerSearchApiMockServer.stubSearchByPrisonNumber("A12345")
