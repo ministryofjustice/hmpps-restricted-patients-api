@@ -163,7 +163,7 @@ class BatchReleaseDateRemovalTest {
           ),
         ),
       )
-      doThrow(WebClientResponseException::class)
+      doThrow(WebClientResponseException(502, "error", null, null, null, null))
         .whenever(restrictedPatientsService).removeRestrictedPatient(anyString())
 
       service.removeNonLifePrisonersPastRelevantDate()
