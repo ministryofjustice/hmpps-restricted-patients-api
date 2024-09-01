@@ -2,13 +2,14 @@ package uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.service
 
 import jakarta.persistence.EntityNotFoundException
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.kotlin.any
+import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.check
 import org.mockito.kotlin.inOrder
 import org.mockito.kotlin.mock
@@ -22,6 +23,7 @@ import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.dataBuilders.make
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.dataBuilders.makeMigrateInRequest
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.dataBuilders.makePrisonerResult
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.dataBuilders.makeRestrictedPatient
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.dataBuilders.makeSupportingPrisonRequest
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.PrisonApiGateway
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.PrisonerSearchApiGateway
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.entities.RestrictedPatient
@@ -59,12 +61,14 @@ class RestrictedPatientServiceTest {
     clock,
   )
 
+  private val argumentCaptor = argumentCaptor<RestrictedPatient>()
+
   @BeforeEach
   fun beforeEach() {
     val fixedClock =
       Clock.fixed(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant(), ZoneId.systemDefault())
     whenever(clock.instant()).thenReturn(fixedClock.instant())
-    whenever(clock.getZone()).thenReturn(fixedClock.getZone())
+    whenever(clock.zone).thenReturn(fixedClock.zone)
   }
 
   @Nested
@@ -147,11 +151,9 @@ class RestrictedPatientServiceTest {
 
       service.removeRestrictedPatient("A12345")
 
-      val argumentCaptor = ArgumentCaptor.forClass(RestrictedPatient::class.java)
-
       verify(restrictedPatientsRepository).delete(argumentCaptor.capture())
 
-      assertThat(argumentCaptor.value).extracting(
+      assertThat(argumentCaptor.firstValue).extracting(
         "prisonerNumber",
         "fromLocationId",
         "hospitalLocationCode",
@@ -249,13 +251,12 @@ class RestrictedPatientServiceTest {
 
       @Test
       fun `calls save with the correct parameters`() {
-        val argumentCaptor = ArgumentCaptor.forClass(RestrictedPatient::class.java)
         val now = LocalDate.now().atStartOfDay()
         service.dischargeToHospital(makeDischargeRequest())
 
         verify(restrictedPatientsRepository).save(argumentCaptor.capture())
 
-        assertThat(argumentCaptor.value).extracting(
+        assertThat(argumentCaptor.firstValue).extracting(
           "fromLocationId",
           "supportingPrisonId",
           "hospitalLocationCode",
@@ -341,7 +342,12 @@ class RestrictedPatientServiceTest {
 
       @Test
       fun `throws exception when Prison API returns multiple movements`() {
-        whenever(prisonApiGateway.getLatestMovements(any())).thenReturn(listOf(makeLatestMovementReturn(), makeLatestMovementReturn()))
+        whenever(prisonApiGateway.getLatestMovements(any())).thenReturn(
+          listOf(
+            makeLatestMovementReturn(),
+            makeLatestMovementReturn(),
+          ),
+        )
 
         assertThrows(RuntimeException::class.java) {
           service.migrateInPatient(makeMigrateInRequest())
@@ -453,16 +459,15 @@ class RestrictedPatientServiceTest {
 
       @Test
       fun `calls save with the correct parameters`() {
-        val argumentCaptor = ArgumentCaptor.forClass(RestrictedPatient::class.java)
         service.migrateInPatient(makeMigrateInRequest())
 
         verify(restrictedPatientsRepository).save(argumentCaptor.capture())
 
-        assertThat(argumentCaptor.value.fromLocationId).isEqualTo("MDI")
-        assertThat(argumentCaptor.value.supportingPrisonId).isEqualTo("MDI")
-        assertThat(argumentCaptor.value.hospitalLocationCode).isEqualTo("HAZLWD")
-        assertThat(argumentCaptor.value.commentText).isEqualTo("Historical discharge to hospital added to restricted patients")
-        assertThat(argumentCaptor.value.dischargeTime).isEqualTo(LocalDateTime.parse("${dischargeDate}T$dischargeTime"))
+        assertThat(argumentCaptor.firstValue.fromLocationId).isEqualTo("MDI")
+        assertThat(argumentCaptor.firstValue.supportingPrisonId).isEqualTo("MDI")
+        assertThat(argumentCaptor.firstValue.hospitalLocationCode).isEqualTo("HAZLWD")
+        assertThat(argumentCaptor.firstValue.commentText).isEqualTo("Historical discharge to hospital added to restricted patients")
+        assertThat(argumentCaptor.firstValue.dischargeTime).isEqualTo(LocalDateTime.parse("${dischargeDate}T$dischargeTime"))
       }
 
       @Test
@@ -512,6 +517,69 @@ class RestrictedPatientServiceTest {
             assertThat(it.commentText).isEqualTo("comment saved to restricted patients")
           },
         )
+      }
+    }
+  }
+
+  @Nested
+  inner class ChangeSupportingPrison {
+    @Nested
+    inner class Failures {
+      @Test
+      fun `throws exception when the offender is not found`() {
+        whenever(restrictedPatientsRepository.findById(anyString())).thenReturn(Optional.empty())
+
+        assertThatThrownBy {
+          service.changeSupportingPrison(makeSupportingPrisonRequest())
+        }.isInstanceOf(EntityNotFoundException::class.java)
+      }
+
+      @Test
+      fun `throws exception when the offender is already supported by MDI`() {
+        whenever(restrictedPatientsRepository.findById(anyString())).thenReturn(
+          Optional.of(
+            makeRestrictedPatient(
+              supportingPrisonId = "MDI",
+            ),
+          ),
+        )
+
+        assertThatThrownBy {
+          service.changeSupportingPrison(makeSupportingPrisonRequest(supportingPrisonId = "MDI"))
+        }.isInstanceOf(BadRequestException::class.java)
+          .hasMessageContaining("already supported by MDI")
+      }
+    }
+
+    @Nested
+    inner class SuccessfulChange {
+      @Test
+      fun `returns supporting prison`() {
+        whenever(restrictedPatientsRepository.findById(anyString())).thenReturn(
+          Optional.of(makeRestrictedPatient(supportingPrisonId = "LEI")),
+        )
+        whenever(restrictedPatientsRepository.save(any())).thenReturn(makeRestrictedPatient(supportingPrisonId = "MDI"))
+        whenever(prisonApiGateway.getAgencyLocationsByType("HSHOSP")).thenReturn(listOf(HOSPITAL))
+        whenever(prisonApiGateway.getAgencyLocationsByType("INST")).thenReturn(listOf(PRISON))
+
+        val response = service.changeSupportingPrison(makeSupportingPrisonRequest(supportingPrisonId = "MDI"))
+
+        assertThat(response.supportingPrison?.agencyId).isEqualTo("MDI")
+      }
+
+      @Test
+      fun `calls save`() {
+        whenever(restrictedPatientsRepository.findById(anyString())).thenReturn(
+          Optional.of(makeRestrictedPatient()),
+        )
+        whenever(restrictedPatientsRepository.save(any())).thenReturn(makeRestrictedPatient(supportingPrisonId = "LEI"))
+
+        service.changeSupportingPrison(makeSupportingPrisonRequest(supportingPrisonId = "LEI"))
+
+        verify(restrictedPatientsRepository).findById("A12345")
+        verify(restrictedPatientsRepository).save(argumentCaptor.capture())
+
+        assertThat(argumentCaptor.firstValue.supportingPrisonId).isEqualTo("LEI")
       }
     }
   }

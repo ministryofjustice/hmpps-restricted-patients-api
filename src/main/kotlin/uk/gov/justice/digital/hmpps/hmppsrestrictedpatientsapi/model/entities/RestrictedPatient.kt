@@ -19,7 +19,7 @@ class RestrictedPatient(
   val prisonerNumber: String,
   val fromLocationId: String,
   val hospitalLocationCode: String,
-  val supportingPrisonId: String,
+  var supportingPrisonId: String,
   val dischargeTime: LocalDateTime,
   val commentText: String? = null,
 ) {
