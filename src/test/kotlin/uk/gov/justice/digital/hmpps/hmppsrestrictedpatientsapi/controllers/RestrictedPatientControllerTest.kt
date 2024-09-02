@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.controllers
 
 import com.microsoft.applicationinsights.TelemetryClient
 import jakarta.persistence.EntityNotFoundException
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
@@ -19,6 +20,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.dataBuilders.makeDischargeRequest
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.dataBuilders.makeRestrictedPatient
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.dataBuilders.makeRestrictedPatientDto
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.dataBuilders.makeSupportingPrisonRequest
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services.DomainEventPublisher
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services.RestrictedPatientsService
 import uk.gov.justice.hmpps.test.kotlin.auth.WithMockAuthUser
@@ -214,6 +216,61 @@ class RestrictedPatientControllerTest : ControllerTestBase() {
 
       verify(telemetryClient).trackEvent(
         "restricted-patient-removed",
+        mapOf(
+          "prisonerNumber" to "A12345",
+          "fromLocationId" to "MDI",
+          "hospitalLocationCode" to "HAZLWD",
+          "supportingPrisonId" to "MDI",
+          "dischargeTime" to "2020-10-10T20:00:01",
+        ),
+        null,
+      )
+    }
+  }
+
+  @Nested
+  @WithMockAuthUser(username = "ITAG_USER")
+  inner class ChangeSupportingPrison {
+    @Test
+    fun `change a prisoner supporting prison`() {
+      whenever(restrictedPatientsService.changeSupportingPrison(any())).thenReturn(makeRestrictedPatientDto())
+
+      mockMvc.post("/change-supporting-prison") {
+        header("Content-Type", "application/json")
+        content = objectMapper.writeValueAsString(makeSupportingPrisonRequest())
+      }.andExpect { status { isOk() } }
+
+      verify(restrictedPatientsService).changeSupportingPrison(
+        org.mockito.kotlin.check {
+          assertThat(it.supportingPrisonId).isEqualTo("MDI")
+          assertThat(it.offenderNo).isEqualTo("A12345")
+        },
+      )
+    }
+
+    @Test
+    fun `will publish change domain event`() {
+      whenever(restrictedPatientsService.changeSupportingPrison(any())).thenReturn(makeRestrictedPatientDto())
+
+      mockMvc.post("/change-supporting-prison") {
+        header("Content-Type", "application/json")
+        content = objectMapper.writeValueAsString(makeSupportingPrisonRequest())
+      }.andExpect { status { isOk() } }
+
+      verify(domainEventPublisher).publishSupportingPrisonChanged("A12345")
+    }
+
+    @Test
+    fun `will publish add telemetry event`() {
+      whenever(restrictedPatientsService.changeSupportingPrison(any())).thenReturn(makeRestrictedPatientDto())
+
+      mockMvc.post("/change-supporting-prison") {
+        header("Content-Type", "application/json")
+        content = objectMapper.writeValueAsString(makeSupportingPrisonRequest())
+      }.andExpect { status { isOk() } }
+
+      verify(telemetryClient).trackEvent(
+        "restricted-patient-changed-supporting-prison",
         mapOf(
           "prisonerNumber" to "A12345",
           "fromLocationId" to "MDI",

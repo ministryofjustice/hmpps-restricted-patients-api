@@ -77,4 +77,33 @@ class RestrictedPatientsController(
       )
       domainEventPublisher.publishRestrictedPatientRemoved(it.prisonerNumber)
     }
+
+  @PostMapping(
+    value = ["/change-supporting-prison"],
+    consumes = [MediaType.APPLICATION_JSON_VALUE],
+  )
+  fun changeSupportingPrison(@RequestBody supportingPrison: SupportingPrisonRequest): RestrictedPatientDto =
+    restrictedPatientsService.changeSupportingPrison(supportingPrison).also {
+      it.publishAndTrackChange()
+    }
+
+  private fun RestrictedPatientDto.publishAndTrackChange() {
+    telemetryClient.trackEvent(
+      "restricted-patient-changed-supporting-prison",
+      mapOf(
+        "prisonerNumber" to prisonerNumber,
+        "fromLocationId" to fromLocation?.agencyId,
+        "hospitalLocationCode" to hospitalLocation?.agencyId,
+        "supportingPrisonId" to supportingPrison?.agencyId,
+        "dischargeTime" to dischargeTime.toString(),
+      ),
+      null,
+    )
+    domainEventPublisher.publishSupportingPrisonChanged(prisonerNumber)
+  }
 }
+
+data class SupportingPrisonRequest(
+  val offenderNo: String,
+  val supportingPrisonId: String,
+)

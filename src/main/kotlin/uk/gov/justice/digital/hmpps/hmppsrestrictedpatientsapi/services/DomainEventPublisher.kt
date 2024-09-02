@@ -64,6 +64,14 @@ class DomainEventPublisher(hmppsQueueService: HmppsQueueService, private val gso
       .also { log.info("Published event to outbound topic. Type: ${domainEvent.eventType}") }
   }
 
+  fun publishSupportingPrisonChanged(prisonerNumber: String) {
+    publishRestrictedPatientEvent(
+      eventType = "restricted-patients.patient.supporting-prison-changed",
+      description = "Supporting prisoner changed for restricted patient",
+      prisonerNumber = prisonerNumber,
+    )
+  }
+
   private companion object {
     private val log = LoggerFactory.getLogger(this::class.java)
   }

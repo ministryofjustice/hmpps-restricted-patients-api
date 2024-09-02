@@ -17,6 +17,8 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.doThrow
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import org.springframework.data.repository.findByIdOrNull
+import org.springframework.test.web.reactive.server.WebTestClient
 import uk.gov.justice.hmpps.test.kotlin.auth.WithMockAuthUser
 
 class RestrictedPatientIntegrationTest : IntegrationTestBase() {
@@ -381,6 +383,113 @@ class RestrictedPatientIntegrationTest : IntegrationTestBase() {
           null,
         )
       }
+    }
+  }
+
+  @Nested
+  @DisplayName("/change-supporting-prison")
+  inner class ChangeSupportingPrison {
+    @Test
+    @WithMockAuthUser
+    fun `change supporting prison`() {
+      saveRestrictedPatient(prisonerNumber = "A12345", supportingPrisonId = "LEI")
+
+      changeSupportingPrisonWebClient()
+        .exchange()
+        .expectStatus().isOk
+        .expectBody()
+        .jsonPath("$.prisonerNumber").isEqualTo("A12345")
+        .jsonPath("$.fromLocation.agencyId").isEqualTo("MDI")
+        .jsonPath("$.hospitalLocation.agencyId").isEqualTo("HAZLWD")
+        .jsonPath("$.supportingPrison.agencyId").isEqualTo("MDI")
+        .jsonPath("$.dischargeTime").isEqualTo("2020-10-09T00:00:00")
+
+      verify(domainEventPublisher).publishSupportingPrisonChanged("A12345")
+
+      verify(telemetryClient).trackEvent(
+        "restricted-patient-changed-supporting-prison",
+        mapOf(
+          "prisonerNumber" to "A12345",
+          "fromLocationId" to "MDI",
+          "hospitalLocationCode" to "HAZLWD",
+          "supportingPrisonId" to "MDI",
+          "dischargeTime" to "2020-10-09T00:00",
+        ),
+        null,
+      )
+    }
+
+    @Nested
+    inner class ChangeSupportingPrisonErrors {
+      @Test
+      fun `should error if offender is not in prison`() {
+        changeSupportingPrisonWebClient()
+          .exchange()
+          .expectStatus().isNotFound
+          .expectBody()
+          .jsonPath("$.status").isEqualTo(404)
+      }
+
+      @Test
+      @WithMockAuthUser
+      fun `should error if supporting prison unchanged`() {
+        saveRestrictedPatient(prisonerNumber = "A12345", supportingPrisonId = "MDI")
+
+        changeSupportingPrisonWebClient(prisonerNumber = "A12345")
+          .exchange()
+          .expectStatus().isBadRequest
+          .expectBody()
+          .jsonPath("$.status").isEqualTo(400)
+          .jsonPath("$.errorCode").isEqualTo("PRISON_UNCHANGED")
+      }
+
+      @Test
+      fun `should commit service transaction before publishing event`() {
+        saveRestrictedPatient(prisonerNumber = "A12345", supportingPrisonId = "LEI")
+
+        doThrow(RuntimeException()).whenever(domainEventPublisher).publishSupportingPrisonChanged(any())
+
+        changeSupportingPrisonWebClient(prisonerNumber = "A12345", supportingPrisonId = "MDI")
+          .exchange()
+          .expectStatus().is5xxServerError
+
+        assertThat(restrictedPatientRepository.findByIdOrNull("A12345")?.supportingPrisonId).isEqualTo("MDI")
+
+        verify(telemetryClient).trackEvent(
+          "restricted-patient-changed-supporting-prison",
+          mapOf(
+            "prisonerNumber" to "A12345",
+            "fromLocationId" to "MDI",
+            "hospitalLocationCode" to "HAZLWD",
+            "supportingPrisonId" to "MDI",
+            "dischargeTime" to "2020-10-09T00:00",
+          ),
+          null,
+        )
+      }
+    }
+
+    private fun changeSupportingPrisonWebClient(
+      prisonerNumber: String = "A12345",
+      supportingPrisonId: String = "MDI",
+    ): WebTestClient.RequestHeadersSpec<*> {
+      stubChangeSupportingPrison(prisonerNumber)
+
+      return webTestClient
+        .post()
+        .uri("/change-supporting-prison")
+        .headers(setHeaders())
+        .bodyValue(
+          mapOf(
+            "offenderNo" to prisonerNumber,
+            "supportingPrisonId" to supportingPrisonId,
+          ),
+        )
+    }
+
+    private fun stubChangeSupportingPrison(prisonerNumber: String) {
+      prisonApiMockServer.stubAgencyLocationForPrisons()
+      prisonApiMockServer.stubAgencyLocationForHospitals()
     }
   }
 }
