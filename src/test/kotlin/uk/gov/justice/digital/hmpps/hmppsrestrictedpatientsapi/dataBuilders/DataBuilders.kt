@@ -1,9 +1,9 @@
 package uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.dataBuilders
 
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.controllers.SupportingPrisonRequest
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.entities.RestrictedPatient
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.request.DischargeToHospitalRequest
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.request.MigrateInRequest
-import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.request.SupportingPrisonRequest
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.Agency
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.MovementResponse
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.PrisonerResult
