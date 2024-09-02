@@ -393,6 +393,7 @@ class RestrictedPatientIntegrationTest : IntegrationTestBase() {
     @WithMockAuthUser
     fun `change supporting prison`() {
       saveRestrictedPatient(prisonerNumber = "A12345", supportingPrisonId = "LEI")
+      prisonApiMockServer.stubGetAgency("MDI", "INST")
 
       changeSupportingPrisonWebClient()
         .exchange()
@@ -435,7 +436,7 @@ class RestrictedPatientIntegrationTest : IntegrationTestBase() {
       fun `should error if supporting prison unchanged`() {
         saveRestrictedPatient(prisonerNumber = "A12345", supportingPrisonId = "MDI")
 
-        changeSupportingPrisonWebClient(prisonerNumber = "A12345")
+        changeSupportingPrisonWebClient(prisonerNumber = "A12345", supportingPrisonId = "MDI")
           .exchange()
           .expectStatus().isBadRequest
           .expectBody()
@@ -444,8 +445,22 @@ class RestrictedPatientIntegrationTest : IntegrationTestBase() {
       }
 
       @Test
+      @WithMockAuthUser
+      fun `should error if supporting prison not found`() {
+        saveRestrictedPatient(prisonerNumber = "A12345", supportingPrisonId = "LEI")
+
+        changeSupportingPrisonWebClient(prisonerNumber = "A12345", supportingPrisonId = "MDI")
+          .exchange()
+          .expectStatus().isBadRequest
+          .expectBody()
+          .jsonPath("$.status").isEqualTo(400)
+          .jsonPath("$.errorCode").isEqualTo("PRISON_NOT_FOUND")
+      }
+
+      @Test
       fun `should commit service transaction before publishing event`() {
         saveRestrictedPatient(prisonerNumber = "A12345", supportingPrisonId = "LEI")
+        prisonApiMockServer.stubGetAgency("MDI", "INST")
 
         doThrow(RuntimeException()).whenever(domainEventPublisher).publishSupportingPrisonChanged(any())
 

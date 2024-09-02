@@ -549,6 +549,22 @@ class RestrictedPatientServiceTest {
         }.isInstanceOf(BadRequestException::class.java)
           .hasMessageContaining("already supported by MDI")
       }
+
+      @Test
+      fun `throws exception when the supporting prison is not found`() {
+        whenever(restrictedPatientsRepository.findById(anyString())).thenReturn(
+          Optional.of(
+            makeRestrictedPatient(
+              supportingPrisonId = "MDI",
+            ),
+          ),
+        )
+
+        assertThatThrownBy {
+          service.changeSupportingPrison(makeSupportingPrisonRequest(supportingPrisonId = "MDI"))
+        }.isInstanceOf(BadRequestException::class.java)
+          .hasMessageContaining("already supported by MDI")
+      }
     }
 
     @Nested
@@ -558,6 +574,7 @@ class RestrictedPatientServiceTest {
         whenever(restrictedPatientsRepository.findById(anyString())).thenReturn(
           Optional.of(makeRestrictedPatient(supportingPrisonId = "LEI")),
         )
+        whenever(prisonApiGateway.getAgency(anyString())).thenReturn(PRISON)
         whenever(restrictedPatientsRepository.save(any())).thenReturn(makeRestrictedPatient(supportingPrisonId = "MDI"))
         whenever(prisonApiGateway.getAgencyLocationsByType("HSHOSP")).thenReturn(listOf(HOSPITAL))
         whenever(prisonApiGateway.getAgencyLocationsByType("INST")).thenReturn(listOf(PRISON))
@@ -573,6 +590,7 @@ class RestrictedPatientServiceTest {
           Optional.of(makeRestrictedPatient()),
         )
         whenever(restrictedPatientsRepository.save(any())).thenReturn(makeRestrictedPatient(supportingPrisonId = "LEI"))
+        whenever(prisonApiGateway.getAgency(anyString())).thenReturn(PRISON)
 
         service.changeSupportingPrison(makeSupportingPrisonRequest(supportingPrisonId = "LEI"))
 

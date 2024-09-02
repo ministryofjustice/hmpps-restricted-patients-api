@@ -188,6 +188,12 @@ class RestrictedPatientsService(
         message = "Prisoner (${request.offenderNo}) already supported by ${request.supportingPrisonId}",
       )
     }
+    if (prisonApiGateway.getAgency(request.supportingPrisonId) == null) {
+      throw BadRequestException(
+        errorCode = "PRISON_NOT_FOUND",
+        message = "Prison ${request.supportingPrisonId} not found",
+      )
+    }
 
     restrictedPatient.supportingPrisonId = request.supportingPrisonId
     return transformIntoDto(restrictedPatientsRepository.save(restrictedPatient))
