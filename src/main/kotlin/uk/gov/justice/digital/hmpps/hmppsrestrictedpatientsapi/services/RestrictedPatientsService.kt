@@ -1,6 +1,7 @@
 package uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services
 
 import jakarta.persistence.EntityNotFoundException
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.config.BadRequestException
@@ -10,6 +11,7 @@ import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.entities.Re
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.request.CreateExternalMovement
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.request.DischargeToHospitalRequest
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.request.MigrateInRequest
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.request.SupportingPrisonRequest
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.Agency
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.MovementResponse
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.RestrictedPatientDto
@@ -133,10 +135,12 @@ class RestrictedPatientsService(
       )
     }
 
-  fun getRestrictedPatient(prisonerNumber: String): RestrictedPatientDto {
-    val restrictedPatient = restrictedPatientsRepository.findById(prisonerNumber)
-      .orElseThrow { EntityNotFoundException("No restricted patient record found for prison number $prisonerNumber") }
+  fun getRestrictedPatient(prisonerNumber: String): RestrictedPatientDto =
+    restrictedPatientsRepository.findByIdOrNull(prisonerNumber)
+      ?.let { transformIntoDto(it) }
+      ?: throw EntityNotFoundException("No restricted patient record found for prison number $prisonerNumber")
 
+  private fun transformIntoDto(restrictedPatient: RestrictedPatient): RestrictedPatientDto {
     val agencies = prisonApiGateway.getAgencyLocationsByType("INST")
     val hospitals =
       prisonApiGateway.getAgencyLocationsByType("HOSPITAL") + prisonApiGateway.getAgencyLocationsByType("HSHOSP")
@@ -171,6 +175,22 @@ class RestrictedPatientsService(
         ),
       )
     }
+  }
+
+  @Transactional
+  fun changeSupportingPrison(request: SupportingPrisonRequest): RestrictedPatientDto {
+    val restrictedPatient = restrictedPatientsRepository.findById(request.offenderNo)
+      .orElseThrow { throw EntityNotFoundException("No restricted patient record found for prison number ${request.offenderNo}") }
+
+    if (restrictedPatient.supportingPrisonId == request.supportingPrisonId) {
+      throw BadRequestException(
+        errorCode = "PRISON_UNCHANGED",
+        message = "Prisoner (${request.offenderNo}) already supported by ${request.supportingPrisonId}",
+      )
+    }
+
+    restrictedPatient.supportingPrisonId = request.supportingPrisonId
+    return transformIntoDto(restrictedPatientsRepository.save(restrictedPatient))
   }
 
   private fun transform(
