@@ -23,9 +23,9 @@ class SubjectAccessRequestService(
         content = RestrictedPatientContent(
           prisonerNumber = it.prisonerNumber,
           supportingPrisonId = it.supportingPrisonId,
-          supportingPrisonDescription = prison?.description,
+          supportingPrisonDescription = prison?.description ?: it.supportingPrisonId,
           hospitalLocationCode = it.hospitalLocationCode,
-          hospitalLocationDescription = hospital?.description,
+          hospitalLocationDescription = hospital?.description ?: it.hospitalLocationCode,
           dischargeTime = it.dischargeTime,
           commentText = it.commentText,
         ),

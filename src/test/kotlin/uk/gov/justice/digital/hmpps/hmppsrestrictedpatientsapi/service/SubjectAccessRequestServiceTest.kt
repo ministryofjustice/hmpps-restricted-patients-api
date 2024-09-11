@@ -40,9 +40,9 @@ class SubjectAccessRequestServiceTest {
 
       assertThat(restrictedPatient).extracting("prisonerNumber").isEqualTo("A12345")
       assertThat(restrictedPatient).extracting("supportingPrisonId").isEqualTo(PRISON.agencyId)
-      assertThat(restrictedPatient).extracting("supportingPrisonDescription").isNull()
+      assertThat(restrictedPatient).extracting("supportingPrisonDescription").isEqualTo(PRISON.agencyId)
       assertThat(restrictedPatient).extracting("hospitalLocationCode").isEqualTo(HOSPITAL.agencyId)
-      assertThat(restrictedPatient).extracting("hospitalLocationDescription").isNull()
+      assertThat(restrictedPatient).extracting("hospitalLocationDescription").isEqualTo(HOSPITAL.agencyId)
       assertThat(restrictedPatient).extracting("commentText").isEqualTo("test")
       assertThat(restrictedPatient).extracting("dischargeTime").isEqualTo(LocalDateTime.parse("2020-10-10T20:00:01"))
     }

@@ -15,20 +15,20 @@ data class RestrictedPatientContent(
   )
   val supportingPrisonId: String,
   @Schema(
-    description = "Prison where the offender is supported by POM.",
-    example = "LEI",
+    description = "Prison where the offender is supported by POM. Defaults to the id if prison id not found.",
+    example = "HMP Leicester",
   )
-  val supportingPrisonDescription: String?,
+  val supportingPrisonDescription: String,
   @Schema(
     description = "Hospital location code, this indicates the current location of a prisoner. This is from AGENCY_LOCATIONS.AGY_LOC_ID in NOMIS.",
     example = "HAZLWD",
   )
   val hospitalLocationCode: String,
   @Schema(
-    description = "Hospital location name, this indicates the current location of a prisoner.",
+    description = "Hospital location name, this indicates the current location of a prisoner. Defaults to the code if hospital code not found.",
     example = "Hazelwood House",
   )
-  val hospitalLocationDescription: String?,
+  val hospitalLocationDescription: String,
   @Schema(description = "Date and time the prisoner was discharged to hospital")
   val dischargeTime: LocalDateTime,
   @Schema(description = "Useful comments")
