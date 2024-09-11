@@ -10,6 +10,7 @@ import org.mockito.kotlin.whenever
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.dataBuilders.HOSPITAL
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.dataBuilders.PRISON
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.dataBuilders.makeRestrictedPatient
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.PrisonApiGateway
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.repositories.RestrictedPatientsRepository
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services.SubjectAccessRequestService
 import java.time.LocalDateTime
@@ -17,7 +18,8 @@ import java.util.Optional
 
 class SubjectAccessRequestServiceTest {
   private val restrictedPatientsRepository: RestrictedPatientsRepository = mock()
-  private val service = SubjectAccessRequestService(restrictedPatientsRepository)
+  private val prisonApiApplicationGateway: PrisonApiGateway = mock()
+  private val service = SubjectAccessRequestService(restrictedPatientsRepository, prisonApiApplicationGateway)
 
   @Nested
   inner class GetRestrictedPatient {
@@ -29,7 +31,7 @@ class SubjectAccessRequestServiceTest {
     }
 
     @Test
-    fun `by prison number`() {
+    fun `by prison number with no agency information`() {
       whenever(restrictedPatientsRepository.findById(anyString())).thenReturn(
         Optional.of(makeRestrictedPatient()),
       )
@@ -38,7 +40,28 @@ class SubjectAccessRequestServiceTest {
 
       assertThat(restrictedPatient).extracting("prisonerNumber").isEqualTo("A12345")
       assertThat(restrictedPatient).extracting("supportingPrisonId").isEqualTo(PRISON.agencyId)
+      assertThat(restrictedPatient).extracting("supportingPrisonDescription").isNull()
       assertThat(restrictedPatient).extracting("hospitalLocationCode").isEqualTo(HOSPITAL.agencyId)
+      assertThat(restrictedPatient).extracting("hospitalLocationDescription").isNull()
+      assertThat(restrictedPatient).extracting("commentText").isEqualTo("test")
+      assertThat(restrictedPatient).extracting("dischargeTime").isEqualTo(LocalDateTime.parse("2020-10-10T20:00:01"))
+    }
+
+    @Test
+    fun `by prison number with agency inoformation`() {
+      whenever(restrictedPatientsRepository.findById(anyString())).thenReturn(
+        Optional.of(makeRestrictedPatient()),
+      )
+      whenever(prisonApiApplicationGateway.getAgency(PRISON.agencyId)).thenReturn(PRISON)
+      whenever(prisonApiApplicationGateway.getAgency(HOSPITAL.agencyId)).thenReturn(HOSPITAL)
+
+      val restrictedPatient = service.getPrisonContentFor("A12345", null, null)?.content
+
+      assertThat(restrictedPatient).extracting("prisonerNumber").isEqualTo("A12345")
+      assertThat(restrictedPatient).extracting("supportingPrisonId").isEqualTo(PRISON.agencyId)
+      assertThat(restrictedPatient).extracting("supportingPrisonDescription").isEqualTo(PRISON.description)
+      assertThat(restrictedPatient).extracting("hospitalLocationCode").isEqualTo(HOSPITAL.agencyId)
+      assertThat(restrictedPatient).extracting("hospitalLocationDescription").isEqualTo(HOSPITAL.description)
       assertThat(restrictedPatient).extracting("commentText").isEqualTo("test")
       assertThat(restrictedPatient).extracting("dischargeTime").isEqualTo(LocalDateTime.parse("2020-10-10T20:00:01"))
     }
