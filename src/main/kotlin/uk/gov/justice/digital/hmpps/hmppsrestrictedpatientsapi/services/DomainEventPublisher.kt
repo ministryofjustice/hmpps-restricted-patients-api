@@ -3,10 +3,9 @@ package uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services
 import com.google.gson.Gson
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import software.amazon.awssdk.services.sns.model.PublishRequest
 import uk.gov.justice.hmpps.sqs.HmppsQueueService
 import uk.gov.justice.hmpps.sqs.MissingTopicException
-import uk.gov.justice.hmpps.sqs.eventTypeMessageAttributes
+import uk.gov.justice.hmpps.sqs.publish
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -58,10 +57,10 @@ class DomainEventPublisher(hmppsQueueService: HmppsQueueService, private val gso
 
     val payload = gson.toJson(domainEvent)
 
-    outboundTopic.snsClient.publish(
-      PublishRequest.builder().topicArn(outboundTopic.arn).message(payload).eventTypeMessageAttributes(domainEvent.eventType).build(),
-    ).get()
-      .also { log.info("Published event to outbound topic. Type: ${domainEvent.eventType}") }
+    outboundTopic.publish(
+      eventType = domainEvent.eventType,
+      event = payload,
+    ).also { log.info("Published event to outbound topic. Type: ${domainEvent.eventType}") }
   }
 
   fun publishSupportingPrisonChanged(prisonerNumber: String) {
