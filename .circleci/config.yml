@@ -1,8 +1,6 @@
 version: 2.1
-
 orbs:
   hmpps: ministryofjustice/hmpps@10
-
 jobs:
   validate:
     executor:
@@ -33,12 +31,11 @@ jobs:
       - save_cache:
           paths:
             - ~/.gradle
-          key: gradle-{{ checksum "build.gradle.kts" }} 
+          key: gradle-{{ checksum "build.gradle.kts" }}
       - store_test_results:
           path: build/test-results
       - store_artifacts:
           path: build/reports/tests
-
 workflows:
   version: 2
   build-test-and-deploy:
@@ -103,42 +100,3 @@ workflows:
             - hmpps-restricted-patients-api-prod
           requires:
             - request-prod-approval
-
-  security:
-    triggers:
-      - schedule:
-          cron: "50 5 * * 1-5"
-          filters:
-            branches:
-              only:
-                - main
-    jobs:
-      - hmpps/gradle_owasp_dependency_check:
-          cache_key: "v2_0"
-          jdk_tag: "21.0"
-          context:
-            - hmpps-common-vars
-      - hmpps/trivy_latest_scan:
-          context:
-            - hmpps-common-vars
-      - hmpps/veracode_pipeline_scan:
-          jdk_tag: "21.0"
-          context:
-            - hmpps-common-vars
-            - veracode-credentials
-  security-weekly:
-    triggers:
-      - schedule:
-          cron: "19 6 * * 1"
-          filters:
-            branches:
-              only:
-                - main
-    jobs:
-      - hmpps/veracode_policy_scan:
-          jdk_tag: "21.0"
-          context:
-            - veracode-credentials
-            - hmpps-common-vars
-
-
