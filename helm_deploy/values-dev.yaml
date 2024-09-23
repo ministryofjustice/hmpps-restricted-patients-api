@@ -18,8 +18,6 @@ generic-service:
     startup: '24 6 * * 1-5' # Start at 6.24am UTC Monday-Friday
     shutdown: '48 21 * * 1-5' # Stop at 9.48`pm UTC Monday-Friday
 
-  allowlist: null
-
 # CloudPlatform AlertManager receiver to route prometheus alerts to slack
 generic-prometheus-alerts:
   businessHoursOnly: true
