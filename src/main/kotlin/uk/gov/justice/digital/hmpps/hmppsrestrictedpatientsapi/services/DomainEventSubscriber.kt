@@ -2,8 +2,6 @@ package uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services
 
 import com.google.gson.Gson
 import io.awspring.cloud.sqs.annotation.SqsListener
-import io.opentelemetry.api.trace.SpanKind
-import io.opentelemetry.instrumentation.annotations.WithSpan
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -27,7 +25,6 @@ class DomainEventSubscriber(
 ) {
 
   @SqsListener("domainevents", factory = "hmppsQueueContainerFactoryProxy")
-  @WithSpan(value = "dps-core-rp_queue_for_domain_events", kind = SpanKind.SERVER)
   fun handleEvents(requestJson: String?) {
     val event = gson.fromJson(requestJson, Event::class.java)
     with(gson.fromJson(event.Message, HmppsDomainEvent::class.java)) {
