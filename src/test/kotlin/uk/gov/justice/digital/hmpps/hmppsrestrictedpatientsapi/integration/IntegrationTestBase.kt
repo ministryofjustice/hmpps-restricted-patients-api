@@ -64,10 +64,13 @@ abstract class IntegrationTestBase {
   lateinit var prisonApiApplicationGateway: PrisonApiApplicationGateway
 
   val offenderEventQueue by lazy {
-    hmppsQueueService.findByQueueId("offenderevents") ?: throw (RuntimeException("Queue offenderevents not found"))
+    hmppsQueueService.findByQueueId("offenderevents") ?: throw RuntimeException("Queue offenderevents not found")
   }
   val domainEventQueue by lazy {
-    hmppsQueueService.findByQueueId("domainevents") ?: throw (RuntimeException("Queue domainevents not found"))
+    hmppsQueueService.findByQueueId("domainevents") ?: throw RuntimeException("Queue domainevents not found")
+  }
+  val testDomainEventQueue by lazy {
+    hmppsQueueService.findByQueueId("testdomainevents") ?: throw RuntimeException("Queue testdomainevents not found")
   }
 
   @MockBean
