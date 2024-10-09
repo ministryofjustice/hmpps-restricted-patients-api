@@ -3,6 +3,7 @@ package uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services
 import com.google.gson.Gson
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services.PersonReference.Companion.withNomsNumber
 import uk.gov.justice.hmpps.sqs.HmppsQueueService
 import uk.gov.justice.hmpps.sqs.MissingTopicException
 import uk.gov.justice.hmpps.sqs.publish
@@ -17,7 +18,16 @@ data class DomainEvent(
   val occurredAt: String,
   val publishedAt: String,
   val description: String,
+  val personReference: PersonReference = withNomsNumber(additionalInformation.prisonerNumber),
 )
+
+data class PersonReference(val identifiers: List<Identifier>) {
+  companion object {
+    fun withNomsNumber(prisonNumber: String) = PersonReference(listOf(Identifier("NOMS", prisonNumber)))
+  }
+
+  data class Identifier(val type: String, val value: String)
+}
 
 data class RestrictedPatientAdditionalInformation(val prisonerNumber: String)
 
