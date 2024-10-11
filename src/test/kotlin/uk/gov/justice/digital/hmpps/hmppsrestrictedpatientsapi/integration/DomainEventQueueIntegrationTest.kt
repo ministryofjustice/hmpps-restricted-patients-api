@@ -66,8 +66,8 @@ class DomainEventQueueIntegrationTest : IntegrationTestBase() {
 
       await untilAsserted {
         verify(domainEventPublisher).publishRestrictedPatientAdded("A1234AA")
+        assertThat(restrictedPatientRepository.findByIdOrNull("A1234AA")).isNotNull
       }
-      assertThat(restrictedPatientRepository.findByIdOrNull("A1234AA")).isNotNull
     }
 
     @Test
