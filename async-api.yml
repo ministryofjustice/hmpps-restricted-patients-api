@@ -1,0 +1,53 @@
+asyncapi: 3.0.0
+info:
+  title: HMPPS Restricted Patients API
+  version: 1.0.0
+  description: API to add / remove / change Restricted Patients
+
+servers:
+  development:
+    host: "hmpps-domain-events-dev.live-1.cloud-platform.service.justice.gov.uk"
+    protocol: sqs
+    description: Development Environment
+  preproduction:
+    host: "hmpps-domain-events-preprod.live-1.cloud-platform.service.justice.gov.uk"
+    protocol: sqs
+    description: Pre-production Environment
+  production:
+    host: "hmpps-domain-events-prod.live-1.cloud-platform.service.justice.gov.uk"
+    protocol: sqs
+    description: Production Environment
+
+components:
+  messages:
+    restricted-patients.patient.added:
+      $ref: https://raw.githubusercontent.com/ministryofjustice/hmpps-domain-events/main/spec/schemas/restricted-patients/patient-added.yaml
+    restricted-patients.patient.supporting-prison-changed:
+      $ref: https://raw.githubusercontent.com/ministryofjustice/hmpps-domain-events/main/spec/schemas/restricted-patients/patient-supporting-prison-changed.yaml
+    restricted-patients.patient.removed:
+      $ref: https://raw.githubusercontent.com/ministryofjustice/hmpps-domain-events/main/spec/schemas/restricted-patients/patient-removed.yaml
+
+
+channels:
+  hmpps-domain-events:
+    description: HMPPS domain events SNS topic
+    bindings:
+      sns:
+        name: domainevents
+    messages:
+      restricted-patients.patient.added:
+        $ref: '#/components/messages/restricted-patients.patient.added'
+      restricted-patients.patient.supporting-prison-changed:
+        $ref: '#/components/messages/restricted-patients.patient.supporting-prison-changed'
+      restricted-patients.patient.removed:
+        $ref: '#/components/messages/restricted-patients.patient.removed'
+
+operations:
+  publish-event:
+    action: send
+    channel:
+      $ref: '#/channels/hmpps-domain-events'
+    messages:
+      - $ref: '#/channels/hmpps-domain-events/messages/restricted-patients.patient.added'
+      - $ref: '#/channels/hmpps-domain-events/messages/restricted-patients.patient.supporting-prison-changed'
+      - $ref: '#/channels/hmpps-domain-events/messages/restricted-patients.patient.removed'
