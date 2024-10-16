@@ -23,12 +23,11 @@ servers:
 components:
   messages:
     restricted-patients.patient.added:
-      $ref: https://raw.githubusercontent.com/ministryofjustice/hmpps-domain-events/pgp-SDIT-1841-local-events/spec/schemas/restricted-patients/patient-added.yaml
+      $ref: events/patient-added.yaml
     restricted-patients.patient.supporting-prison-changed:
-      $ref: https://raw.githubusercontent.com/ministryofjustice/hmpps-domain-events/pgp-SDIT-1841-local-events/spec/schemas/restricted-patients/patient-supporting-prison-changed.yaml
+      $ref: events/patient-supporting-prison-changed.yaml
     restricted-patients.patient.removed:
-      $ref: https://raw.githubusercontent.com/ministryofjustice/hmpps-domain-events/pgp-SDIT-1841-local-events/spec/schemas/restricted-patients/patient-removed.yaml
-
+      $ref: events/patient-removed.yaml
 
 channels:
   hmpps-domain-events:
