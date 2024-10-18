@@ -3,7 +3,7 @@
 [![CircleCI](https://circleci.com/gh/ministryofjustice/hmpps-restricted-patients-api/tree/main.svg?style=svg)](https://circleci.com/gh/ministryofjustice/hmpps-restricted-patients-api)
 [![Docker Repository on Quay](https://img.shields.io/badge/quay.io-repository-2496ED.svg?logo=docker)](https://quay.io/repository/hmpps/hmpps-restricted-patients-api)
 [![API docs](https://img.shields.io/badge/API_docs_-view-85EA2D.svg?logo=swagger)](https://restricted-patients-api-dev.hmpps.service.justice.gov.uk/swagger-ui/index.html)
-[![Event docs](https://img.shields.io/badge/Event_docs-view-85EA2D.svg)](https://studio.asyncapi.com/?url=https://raw.githubusercontent.com/ministryofjustice/hmpps-restricted-patients-api/main/async-api.yml)
+[![Event docs](https://img.shields.io/badge/Event_docs-view-85EA2D.svg)](https://studio.asyncapi.com/?url=https://raw.githubusercontent.com/ministryofjustice/hmpps-restricted-patients-api/main/async-api.yml&readOnly)
 
 # Features
 * Discharge a prisoner to hospital 
