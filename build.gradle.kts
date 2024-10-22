@@ -1,5 +1,5 @@
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "6.0.6"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "6.0.7"
   kotlin("plugin.spring") version "2.0.20"
   kotlin("plugin.jpa") version "2.0.20"
 }
@@ -22,9 +22,9 @@ dependencies {
   implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0")
   implementation("org.springframework:spring-jms")
   implementation("com.google.code.gson:gson:2.11.0")
-  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:4.4.4")
-  implementation("org.apache.commons:commons-csv:1.11.0")
-  implementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:2.6.0")
+  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:5.0.1")
+  implementation("org.apache.commons:commons-csv:1.12.0")
+  implementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:2.9.0")
 
   runtimeOnly("org.flywaydb:flyway-database-postgresql")
   runtimeOnly("org.postgresql:postgresql:42.7.4")
@@ -38,8 +38,8 @@ dependencies {
   testImplementation("io.swagger.parser.v3:swagger-parser:2.1.22") {
     exclude(group = "io.swagger.core.v3")
   }
-  testImplementation("io.swagger.core.v3:swagger-core-jakarta:2.2.23")
-  testImplementation("io.opentelemetry:opentelemetry-sdk-testing:1.40.0")
+  testImplementation("io.swagger.core.v3:swagger-core-jakarta:2.2.25")
+  testImplementation("io.opentelemetry:opentelemetry-sdk-testing:1.43.0")
 }
 
 allOpen {
