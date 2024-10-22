@@ -10,7 +10,7 @@
       "enabled": false
     },
     "logging": {
-      "level": "DEBUG"
+      "level": "INFO"
     }
   },
   "selfDiagnostics": {
@@ -28,7 +28,18 @@
             "matchType": "strict"
           }
         ],
-        "percentage": 10
+        "percentage": 5
+      },
+      {
+        "telemetryType": "dependency",
+        "attributes": [
+          {
+            "key": "server.address",
+            "value": "(sign-in|sts.eu).*",
+            "matchType": "regexp"
+          }
+        ],
+        "percentage": 5
       },
       {
         "telemetryType": "request",
@@ -39,7 +50,7 @@
             "matchType": "regexp"
           }
         ],
-        "percentage": 10
+        "percentage": 5
       },
       {
         "telemetryType": "request",
@@ -50,7 +61,7 @@
             "matchType": "strict"
           }
         ],
-        "percentage": 10
+        "percentage": 5
       }
     ]
   }
