@@ -1,5 +1,5 @@
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "6.0.8"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "6.0.9"
   kotlin("plugin.spring") version "2.0.21"
   kotlin("plugin.jpa") version "2.0.21"
 }
@@ -33,12 +33,12 @@ dependencies {
   testImplementation("org.flywaydb:flyway-core")
   testImplementation("org.wiremock:wiremock-standalone:3.9.2")
   testImplementation("org.springframework.security:spring-security-test")
-  testImplementation("net.javacrumbs.json-unit:json-unit-assertj:3.4.1")
+  testImplementation("net.javacrumbs.json-unit:json-unit-assertj:4.0.0")
   testImplementation("org.awaitility:awaitility-kotlin:4.2.2")
-  testImplementation("io.swagger.parser.v3:swagger-parser:2.1.23") {
+  testImplementation("io.swagger.parser.v3:swagger-parser:2.1.24") {
     exclude(group = "io.swagger.core.v3")
   }
-  testImplementation("io.swagger.core.v3:swagger-core-jakarta:2.2.25")
+  testImplementation("io.swagger.core.v3:swagger-core-jakarta:2.2.26")
   testImplementation("io.opentelemetry:opentelemetry-sdk-testing:1.43.0")
 }
 
