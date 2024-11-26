@@ -40,7 +40,6 @@ class SubjectAccessRequestServiceTest {
 
       assertThat(restrictedPatient).extracting("prisonerNumber").isEqualTo("A12345")
       assertThat(restrictedPatient).extracting("supportingPrisonId").isEqualTo(PRISON.agencyId)
-      assertThat(restrictedPatient).extracting("supportingPrisonDescription").isEqualTo(PRISON.agencyId)
       assertThat(restrictedPatient).extracting("hospitalLocationCode").isEqualTo(HOSPITAL.agencyId)
       assertThat(restrictedPatient).extracting("hospitalLocationDescription").isEqualTo(HOSPITAL.agencyId)
       assertThat(restrictedPatient).extracting("commentText").isEqualTo("test")
@@ -52,14 +51,12 @@ class SubjectAccessRequestServiceTest {
       whenever(restrictedPatientsRepository.findById(anyString())).thenReturn(
         Optional.of(makeRestrictedPatient()),
       )
-      whenever(prisonApiApplicationGateway.getAgency(PRISON.agencyId)).thenReturn(PRISON)
       whenever(prisonApiApplicationGateway.getAgency(HOSPITAL.agencyId)).thenReturn(HOSPITAL)
 
       val restrictedPatient = service.getPrisonContentFor("A12345", null, null)?.content
 
       assertThat(restrictedPatient).extracting("prisonerNumber").isEqualTo("A12345")
       assertThat(restrictedPatient).extracting("supportingPrisonId").isEqualTo(PRISON.agencyId)
-      assertThat(restrictedPatient).extracting("supportingPrisonDescription").isEqualTo(PRISON.description)
       assertThat(restrictedPatient).extracting("hospitalLocationCode").isEqualTo(HOSPITAL.agencyId)
       assertThat(restrictedPatient).extracting("hospitalLocationDescription").isEqualTo(HOSPITAL.description)
       assertThat(restrictedPatient).extracting("commentText").isEqualTo("test")
