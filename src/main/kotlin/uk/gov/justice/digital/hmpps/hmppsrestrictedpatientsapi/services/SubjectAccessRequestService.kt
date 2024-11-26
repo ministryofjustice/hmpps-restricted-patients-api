@@ -16,14 +16,12 @@ class SubjectAccessRequestService(
 ) : HmppsPrisonSubjectAccessRequestService {
   override fun getPrisonContentFor(prn: String, fromDate: LocalDate?, toDate: LocalDate?) =
     repository.findByIdOrNull(prn)?.let {
-      val prison = prisonApiApplicationGateway.getAgency(it.supportingPrisonId)
       val hospital = prisonApiApplicationGateway.getAgency(it.hospitalLocationCode)
 
       HmppsSubjectAccessRequestContent(
         content = RestrictedPatientContent(
           prisonerNumber = it.prisonerNumber,
           supportingPrisonId = it.supportingPrisonId,
-          supportingPrisonDescription = prison?.description ?: it.supportingPrisonId,
           hospitalLocationCode = it.hospitalLocationCode,
           hospitalLocationDescription = hospital?.description ?: it.hospitalLocationCode,
           dischargeTime = it.dischargeTime,
