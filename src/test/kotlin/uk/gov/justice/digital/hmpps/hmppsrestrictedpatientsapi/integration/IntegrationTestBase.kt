@@ -12,13 +12,13 @@ import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT
-import org.springframework.boot.test.mock.mockito.MockBean
-import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.boot.test.system.OutputCaptureExtension
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.test.context.ActiveProfiles
+import org.springframework.test.context.bean.override.mockito.MockitoBean
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import org.springframework.test.web.reactive.server.WebTestClient
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.PrisonApiApplicationGateway
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.integration.wiremock.OAuthMockServer
@@ -54,13 +54,13 @@ abstract class IntegrationTestBase {
   @Autowired
   lateinit var hmppsQueueService: HmppsQueueService
 
-  @SpyBean
+  @MockitoSpyBean
   lateinit var domainEventPublisher: DomainEventPublisher
 
-  @SpyBean
+  @MockitoSpyBean
   lateinit var telemetryClient: TelemetryClient
 
-  @SpyBean
+  @MockitoSpyBean
   lateinit var prisonApiApplicationGateway: PrisonApiApplicationGateway
 
   val offenderEventQueue by lazy {
@@ -73,7 +73,7 @@ abstract class IntegrationTestBase {
     hmppsQueueService.findByQueueId("testdomainevents") ?: throw RuntimeException("Queue testdomainevents not found")
   }
 
-  @MockBean
+  @MockitoBean
   lateinit var clock: Clock
 
   companion object {
