@@ -18,9 +18,7 @@ data class PrisonerResult(
 
   // I think this is due to dodgy sentence data, but some of the recalls have legal status of INDETERMINATE_SENTENCE
   // so try to only include ones that are actually recalls
-  fun isRecallPastSentenceExpiry(now: LocalDate): Boolean =
-    recall == true && (legalStatus == "SENTENCED" || legalStatus == "RECALL") && sentenceExpiryDate?.isBefore(now) ?: false
+  fun isRecallPastSentenceExpiry(now: LocalDate): Boolean = recall == true && (legalStatus == "SENTENCED" || legalStatus == "RECALL") && sentenceExpiryDate?.isBefore(now) ?: false
 
-  fun isNotRecallPastConditionalRelease(now: LocalDate): Boolean =
-    recall == false && legalStatus == "SENTENCED" && conditionalReleaseDate?.isBefore(now) ?: false
+  fun isNotRecallPastConditionalRelease(now: LocalDate): Boolean = recall == false && legalStatus == "SENTENCED" && conditionalReleaseDate?.isBefore(now) ?: false
 }

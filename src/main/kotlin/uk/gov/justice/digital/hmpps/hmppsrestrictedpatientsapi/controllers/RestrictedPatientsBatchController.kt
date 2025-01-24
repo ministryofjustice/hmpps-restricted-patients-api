@@ -15,6 +15,5 @@ class RestrictedPatientsBatchController(
    */
   @Hidden
   @PostMapping(value = ["/process-past-date-restricted-patients"])
-  fun processPastDateRestrictedPatients(): Unit =
-    batchReleaseDateRemoval.removeNonLifePrisonersPastRelevantDate()
+  fun processPastDateRestrictedPatients(): Unit = batchReleaseDateRemoval.removeNonLifePrisonersPastRelevantDate()
 }

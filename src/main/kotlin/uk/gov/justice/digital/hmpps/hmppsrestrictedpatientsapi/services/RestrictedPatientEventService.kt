@@ -52,16 +52,14 @@ class RestrictedPatientEventService(
     domainEventPublisher.publishRestrictedPatientAdded(offenderNo)
   }
 
-  private fun getHospital(lastMovement: MovementResponse): Agency? =
-    lastMovement
-      .takeIf { it.toAgency != null }
-      ?.let { prisonApiApplicationGateway.getAgency(it.toAgency!!) }
-      ?.takeIf { agency -> listOf("HOSPITAL", "HSHOSP").contains(agency.agencyType) }
+  private fun getHospital(lastMovement: MovementResponse): Agency? = lastMovement
+    .takeIf { it.toAgency != null }
+    ?.let { prisonApiApplicationGateway.getAgency(it.toAgency!!) }
+    ?.takeIf { agency -> listOf("HOSPITAL", "HSHOSP").contains(agency.agencyType) }
 
-  private fun getReleaseToHospitalMovement(offenderNo: String): MovementResponse? =
-    prisonApiApplicationGateway.getLatestMovements(offenderNo)
-      .lastOrNull()
-      ?.takeIf { it.movementType == "REL" && it.movementReasonCode == "HP" }
+  private fun getReleaseToHospitalMovement(offenderNo: String): MovementResponse? = prisonApiApplicationGateway.getLatestMovements(offenderNo)
+    .lastOrNull()
+    ?.takeIf { it.movementType == "REL" && it.movementReasonCode == "HP" }
 
   companion object {
     private val log = LoggerFactory.getLogger(this::class.java)

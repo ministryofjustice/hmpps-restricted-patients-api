@@ -27,20 +27,18 @@ class RestrictedPatientsController(
     consumes = [MediaType.APPLICATION_JSON_VALUE],
   )
   @ResponseStatus(code = HttpStatus.CREATED)
-  fun dischargeToHospital(@RequestBody dischargeToHospital: DischargeToHospitalRequest): RestrictedPatientDto =
-    restrictedPatientsService.dischargeToHospital(dischargeToHospital).also {
-      it.publishAndTrackAdd("discharge")
-    }
+  fun dischargeToHospital(@RequestBody dischargeToHospital: DischargeToHospitalRequest): RestrictedPatientDto = restrictedPatientsService.dischargeToHospital(dischargeToHospital).also {
+    it.publishAndTrackAdd("discharge")
+  }
 
   @PostMapping(
     value = ["/migrate-in-restricted-patient"],
     consumes = [MediaType.APPLICATION_JSON_VALUE],
   )
   @ResponseStatus(code = HttpStatus.CREATED)
-  fun migrateInPatient(@RequestBody migrateIn: MigrateInRequest): RestrictedPatientDto =
-    restrictedPatientsService.migrateInPatient(migrateIn).also {
-      it.publishAndTrackAdd("migrate")
-    }
+  fun migrateInPatient(@RequestBody migrateIn: MigrateInRequest): RestrictedPatientDto = restrictedPatientsService.migrateInPatient(migrateIn).also {
+    it.publishAndTrackAdd("migrate")
+  }
 
   private fun RestrictedPatientDto.publishAndTrackAdd(type: String) {
     telemetryClient.trackEvent(
@@ -58,34 +56,31 @@ class RestrictedPatientsController(
   }
 
   @GetMapping(value = ["/restricted-patient/prison-number/{prison-number}"])
-  fun getRestrictedPatientByPrisonNumber(@PathVariable(name = "prison-number") prisonNumber: String): RestrictedPatientDto =
-    restrictedPatientsService.getRestrictedPatient(prisonNumber)
+  fun getRestrictedPatientByPrisonNumber(@PathVariable(name = "prison-number") prisonNumber: String): RestrictedPatientDto = restrictedPatientsService.getRestrictedPatient(prisonNumber)
 
   @DeleteMapping(value = ["/restricted-patient/prison-number/{prison-number}"])
-  fun removeRestrictedPatient(@PathVariable(name = "prison-number") prisonNumber: String) =
-    restrictedPatientsService.removeRestrictedPatient(prisonNumber).also {
-      telemetryClient.trackEvent(
-        "restricted-patient-removed",
-        mapOf(
-          "prisonerNumber" to it.prisonerNumber,
-          "fromLocationId" to it.fromLocationId,
-          "hospitalLocationCode" to it.hospitalLocationCode,
-          "supportingPrisonId" to it.supportingPrisonId,
-          "dischargeTime" to it.dischargeTime.toString(),
-        ),
-        null,
-      )
-      domainEventPublisher.publishRestrictedPatientRemoved(it.prisonerNumber)
-    }
+  fun removeRestrictedPatient(@PathVariable(name = "prison-number") prisonNumber: String) = restrictedPatientsService.removeRestrictedPatient(prisonNumber).also {
+    telemetryClient.trackEvent(
+      "restricted-patient-removed",
+      mapOf(
+        "prisonerNumber" to it.prisonerNumber,
+        "fromLocationId" to it.fromLocationId,
+        "hospitalLocationCode" to it.hospitalLocationCode,
+        "supportingPrisonId" to it.supportingPrisonId,
+        "dischargeTime" to it.dischargeTime.toString(),
+      ),
+      null,
+    )
+    domainEventPublisher.publishRestrictedPatientRemoved(it.prisonerNumber)
+  }
 
   @PostMapping(
     value = ["/change-supporting-prison"],
     consumes = [MediaType.APPLICATION_JSON_VALUE],
   )
-  fun changeSupportingPrison(@RequestBody supportingPrison: SupportingPrisonRequest): RestrictedPatientDto =
-    restrictedPatientsService.changeSupportingPrison(supportingPrison).also {
-      it.publishAndTrackChange()
-    }
+  fun changeSupportingPrison(@RequestBody supportingPrison: SupportingPrisonRequest): RestrictedPatientDto = restrictedPatientsService.changeSupportingPrison(supportingPrison).also {
+    it.publishAndTrackChange()
+  }
 
   private fun RestrictedPatientDto.publishAndTrackChange() {
     telemetryClient.trackEvent(

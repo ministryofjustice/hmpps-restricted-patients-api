@@ -82,8 +82,7 @@ class DomainEventPublisherIntTest : IntegrationTestBase() {
     assertThatJson(message).node("additionalInformation.prisonerNumber").isEqualTo("some_offender")
   }
 
-  private fun getNumberOfMessagesCurrentlyOnDomainQueue(): Int? =
-    testDomainEventQueue.sqsClient.countAllMessagesOnQueue(testDomainEventQueue.queueUrl).get()
+  private fun getNumberOfMessagesCurrentlyOnDomainQueue(): Int? = testDomainEventQueue.sqsClient.countAllMessagesOnQueue(testDomainEventQueue.queueUrl).get()
 
   private fun readNextDomainEventMessage(): String {
     val updateResult = testDomainEventQueue.sqsClient.receiveFirstMessage()

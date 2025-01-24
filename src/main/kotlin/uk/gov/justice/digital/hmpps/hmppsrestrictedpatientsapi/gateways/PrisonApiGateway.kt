@@ -19,34 +19,32 @@ class PrisonApiApplicationGateway(prisonApiClientCredsAppScope: WebClient) : Pri
 
 @Service
 class PrisonApiGateway(private val prisonApiClientCreds: WebClient) {
-  fun dischargeToHospital(newRestrictedPatient: RestrictedPatient): InmateDetail =
-    prisonApiClientCreds
-      .put()
-      .uri("/offenders/{prisonerNumber}/discharge-to-hospital", newRestrictedPatient.prisonerNumber)
-      .bodyValue(
-        mapOf(
-          "dischargeTime" to newRestrictedPatient.dischargeTime.toString(),
-          "fromLocationId" to newRestrictedPatient.fromLocationId,
-          "hospitalLocationCode" to newRestrictedPatient.hospitalLocationCode,
-          "supportingPrisonId" to newRestrictedPatient.supportingPrisonId,
-        ),
-      )
-      .retrieve()
-      .bodyToMono<InmateDetail>()
-      .block()!!
+  fun dischargeToHospital(newRestrictedPatient: RestrictedPatient): InmateDetail = prisonApiClientCreds
+    .put()
+    .uri("/offenders/{prisonerNumber}/discharge-to-hospital", newRestrictedPatient.prisonerNumber)
+    .bodyValue(
+      mapOf(
+        "dischargeTime" to newRestrictedPatient.dischargeTime.toString(),
+        "fromLocationId" to newRestrictedPatient.fromLocationId,
+        "hospitalLocationCode" to newRestrictedPatient.hospitalLocationCode,
+        "supportingPrisonId" to newRestrictedPatient.supportingPrisonId,
+      ),
+    )
+    .retrieve()
+    .bodyToMono<InmateDetail>()
+    .block()!!
 
-  fun getLatestMovements(offenderNo: String): List<MovementResponse> =
-    prisonApiClientCreds
-      .post()
-      .uri("/movements/offenders?latestOnly=true&allBookings=false")
-      .bodyValue(
-        listOf(
-          offenderNo,
-        ),
-      )
-      .retrieve()
-      .bodyToMono(object : ParameterizedTypeReference<List<MovementResponse>>() {})
-      .block()!!
+  fun getLatestMovements(offenderNo: String): List<MovementResponse> = prisonApiClientCreds
+    .post()
+    .uri("/movements/offenders?latestOnly=true&allBookings=false")
+    .bodyValue(
+      listOf(
+        offenderNo,
+      ),
+    )
+    .retrieve()
+    .bodyToMono(object : ParameterizedTypeReference<List<MovementResponse>>() {})
+    .block()!!
 
   fun getAgencyLocationsByType(type: String): List<Agency> = prisonApiClientCreds
     .get()
@@ -75,23 +73,21 @@ class PrisonApiGateway(private val prisonApiClientCreds: WebClient) {
       .block()
   }
 
-  fun getOffenderBooking(offenderNo: String): OffenderBookingResponse? =
-    prisonApiClientCreds
-      .get()
-      .uri {
-        it.path("/bookings/offenderNo/{offenderNo}")
-          .queryParam("fullInfo", "true")
-          .queryParam("extraInfo", "false")
-          .queryParam("csraSummary", "false")
-          .build(offenderNo)
-      }
-      .retrieve()
-      .bodyToMono<OffenderBookingResponse>()
-      .onErrorResume(WebClientResponseException::class.java) { emptyWhenNotFound(it) }
-      .block()
+  fun getOffenderBooking(offenderNo: String): OffenderBookingResponse? = prisonApiClientCreds
+    .get()
+    .uri {
+      it.path("/bookings/offenderNo/{offenderNo}")
+        .queryParam("fullInfo", "true")
+        .queryParam("extraInfo", "false")
+        .queryParam("csraSummary", "false")
+        .build(offenderNo)
+    }
+    .retrieve()
+    .bodyToMono<OffenderBookingResponse>()
+    .onErrorResume(WebClientResponseException::class.java) { emptyWhenNotFound(it) }
+    .block()
 
-  private fun <T> emptyWhenNotFound(exception: WebClientResponseException): Mono<T> =
-    if (exception.statusCode == NOT_FOUND) Mono.empty() else Mono.error(exception)
+  private fun <T> emptyWhenNotFound(exception: WebClientResponseException): Mono<T> = if (exception.statusCode == NOT_FOUND) Mono.empty() else Mono.error(exception)
 }
 
 class InmateDetail(val offenderNo: String)

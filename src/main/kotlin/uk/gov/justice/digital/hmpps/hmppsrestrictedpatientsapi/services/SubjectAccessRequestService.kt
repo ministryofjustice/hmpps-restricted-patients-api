@@ -14,19 +14,18 @@ class SubjectAccessRequestService(
   private val repository: RestrictedPatientsRepository,
   private val prisonApiApplicationGateway: PrisonApiGateway,
 ) : HmppsPrisonSubjectAccessRequestService {
-  override fun getPrisonContentFor(prn: String, fromDate: LocalDate?, toDate: LocalDate?) =
-    repository.findByIdOrNull(prn)?.let {
-      val hospital = prisonApiApplicationGateway.getAgency(it.hospitalLocationCode)
+  override fun getPrisonContentFor(prn: String, fromDate: LocalDate?, toDate: LocalDate?) = repository.findByIdOrNull(prn)?.let {
+    val hospital = prisonApiApplicationGateway.getAgency(it.hospitalLocationCode)
 
-      HmppsSubjectAccessRequestContent(
-        content = RestrictedPatientContent(
-          prisonerNumber = it.prisonerNumber,
-          supportingPrisonId = it.supportingPrisonId,
-          hospitalLocationCode = it.hospitalLocationCode,
-          hospitalLocationDescription = hospital?.description ?: it.hospitalLocationCode,
-          dischargeTime = it.dischargeTime,
-          commentText = it.commentText,
-        ),
-      )
-    }
+    HmppsSubjectAccessRequestContent(
+      content = RestrictedPatientContent(
+        prisonerNumber = it.prisonerNumber,
+        supportingPrisonId = it.supportingPrisonId,
+        hospitalLocationCode = it.hospitalLocationCode,
+        hospitalLocationDescription = hospital?.description ?: it.hospitalLocationCode,
+        dischargeTime = it.dischargeTime,
+        commentText = it.commentText,
+      ),
+    )
+  }
 }
