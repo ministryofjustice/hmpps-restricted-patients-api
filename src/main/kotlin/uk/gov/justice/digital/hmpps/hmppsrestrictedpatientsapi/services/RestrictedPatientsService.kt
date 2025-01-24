@@ -75,13 +75,12 @@ class RestrictedPatientsService(
       .let { addRestrictedPatient(it) }
   }
 
-  private fun checkNotExistingPatient(offenderNo: String) =
-    restrictedPatientsRepository.findById(offenderNo).map {
-      throw BadRequestException(
-        errorCode = "EXISTING_PATIENT",
-        message = "Prisoner ($offenderNo) is already a restricted patient",
-      )
-    }
+  private fun checkNotExistingPatient(offenderNo: String) = restrictedPatientsRepository.findById(offenderNo).map {
+    throw BadRequestException(
+      errorCode = "EXISTING_PATIENT",
+      message = "Prisoner ($offenderNo) is already a restricted patient",
+    )
+  }
 
   private fun getLatestMovement(offenderNo: String): MovementResponse {
     val movements = prisonApiGateway.getLatestMovements(offenderNo)
@@ -124,21 +123,19 @@ class RestrictedPatientsService(
     )
   }
 
-  private fun addRestrictedPatient(restrictedPatient: RestrictedPatient): RestrictedPatientDto =
-    restrictedPatientsRepository.save(restrictedPatient).run {
-      prisonApiGateway.dischargeToHospital(this)
-      transform(
-        this,
-        Agency(agencyId = fromLocationId),
-        Agency(agencyId = hospitalLocationCode),
-        Agency(agencyId = supportingPrisonId),
-      )
-    }
+  private fun addRestrictedPatient(restrictedPatient: RestrictedPatient): RestrictedPatientDto = restrictedPatientsRepository.save(restrictedPatient).run {
+    prisonApiGateway.dischargeToHospital(this)
+    transform(
+      this,
+      Agency(agencyId = fromLocationId),
+      Agency(agencyId = hospitalLocationCode),
+      Agency(agencyId = supportingPrisonId),
+    )
+  }
 
-  fun getRestrictedPatient(prisonerNumber: String): RestrictedPatientDto =
-    restrictedPatientsRepository.findByIdOrNull(prisonerNumber)
-      ?.let { transformIntoDto(it) }
-      ?: throw EntityNotFoundException("No restricted patient record found for prison number $prisonerNumber")
+  fun getRestrictedPatient(prisonerNumber: String): RestrictedPatientDto = restrictedPatientsRepository.findByIdOrNull(prisonerNumber)
+    ?.let { transformIntoDto(it) }
+    ?: throw EntityNotFoundException("No restricted patient record found for prison number $prisonerNumber")
 
   private fun transformIntoDto(restrictedPatient: RestrictedPatient): RestrictedPatientDto {
     val agencies = prisonApiGateway.getAgencyLocationsByType("INST")

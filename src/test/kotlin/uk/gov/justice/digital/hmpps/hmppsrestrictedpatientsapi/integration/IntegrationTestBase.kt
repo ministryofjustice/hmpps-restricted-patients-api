@@ -140,9 +140,8 @@ abstract class IntegrationTestBase {
     return javaClass.getResource("/$packageName/$fileName").readText()
   }
 
-  fun getRestrictedPatient(prisonerNumber: String = "A12345"): WebTestClient.RequestHeadersSpec<*> =
-    webTestClient.get().uri("/restricted-patient/prison-number/$prisonerNumber")
-      .headers(setHeaders())
+  fun getRestrictedPatient(prisonerNumber: String = "A12345"): WebTestClient.RequestHeadersSpec<*> = webTestClient.get().uri("/restricted-patient/prison-number/$prisonerNumber")
+    .headers(setHeaders())
 
   fun dischargePrisonerWebClient(
     prisonerNumber: String,
