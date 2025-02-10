@@ -1,7 +1,7 @@
 version: '3.9'
 services:
   restricted-patients-api-db:
-    image: postgres:16
+    image: postgres:17
     networks:
       - hmpps
     container_name: restricted-patients-api-db
