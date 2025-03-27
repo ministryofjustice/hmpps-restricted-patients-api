@@ -19,7 +19,7 @@ dependencies {
 
   implementation("org.apache.commons:commons-text:1.13.0")
   implementation("io.swagger:swagger-annotations:1.6.15")
-  implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.5")
+  implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.6")
   implementation("org.springframework:spring-jms")
   implementation("com.google.code.gson:gson:2.12.1")
   implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:5.4.2")
