@@ -7,7 +7,7 @@ generic-service:
   replicaCount: 4
 
   image:
-    repository: quay.io/hmpps/hmpps-restricted-patients-api
+    repository: ghcr.io/ministryofjustice/hmpps-restricted-patients-api
     tag: app_version # override at deployment time
     port: 8080
 
@@ -42,11 +42,11 @@ generic-service:
   #     [name of environment variable as seen by app]: [key of kubernetes secret to load]
 
   namespace_secrets:
-    application-insights:
+    hmpps-restricted-patients-api-application-insights:
       APPLICATIONINSIGHTS_CONNECTION_STRING: "APPLICATIONINSIGHTS_CONNECTION_STRING"
-    hmpps-restricted-patients-api:
-      RESTRICTED_PATIENTS_API_CLIENT_ID: "RESTRICTED_PATIENTS_API_CLIENT_ID"
-      RESTRICTED_PATIENTS_API_CLIENT_SECRET: "RESTRICTED_PATIENTS_API_CLIENT_SECRET"
+    hmpps-restricted-patients-api-client-creds:
+      RESTRICTED_PATIENTS_API_CLIENT_ID: "API_CLIENT_ID"
+      RESTRICTED_PATIENTS_API_CLIENT_SECRET: "API_CLIENT_SECRET"
     hmpps-domain-events-topic:
       HMPPS_SQS_TOPICS_DOMAINEVENTSOUTBOUND_ARN: "topic_arn"
     rp-rds-instance-output:
