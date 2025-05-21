@@ -2,9 +2,11 @@ package uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.integration.wire
 
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock.aResponse
+import com.github.tomakehurst.wiremock.client.WireMock.containing
 import com.github.tomakehurst.wiremock.client.WireMock.get
 import com.github.tomakehurst.wiremock.client.WireMock.post
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
+import com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo
 
 class PrisonerSearchApiMockServer : WireMockServer(8100) {
   fun stubHealth() {
@@ -27,7 +29,16 @@ class PrisonerSearchApiMockServer : WireMockServer(8100) {
 
   fun stubSearchByPrisonNumber(prisonerNumber: String) {
     stubFor(
-      post(urlEqualTo("/prisoner-search/prisoner-numbers"))
+      post(urlPathEqualTo("/prisoner-search/prisoner-numbers"))
+        .withQueryParam("responseFields", containing("prisonerNumber"))
+        .withQueryParam("responseFields", containing("bookingId"))
+        .withQueryParam("responseFields", containing("conditionalReleaseDate"))
+        .withQueryParam("responseFields", containing("sentenceExpiryDate"))
+        .withQueryParam("responseFields", containing("recall"))
+        .withQueryParam("responseFields", containing("indeterminateSentence"))
+        .withQueryParam("responseFields", containing("legalStatus"))
+        .withQueryParam("responseFields", containing("lastMovementTypeCode"))
+        .withQueryParam("responseFields", containing("lastMovementReasonCode"))
         .willReturn(
           aResponse()
             .withHeader("Content-Type", "application/json")
@@ -37,16 +48,7 @@ class PrisonerSearchApiMockServer : WireMockServer(8100) {
              [
                 {
                   "prisonerNumber": "$prisonerNumber",
-                  "pncNumber": "96/371915Q",
-                  "pncNumberCanonicalShort": "96/371915Q",
-                  "pncNumberCanonicalLong": "1996/371915Q",
-                  "croNumber": "177155/96K",
                   "bookingId": "1138058",
-                  "bookNumber": "W73895",
-                  "firstName": "EMANETTA",
-                  "middleNames": "PATES",
-                  "lastName": "ABOLD",
-                  "dateOfBirth": "1984-08-22",
                   "legalStatus": "SENTENCED"
                 }
                ]
