@@ -2,11 +2,11 @@ package uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.integration.wire
 
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock.aResponse
+import com.github.tomakehurst.wiremock.client.WireMock.containing
 import com.github.tomakehurst.wiremock.client.WireMock.get
 import com.github.tomakehurst.wiremock.client.WireMock.post
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 import com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo
-import com.github.tomakehurst.wiremock.client.WireMock.containing
 
 class PrisonerSearchApiMockServer : WireMockServer(8100) {
   fun stubHealth() {

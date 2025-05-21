@@ -14,18 +14,18 @@ class PrisonerSearchApiGateway(@Qualifier("prisonerSearchClientCreds") private v
   fun searchByPrisonNumber(prisonNumber: String): List<PrisonerResult> = findByPrisonNumbers(listOf(prisonNumber))
 
   fun findByPrisonNumbers(prisonNumbers: List<String>): List<PrisonerResult> = prisonerSearchClientCreds
-      .post()
-      .uri {
-        it.path("/prisoner-search/prisoner-numbers")
-          .queryParam("responseFields", prisonerResultProperties)
-          .build()
-      }
-      .bodyValue(
-        mapOf("prisonerNumbers" to prisonNumbers),
-      )
-      .retrieve()
-      .bodyToMono(object : ParameterizedTypeReference<List<PrisonerResult>>() {})
-      .block()!!
+    .post()
+    .uri {
+      it.path("/prisoner-search/prisoner-numbers")
+        .queryParam("responseFields", prisonerResultProperties)
+        .build()
+    }
+    .bodyValue(
+      mapOf("prisonerNumbers" to prisonNumbers),
+    )
+    .retrieve()
+    .bodyToMono(object : ParameterizedTypeReference<List<PrisonerResult>>() {})
+    .block()!!
 
   companion object {
     // Get all property names from PrisonerResult class
