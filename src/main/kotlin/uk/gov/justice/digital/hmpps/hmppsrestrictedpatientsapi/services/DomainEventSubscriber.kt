@@ -31,7 +31,7 @@ class DomainEventSubscriber(
       when (eventType) {
         "prison-offender-events.prisoner.merged" ->
           restrictedPatientCleanup.mergeRestrictedPatient(
-            additionalInformation.removedNomsNumber,
+            additionalInformation.removedNomsNumber!!,
             additionalInformation.nomsNumber,
           )
         "prisoner-offender-search.prisoner.released" ->
