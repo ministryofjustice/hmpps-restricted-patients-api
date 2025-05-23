@@ -30,7 +30,7 @@ class RestrictedPatientCleanup(
     } ?: log.debug("Movement into prison for prisoner {} ignored as not a restricted patient", prisonerNumber)
   }
 
-  fun mergeRestrictedPatient(removedPrisonerNumber: String?, prisonerNumber: String) {
+  fun mergeRestrictedPatient(removedPrisonerNumber: String, prisonerNumber: String) {
     // If we find that either side of the merge was a restricted patient then we throw our toys out of the pram.
     // Fix would normally be to manually remove the old prisoner number from the restricted patients database
     // and then work out where the prisoner is now and move them to the correct hospital if required.  See README.md.
