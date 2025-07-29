@@ -42,6 +42,8 @@ jobs:
       postgres-db: restricted-patients
       postgres-username: restricted-patients
       postgres-password: test
+      gradle-command: './gradlew assemble check'
+      upload-build-artifacts: true
   build:
     name: Build docker image from hmpps-github-actions
     if: github.ref == 'refs/heads/main'
@@ -54,6 +56,7 @@ jobs:
       additional_docker_tag: ${{ inputs.additional_docker_tag }}
       push: ${{ inputs.push || true }}
       docker_multiplatform: false
+      download_build_artifacts: true
   deploy_dev:
     name: Deploy to the dev environment
     if: github.ref == 'refs/heads/main'
