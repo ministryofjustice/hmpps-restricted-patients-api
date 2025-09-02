@@ -21,7 +21,7 @@ generic-service:
 # CloudPlatform AlertManager receiver to route prometheus alerts to slack
 generic-prometheus-alerts:
   businessHoursOnly: true
-  alertSeverity: digital-prison-service-dev
+  alertSeverity: syscon-nonprod
   sqsNumberAlertQueueNames:
     - "dps-core-dev-restricted_patients_queue"
     - "dps-core-dev-restricted_patients_queue_dl"
