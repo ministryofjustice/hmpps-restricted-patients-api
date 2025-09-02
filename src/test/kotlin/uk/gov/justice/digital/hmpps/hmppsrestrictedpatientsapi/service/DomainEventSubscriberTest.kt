@@ -1,20 +1,22 @@
 package uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.service
 
-import com.google.gson.GsonBuilder
+import com.google.gson.Gson
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
-import org.springframework.boot.autoconfigure.gson.GsonAutoConfiguration
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.autoconfigure.json.JsonTest
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.dataBuilders.makeOutboundPrisonerSearchReleasedEvent
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.dataBuilders.makePrisonerMergeEvent
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services.DomainEventSubscriber
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services.RestrictedPatientCleanup
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services.RestrictedPatientEventService
 
-class DomainEventSubscriberTest {
+@JsonTest
+class DomainEventSubscriberTest(@Autowired gson: Gson) {
   private val restrictedPatientCleanup: RestrictedPatientCleanup = mock()
   private val restrictedPatientsEventService: RestrictedPatientEventService = mock()
-  private val domainEventSubscriber = DomainEventSubscriber(GsonAutoConfiguration().gson(GsonBuilder()), restrictedPatientCleanup, restrictedPatientsEventService)
+  private val domainEventSubscriber = DomainEventSubscriber(gson, restrictedPatientCleanup, restrictedPatientsEventService)
 
   @Test
   fun `calls merge restricted patient when two prisoner records are merged`() {
