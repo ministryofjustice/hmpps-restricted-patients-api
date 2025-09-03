@@ -3,7 +3,7 @@ package uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.PrisonApiGateway
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.PrisonApiApplicationGateway
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.entities.RestrictedPatient
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.Agency
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.MovementResponse
@@ -11,7 +11,7 @@ import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.repositories.Rest
 
 @Service
 class RestrictedPatientEventService(
-  private val prisonApiApplicationGateway: PrisonApiGateway,
+  private val prisonApiApplicationGateway: PrisonApiApplicationGateway,
   private val domainEventPublisher: DomainEventPublisher,
   private val restrictedPatientsRepository: RestrictedPatientsRepository,
 ) {

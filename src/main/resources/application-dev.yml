@@ -1,3 +1,9 @@
 prison.api.endpoint.url: https://prison-api-dev.prison.service.justice.gov.uk
 prisoner.search.api.endpoint.url: https://prisoner-search-dev.prison.service.justice.gov.uk
 oauth.endpoint.url: https://sign-in-dev.hmpps.service.justice.gov.uk/auth
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/restricted-patients
+    username: restricted-patients
+    password: test

@@ -14,7 +14,7 @@ import org.mockito.kotlin.whenever
 import org.springframework.web.reactive.function.client.WebClientResponseException
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.dataBuilders.makeLatestMovementReturn
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.dataBuilders.makeRestrictedPatient
-import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.PrisonApiGateway
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.PrisonApiApplicationGateway
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.Agency
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.repositories.RestrictedPatientsRepository
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services.DomainEventPublisher
@@ -22,7 +22,7 @@ import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services.Restrict
 
 class RestrictedPatientEventServiceTest {
 
-  private val prisonApiApplicationGateway: PrisonApiGateway = mock()
+  private val prisonApiApplicationGateway: PrisonApiApplicationGateway = mock()
   private val domainEventPublisher: DomainEventPublisher = mock()
   private val restrictedPatientsRepository: RestrictedPatientsRepository = mock()
   private val service = RestrictedPatientEventService(
