@@ -20,6 +20,11 @@ spring:
       test:
         - "stdout"
 
+  datasource:
+    url: jdbc:postgresql://${DATABASE_ENDPOINT}/${DATABASE_NAME}?sslmode=verify-full
+    username: ${DATABASE_USERNAME}
+    password: ${DATABASE_PASSWORD}
+
   jpa:
     open-in-view: false
     show-sql: false

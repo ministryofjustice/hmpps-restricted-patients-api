@@ -2,7 +2,7 @@ package uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services
 
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
-import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.PrisonApiGateway
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.PrisonApiApplicationGateway
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.RestrictedPatientContent
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.repositories.RestrictedPatientsRepository
 import uk.gov.justice.hmpps.kotlin.sar.HmppsPrisonSubjectAccessRequestService
@@ -12,7 +12,7 @@ import java.time.LocalDate
 @Service
 class SubjectAccessRequestService(
   private val repository: RestrictedPatientsRepository,
-  private val prisonApiApplicationGateway: PrisonApiGateway,
+  private val prisonApiApplicationGateway: PrisonApiApplicationGateway,
 ) : HmppsPrisonSubjectAccessRequestService {
   override fun getPrisonContentFor(prn: String, fromDate: LocalDate?, toDate: LocalDate?) = repository.findByIdOrNull(prn)?.let {
     val hospital = prisonApiApplicationGateway.getAgency(it.hospitalLocationCode)

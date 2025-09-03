@@ -65,12 +65,6 @@ class WebClientConfig(
     builder: WebClient.Builder,
   ): WebClient = builder.authorisedWebClient(authorizedClientManager, registrationId = "restricted-patients-api", url = "$prisonApiUrl/api", timeout)
 
-  @Bean
-  fun prisonerSearchClientCredsAppScope(
-    authorizedClientManager: OAuth2AuthorizedClientManager,
-    builder: WebClient.Builder,
-  ): WebClient = builder.authorisedWebClient(authorizedClientManager, registrationId = "restricted-patients-api", url = prisonerSearchApiUrl, timeout)
-
   private fun authorizedClientManagerRequestScope(
     clientRegistrationRepository: ClientRegistrationRepository,
     authorizedClientRepository: OAuth2AuthorizedClientRepository,

@@ -10,7 +10,7 @@ import org.mockito.kotlin.whenever
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.dataBuilders.HOSPITAL
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.dataBuilders.PRISON
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.dataBuilders.makeRestrictedPatient
-import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.PrisonApiGateway
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.PrisonApiApplicationGateway
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.repositories.RestrictedPatientsRepository
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services.SubjectAccessRequestService
 import java.time.LocalDateTime
@@ -18,7 +18,7 @@ import java.util.Optional
 
 class SubjectAccessRequestServiceTest {
   private val restrictedPatientsRepository: RestrictedPatientsRepository = mock()
-  private val prisonApiApplicationGateway: PrisonApiGateway = mock()
+  private val prisonApiApplicationGateway: PrisonApiApplicationGateway = mock()
   private val service = SubjectAccessRequestService(restrictedPatientsRepository, prisonApiApplicationGateway)
 
   @Nested
