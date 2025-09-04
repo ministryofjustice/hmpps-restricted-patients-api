@@ -3,21 +3,15 @@ package uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.config
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.security.core.Authentication
-import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager
-import org.springframework.security.oauth2.client.OAuth2AuthorizedClientProviderBuilder
-import org.springframework.security.oauth2.client.endpoint.DefaultClientCredentialsTokenResponseClient
-import org.springframework.security.oauth2.client.endpoint.OAuth2ClientCredentialsGrantRequest
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository
-import org.springframework.security.oauth2.client.web.DefaultOAuth2AuthorizedClientManager
-import org.springframework.security.oauth2.client.web.OAuth2AuthorizedClientRepository
 import org.springframework.web.context.annotation.RequestScope
 import org.springframework.web.reactive.function.client.WebClient
 import uk.gov.justice.hmpps.kotlin.auth.authorisedWebClient
 import uk.gov.justice.hmpps.kotlin.auth.healthWebClient
+import uk.gov.justice.hmpps.kotlin.auth.usernameAwareTokenRequestOAuth2AuthorizedClientManager
 import java.time.Duration
-import kotlin.apply as kotlinApply
 
 @Configuration
 class WebClientConfig(
@@ -37,10 +31,13 @@ class WebClientConfig(
   @RequestScope
   fun prisonApiClientCreds(
     clientRegistrationRepository: ClientRegistrationRepository,
-    authorizedClientRepository: OAuth2AuthorizedClientRepository,
+    oAuth2AuthorizedClientService: OAuth2AuthorizedClientService,
     builder: WebClient.Builder,
   ): WebClient = builder.authorisedWebClient(
-    authorizedClientManagerRequestScope(clientRegistrationRepository, authorizedClientRepository),
+    usernameAwareTokenRequestOAuth2AuthorizedClientManager(
+      clientRegistrationRepository,
+      oAuth2AuthorizedClientService,
+    ),
     registrationId = "restricted-patients-api",
     url = "$prisonApiUrl/api",
     timeout,
@@ -50,10 +47,13 @@ class WebClientConfig(
   @RequestScope
   fun prisonerSearchClientCreds(
     clientRegistrationRepository: ClientRegistrationRepository,
-    authorizedClientRepository: OAuth2AuthorizedClientRepository,
+    oAuth2AuthorizedClientService: OAuth2AuthorizedClientService,
     builder: WebClient.Builder,
   ): WebClient = builder.authorisedWebClient(
-    authorizedClientManagerRequestScope(clientRegistrationRepository, authorizedClientRepository),
+    usernameAwareTokenRequestOAuth2AuthorizedClientManager(
+      clientRegistrationRepository,
+      oAuth2AuthorizedClientService,
+    ),
     registrationId = "restricted-patients-api",
     url = prisonerSearchApiUrl,
     timeout,
@@ -64,28 +64,4 @@ class WebClientConfig(
     authorizedClientManager: OAuth2AuthorizedClientManager,
     builder: WebClient.Builder,
   ): WebClient = builder.authorisedWebClient(authorizedClientManager, registrationId = "restricted-patients-api", url = "$prisonApiUrl/api", timeout)
-
-  private fun authorizedClientManagerRequestScope(
-    clientRegistrationRepository: ClientRegistrationRepository,
-    authorizedClientRepository: OAuth2AuthorizedClientRepository,
-  ): OAuth2AuthorizedClientManager {
-    val defaultClientCredentialsTokenResponseClient = DefaultClientCredentialsTokenResponseClient()
-    val authentication: Authentication = SecurityContextHolder.getContext().authentication
-
-    defaultClientCredentialsTokenResponseClient.setRequestEntityConverter { grantRequest: OAuth2ClientCredentialsGrantRequest? ->
-      val converter = CustomOAuth2ClientCredentialsGrantRequestEntityConverter()
-      converter.enhanceWithUsername(grantRequest, authentication.name)
-    }
-
-    val authorizedClientProvider = OAuth2AuthorizedClientProviderBuilder.builder()
-      .clientCredentials { clientCredentialsGrantBuilder: OAuth2AuthorizedClientProviderBuilder.ClientCredentialsGrantBuilder ->
-        clientCredentialsGrantBuilder.accessTokenResponseClient(
-          defaultClientCredentialsTokenResponseClient,
-        )
-      }
-      .build()
-    return DefaultOAuth2AuthorizedClientManager(clientRegistrationRepository, authorizedClientRepository).kotlinApply {
-      setAuthorizedClientProvider(authorizedClientProvider)
-    }
-  }
 }
