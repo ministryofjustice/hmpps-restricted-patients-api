@@ -32,4 +32,4 @@ environment: dev
 
 cron:
   retry_dlqs_schedule: "*/10 7-20 * * 1-5"
-  past_date_check_schedule: "0 13 * * *"
+  past_date_check_schedule: "0 13 * * 1-5"
