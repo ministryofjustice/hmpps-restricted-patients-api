@@ -4,6 +4,7 @@ metadata:
   name: hmppps-restricted-patients-api-dlq-retry
 spec:
   schedule: "{{ .Values.cron.retry_dlqs_schedule }}"
+  suspend: true
   concurrencyPolicy: Forbid
   failedJobsHistoryLimit: 5
   startingDeadlineSeconds: 600
