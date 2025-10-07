@@ -24,10 +24,6 @@ generic-service:
           deny all;
           return 401;
         }
-        location /process-past-date-restricted-patients {
-          deny all;
-          return 401;
-        }
 
   # Environment variables to load into the deployment
   env:
@@ -66,6 +62,13 @@ generic-service:
   allowlist:
     groups:
       - internal
+      -
+  # The name has max length of 22 chars (Cronjob name max length is 52 chars, including prefix "hmpps-restricted-patients-api-")
+  # The type must exist in enum BatchType
+  batchjobs:
+    - name: past-date-check
+      type: PAST_DATE_CHECK
+      schedule: "0 3 * * *"
 
 generic-prometheus-alerts:
   alertSeverity: syscon
@@ -74,4 +77,3 @@ generic-prometheus-alerts:
 
 cron:
   retry_dlqs_schedule: "*/10 * * * *"
-  past_date_check_schedule: "0 3 * * *"

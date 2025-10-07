@@ -17,7 +17,7 @@ data class Event(val Message: String)
 class OffenderEventSubscriber(
   private val gson: Gson,
   private val restrictedPatientCleanup: RestrictedPatientCleanup,
-) {
+) : EventSubscriber {
 
   @SqsListener("offenderevents", factory = "hmppsQueueContainerFactoryProxy")
   fun handleEvents(requestJson: String?) {
