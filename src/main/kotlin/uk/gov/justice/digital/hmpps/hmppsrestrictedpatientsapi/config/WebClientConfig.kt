@@ -1,6 +1,7 @@
 package uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.config
 
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager
@@ -45,6 +46,7 @@ class WebClientConfig(
 
   @Bean
   @RequestScope
+  @ConditionalOnProperty(name = ["batch.enabled"], havingValue = "false", matchIfMissing = true)
   fun prisonerSearchClientCreds(
     clientRegistrationRepository: ClientRegistrationRepository,
     oAuth2AuthorizedClientService: OAuth2AuthorizedClientService,
@@ -64,4 +66,11 @@ class WebClientConfig(
     authorizedClientManager: OAuth2AuthorizedClientManager,
     builder: WebClient.Builder,
   ): WebClient = builder.authorisedWebClient(authorizedClientManager, registrationId = "restricted-patients-api", url = "$prisonApiUrl/api", timeout)
+
+  @Bean("prisonerSearchClientCreds")
+  @ConditionalOnProperty(name = ["batch.enabled"], havingValue = "true", matchIfMissing = false)
+  fun prisonerSearchClientCredsAppScope(
+    authorizedClientManager: OAuth2AuthorizedClientManager,
+    builder: WebClient.Builder,
+  ): WebClient = builder.authorisedWebClient(authorizedClientManager, registrationId = "restricted-patients-api", url = prisonerSearchApiUrl, timeout)
 }

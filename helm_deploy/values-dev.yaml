@@ -18,6 +18,11 @@ generic-service:
     startup: '24 6 * * 1-5' # Start at 6.24am UTC Monday-Friday
     shutdown: '48 21 * * 1-5' # Stop at 9.48`pm UTC Monday-Friday
 
+  batchjobs:
+    - name: past-date-check
+      type: PAST_DATE_CHECK
+      schedule: "0 13 * * 1-5"
+
 # CloudPlatform AlertManager receiver to route prometheus alerts to slack
 generic-prometheus-alerts:
   businessHoursOnly: true
@@ -32,4 +37,3 @@ environment: dev
 
 cron:
   retry_dlqs_schedule: "*/10 7-20 * * 1-5"
-  past_date_check_schedule: "0 13 * * 1-5"

@@ -22,7 +22,7 @@ class DomainEventSubscriber(
   private val gson: Gson,
   private val restrictedPatientCleanup: RestrictedPatientCleanup,
   private val restrictedPatientEventService: RestrictedPatientEventService,
-) {
+) : EventSubscriber {
 
   @SqsListener("domainevents", factory = "hmppsQueueContainerFactoryProxy")
   fun handleEvents(requestJson: String?) {
