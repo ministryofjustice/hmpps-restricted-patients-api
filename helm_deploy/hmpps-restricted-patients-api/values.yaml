@@ -62,7 +62,7 @@ generic-service:
   allowlist:
     groups:
       - internal
-      -
+
   # The name has max length of 22 chars (Cronjob name max length is 52 chars, including prefix "hmpps-restricted-patients-api-")
   # The type must exist in enum BatchType
   batchjobs:
