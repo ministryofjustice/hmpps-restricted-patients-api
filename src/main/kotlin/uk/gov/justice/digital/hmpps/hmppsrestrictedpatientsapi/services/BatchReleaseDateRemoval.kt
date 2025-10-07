@@ -19,6 +19,7 @@ class BatchReleaseDateRemoval(
 ) {
 
   fun removeNonLifePrisonersPastRelevantDate() {
+    log.info("Removing non-life prisoners with a release date in the past")
     val now = LocalDate.now(clock)
     val toBeDeleted = restrictedPatientsRepository.findAll()
       .chunked(1000)
