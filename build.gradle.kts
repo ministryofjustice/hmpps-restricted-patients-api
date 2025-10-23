@@ -25,7 +25,7 @@ dependencies {
   implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.13")
   implementation("org.springframework:spring-jms")
   implementation("com.google.code.gson:gson:2.13.2")
-  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:5.5.0")
+  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:5.6.0")
   implementation("org.apache.commons:commons-csv:1.14.1")
   // Needs to match this version https://github.com/microsoft/ApplicationInsights-Java/blob/3.7.4/dependencyManagement/build.gradle.kts#L16
   implementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:2.18.1")
