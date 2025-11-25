@@ -30,6 +30,7 @@ class WebClientConfig(
 
   @Bean
   @RequestScope
+  @ConditionalOnProperty(name = ["batch.enabled"], havingValue = "false", matchIfMissing = true)
   fun prisonApiClientCreds(
     clientRegistrationRepository: ClientRegistrationRepository,
     oAuth2AuthorizedClientService: OAuth2AuthorizedClientService,
