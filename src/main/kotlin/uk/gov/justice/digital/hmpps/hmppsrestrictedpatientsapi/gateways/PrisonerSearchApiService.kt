@@ -9,11 +9,11 @@ import kotlin.reflect.KProperty1
 import kotlin.reflect.full.memberProperties
 
 @Component
-class PrisonerSearchApiGateway(@Qualifier("prisonerSearchClientCreds") private val prisonerSearchClientCreds: WebClient) {
+class PrisonerSearchApiService(@Qualifier("prisonerSearchSystemClient") private val prisonerSearchSystemClient: WebClient) {
 
   fun searchByPrisonNumber(prisonNumber: String): List<PrisonerResult> = findByPrisonNumbers(listOf(prisonNumber))
 
-  fun findByPrisonNumbers(prisonNumbers: List<String>): List<PrisonerResult> = prisonerSearchClientCreds
+  fun findByPrisonNumbers(prisonNumbers: List<String>): List<PrisonerResult> = prisonerSearchSystemClient
     .post()
     .uri {
       it.path("/prisoner-search/prisoner-numbers")

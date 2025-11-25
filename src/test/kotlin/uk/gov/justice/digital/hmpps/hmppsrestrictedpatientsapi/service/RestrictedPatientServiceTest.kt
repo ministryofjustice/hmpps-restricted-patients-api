@@ -24,8 +24,9 @@ import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.dataBuilders.make
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.dataBuilders.makePrisonerResult
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.dataBuilders.makeRestrictedPatient
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.dataBuilders.makeSupportingPrisonRequest
-import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.PrisonApiGateway
-import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.PrisonerSearchApiGateway
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.PrisonApiQueryService
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.PrisonApiUpdateService
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.PrisonerSearchApiService
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.entities.RestrictedPatient
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.request.CreateExternalMovement
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.Agency
@@ -40,8 +41,9 @@ import java.util.Optional
 
 class RestrictedPatientServiceTest {
 
-  private val prisonApiGateway: PrisonApiGateway = mock()
-  private val prisonerSearchApiGateway: PrisonerSearchApiGateway = mock()
+  private val prisonApiUpdateService: PrisonApiUpdateService = mock()
+  private val prisonApiQueryService: PrisonApiQueryService = mock()
+  private val prisonerSearchApiService: PrisonerSearchApiService = mock()
   private val restrictedPatientsRepository: RestrictedPatientsRepository = mock()
   private val clock: Clock = mock()
 
@@ -55,8 +57,9 @@ class RestrictedPatientServiceTest {
   )
 
   private val service = RestrictedPatientsService(
-    prisonApiGateway,
-    prisonerSearchApiGateway,
+    prisonApiQueryService,
+    prisonApiUpdateService,
+    prisonerSearchApiService,
     restrictedPatientsRepository,
     clock,
   )
@@ -78,7 +81,7 @@ class RestrictedPatientServiceTest {
       whenever(restrictedPatientsRepository.findById(anyString())).thenReturn(
         Optional.of(makeRestrictedPatient()),
       )
-      whenever(prisonerSearchApiGateway.searchByPrisonNumber(anyString())).thenReturn(listOf(makePrisonerResult()))
+      whenever(prisonerSearchApiService.searchByPrisonNumber(anyString())).thenReturn(listOf(makePrisonerResult()))
 
       service.removeRestrictedPatient("A12345")
 
@@ -98,14 +101,14 @@ class RestrictedPatientServiceTest {
 
     @Test
     fun `makes a call to prisoner offender search`() {
-      whenever(prisonerSearchApiGateway.searchByPrisonNumber(anyString())).thenReturn(listOf(makePrisonerResult()))
+      whenever(prisonerSearchApiService.searchByPrisonNumber(anyString())).thenReturn(listOf(makePrisonerResult()))
       whenever(restrictedPatientsRepository.findById(anyString())).thenReturn(
         Optional.of(makeRestrictedPatient()),
       )
 
       service.removeRestrictedPatient("A12345")
 
-      verify(prisonerSearchApiGateway).searchByPrisonNumber("A12345")
+      verify(prisonerSearchApiService).searchByPrisonNumber("A12345")
     }
 
     @Test
@@ -113,7 +116,7 @@ class RestrictedPatientServiceTest {
       whenever(restrictedPatientsRepository.findById(anyString())).thenReturn(
         Optional.of(makeRestrictedPatient()),
       )
-      whenever(prisonerSearchApiGateway.searchByPrisonNumber(anyString())).thenReturn(emptyList())
+      whenever(prisonerSearchApiService.searchByPrisonNumber(anyString())).thenReturn(emptyList())
 
       val exception = assertThrows(EntityNotFoundException::class.java) {
         service.removeRestrictedPatient("A12345")
@@ -127,11 +130,11 @@ class RestrictedPatientServiceTest {
       whenever(restrictedPatientsRepository.findById(anyString())).thenReturn(
         Optional.of(makeRestrictedPatient()),
       )
-      whenever(prisonerSearchApiGateway.searchByPrisonNumber(anyString())).thenReturn(listOf(makePrisonerResult()))
+      whenever(prisonerSearchApiService.searchByPrisonNumber(anyString())).thenReturn(listOf(makePrisonerResult()))
 
       service.removeRestrictedPatient("A12345")
 
-      verify(prisonApiGateway).createExternalMovement(
+      verify(prisonApiUpdateService).createExternalMovement(
         CreateExternalMovement(
           bookingId = 1L,
           fromAgencyId = "HAZLWD",
@@ -147,7 +150,7 @@ class RestrictedPatientServiceTest {
     @Test
     fun `remove restricted patient`() {
       whenever(restrictedPatientsRepository.findById(anyString())).thenReturn(Optional.of(makeRestrictedPatient()))
-      whenever(prisonerSearchApiGateway.searchByPrisonNumber(anyString())).thenReturn(listOf(makePrisonerResult()))
+      whenever(prisonerSearchApiService.searchByPrisonNumber(anyString())).thenReturn(listOf(makePrisonerResult()))
 
       service.removeRestrictedPatient("A12345")
 
@@ -166,14 +169,14 @@ class RestrictedPatientServiceTest {
     @Test
     fun `ensures that the restricted patient is removed before the prison api calls`() {
       whenever(restrictedPatientsRepository.findById(any())).thenReturn(Optional.of(makeRestrictedPatient()))
-      whenever(prisonerSearchApiGateway.searchByPrisonNumber(anyString())).thenReturn(listOf(makePrisonerResult()))
+      whenever(prisonerSearchApiService.searchByPrisonNumber(anyString())).thenReturn(listOf(makePrisonerResult()))
 
       service.removeRestrictedPatient("A12345")
 
-      val inOrder = inOrder(restrictedPatientsRepository, prisonApiGateway)
+      val inOrder = inOrder(restrictedPatientsRepository, prisonApiUpdateService)
 
       inOrder.verify(restrictedPatientsRepository).delete(any())
-      inOrder.verify(prisonApiGateway).createExternalMovement(any())
+      inOrder.verify(prisonApiUpdateService).createExternalMovement(any())
     }
   }
 
@@ -183,7 +186,7 @@ class RestrictedPatientServiceTest {
     inner class Failures {
       @Test
       fun `throws exception when offender not found`() {
-        whenever(prisonApiGateway.getOffenderBooking(any())).thenReturn(null)
+        whenever(prisonApiQueryService.getOffenderBooking(any())).thenReturn(null)
 
         assertThrows(EntityNotFoundException::class.java) {
           service.dischargeToHospital(makeDischargeRequest())
@@ -192,7 +195,7 @@ class RestrictedPatientServiceTest {
 
       @Test
       fun `throws exception when offender is OUT`() {
-        whenever(prisonApiGateway.getOffenderBooking(any())).thenReturn(
+        whenever(prisonApiQueryService.getOffenderBooking(any())).thenReturn(
           OffenderBookingResponse(1234567, "A1234AA", false),
         )
 
@@ -215,7 +218,7 @@ class RestrictedPatientServiceTest {
     inner class SuccessfulDischargeToHospital {
       @BeforeEach
       fun beforeEach() {
-        whenever(prisonApiGateway.getOffenderBooking(any())).thenReturn(
+        whenever(prisonApiQueryService.getOffenderBooking(any())).thenReturn(
           OffenderBookingResponse(1234567, "A1234AA", true),
         )
         whenever(restrictedPatientsRepository.save(any())).thenReturn(makeRestrictedPatient())
@@ -227,7 +230,7 @@ class RestrictedPatientServiceTest {
         whenever(restrictedPatientsRepository.save(any())).thenReturn(patient)
         val response = service.dischargeToHospital(makeDischargeRequest().copy(supportingPrisonId = "LEI"))
 
-        verify(prisonApiGateway).dischargeToHospital(patient)
+        verify(prisonApiUpdateService).dischargeToHospital(patient)
 
         assertThat(response.fromLocation).isEqualTo(Agency(agencyId = "MDI"))
         assertThat(response.supportingPrison).isEqualTo(Agency(agencyId = "LEI"))
@@ -246,7 +249,7 @@ class RestrictedPatientServiceTest {
       fun `default to from prison id for supporting prison when not supplied`() {
         service.dischargeToHospital(makeDischargeRequest())
 
-        verify(prisonApiGateway).dischargeToHospital(restrictedPatient)
+        verify(prisonApiUpdateService).dischargeToHospital(restrictedPatient)
       }
 
       @Test
@@ -269,10 +272,10 @@ class RestrictedPatientServiceTest {
       fun `ensures that the restricted patient is saved to the database before the prison api call`() {
         service.dischargeToHospital(makeDischargeRequest())
 
-        val inOrder = inOrder(restrictedPatientsRepository, prisonApiGateway)
+        val inOrder = inOrder(restrictedPatientsRepository, prisonApiUpdateService)
 
         inOrder.verify(restrictedPatientsRepository).save(any())
-        inOrder.verify(prisonApiGateway).dischargeToHospital(any())
+        inOrder.verify(prisonApiUpdateService).dischargeToHospital(any())
       }
     }
 
@@ -289,8 +292,8 @@ class RestrictedPatientServiceTest {
 
       @Test
       fun `by prison number`() {
-        whenever(prisonApiGateway.getAgencyLocationsByType("HSHOSP")).thenReturn(listOf(HOSPITAL))
-        whenever(prisonApiGateway.getAgencyLocationsByType("INST")).thenReturn(listOf(PRISON))
+        whenever(prisonApiQueryService.getAgencyLocationsByType("HSHOSP")).thenReturn(listOf(HOSPITAL))
+        whenever(prisonApiQueryService.getAgencyLocationsByType("INST")).thenReturn(listOf(PRISON))
         whenever(restrictedPatientsRepository.findById(anyString())).thenReturn(
           Optional.of(makeRestrictedPatient()),
         )
@@ -333,7 +336,7 @@ class RestrictedPatientServiceTest {
 
       @Test
       fun `throws exception when the offender has not got any previous movements`() {
-        whenever(prisonApiGateway.getLatestMovements(any())).thenReturn(emptyList())
+        whenever(prisonApiQueryService.getLatestMovements(any())).thenReturn(emptyList())
 
         assertThrows(BadRequestException::class.java) {
           service.migrateInPatient(makeMigrateInRequest())
@@ -342,7 +345,7 @@ class RestrictedPatientServiceTest {
 
       @Test
       fun `throws exception when Prison API returns multiple movements`() {
-        whenever(prisonApiGateway.getLatestMovements(any())).thenReturn(
+        whenever(prisonApiQueryService.getLatestMovements(any())).thenReturn(
           listOf(
             makeLatestMovementReturn(),
             makeLatestMovementReturn(),
@@ -359,7 +362,7 @@ class RestrictedPatientServiceTest {
         val nonRelMovement = makeLatestMovementReturn().copy(
           movementType = "TPT",
         )
-        whenever(prisonApiGateway.getLatestMovements(any())).thenReturn(listOf(nonRelMovement))
+        whenever(prisonApiQueryService.getLatestMovements(any())).thenReturn(listOf(nonRelMovement))
 
         assertThrows(BadRequestException::class.java) {
           service.migrateInPatient(makeMigrateInRequest())
@@ -371,7 +374,7 @@ class RestrictedPatientServiceTest {
         val movementWithoutFromAgency = makeLatestMovementReturn().copy(
           fromAgency = null,
         )
-        whenever(prisonApiGateway.getLatestMovements(any())).thenReturn(listOf(movementWithoutFromAgency))
+        whenever(prisonApiQueryService.getLatestMovements(any())).thenReturn(listOf(movementWithoutFromAgency))
 
         assertThrows(BadRequestException::class.java) {
           service.migrateInPatient(makeMigrateInRequest())
@@ -383,7 +386,7 @@ class RestrictedPatientServiceTest {
         val movementWithInvalidDate = makeLatestMovementReturn().copy(
           movementDate = null,
         )
-        whenever(prisonApiGateway.getLatestMovements(any())).thenReturn(listOf(movementWithInvalidDate))
+        whenever(prisonApiQueryService.getLatestMovements(any())).thenReturn(listOf(movementWithInvalidDate))
 
         assertThrows(BadRequestException::class.java) {
           service.migrateInPatient(makeMigrateInRequest())
@@ -395,7 +398,7 @@ class RestrictedPatientServiceTest {
         val movementWithInvalidTime = makeLatestMovementReturn().copy(
           movementTime = null,
         )
-        whenever(prisonApiGateway.getLatestMovements(any())).thenReturn(listOf(movementWithInvalidTime))
+        whenever(prisonApiQueryService.getLatestMovements(any())).thenReturn(listOf(movementWithInvalidTime))
 
         assertThrows(BadRequestException::class.java) {
           service.migrateInPatient(makeMigrateInRequest())
@@ -427,7 +430,7 @@ class RestrictedPatientServiceTest {
             commentText = testComment,
           ),
         )
-        whenever(prisonApiGateway.getLatestMovements(any())).thenReturn(
+        whenever(prisonApiQueryService.getLatestMovements(any())).thenReturn(
           listOf(
             makeLatestMovementReturn(
               movementDate = dischargeDate,
@@ -442,7 +445,7 @@ class RestrictedPatientServiceTest {
       fun `it makes a call to prison api to update discharge record`() {
         val response = service.migrateInPatient(makeMigrateInRequest())
 
-        verify(prisonApiGateway).dischargeToHospital(migratedRestrictedPatient)
+        verify(prisonApiUpdateService).dischargeToHospital(migratedRestrictedPatient)
 
         assertThat(response.fromLocation).isEqualTo(Agency(agencyId = "MDI"))
         assertThat(response.supportingPrison).isEqualTo(Agency(agencyId = "MDI"))
@@ -492,7 +495,7 @@ class RestrictedPatientServiceTest {
             commentText = "comment saved to restricted patients",
           ),
         )
-        whenever(prisonApiGateway.getLatestMovements(any())).thenReturn(
+        whenever(prisonApiQueryService.getLatestMovements(any())).thenReturn(
           listOf(
             makeLatestMovementReturn(
               movementDate = dischargeDate,
@@ -512,7 +515,7 @@ class RestrictedPatientServiceTest {
             assertThat(it.commentText).isEqualTo("Historical discharge to hospital added to restricted patients")
           },
         )
-        verify(prisonApiGateway).dischargeToHospital(
+        verify(prisonApiUpdateService).dischargeToHospital(
           newRestrictedPatient = check {
             assertThat(it.commentText).isEqualTo("comment saved to restricted patients")
           },
@@ -574,10 +577,10 @@ class RestrictedPatientServiceTest {
         whenever(restrictedPatientsRepository.findById(anyString())).thenReturn(
           Optional.of(makeRestrictedPatient(supportingPrisonId = "LEI")),
         )
-        whenever(prisonApiGateway.getAgency(anyString())).thenReturn(PRISON)
+        whenever(prisonApiQueryService.getAgency(anyString())).thenReturn(PRISON)
         whenever(restrictedPatientsRepository.save(any())).thenReturn(makeRestrictedPatient(supportingPrisonId = "MDI"))
-        whenever(prisonApiGateway.getAgencyLocationsByType("HSHOSP")).thenReturn(listOf(HOSPITAL))
-        whenever(prisonApiGateway.getAgencyLocationsByType("INST")).thenReturn(listOf(PRISON))
+        whenever(prisonApiQueryService.getAgencyLocationsByType("HSHOSP")).thenReturn(listOf(HOSPITAL))
+        whenever(prisonApiQueryService.getAgencyLocationsByType("INST")).thenReturn(listOf(PRISON))
 
         val response = service.changeSupportingPrison(makeSupportingPrisonRequest(supportingPrisonId = "MDI"))
 
@@ -590,7 +593,7 @@ class RestrictedPatientServiceTest {
           Optional.of(makeRestrictedPatient()),
         )
         whenever(restrictedPatientsRepository.save(any())).thenReturn(makeRestrictedPatient(supportingPrisonId = "LEI"))
-        whenever(prisonApiGateway.getAgency(anyString())).thenReturn(PRISON)
+        whenever(prisonApiQueryService.getAgency(anyString())).thenReturn(PRISON)
 
         service.changeSupportingPrison(makeSupportingPrisonRequest(supportingPrisonId = "LEI"))
 

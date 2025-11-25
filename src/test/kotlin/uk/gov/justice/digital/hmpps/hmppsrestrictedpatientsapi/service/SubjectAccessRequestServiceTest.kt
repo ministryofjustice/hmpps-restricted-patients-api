@@ -10,7 +10,7 @@ import org.mockito.kotlin.whenever
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.dataBuilders.HOSPITAL
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.dataBuilders.PRISON
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.dataBuilders.makeRestrictedPatient
-import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.PrisonApiApplicationGateway
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.PrisonApiQueryService
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.repositories.RestrictedPatientsRepository
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services.SubjectAccessRequestService
 import java.time.LocalDateTime
@@ -18,8 +18,8 @@ import java.util.Optional
 
 class SubjectAccessRequestServiceTest {
   private val restrictedPatientsRepository: RestrictedPatientsRepository = mock()
-  private val prisonApiApplicationGateway: PrisonApiApplicationGateway = mock()
-  private val service = SubjectAccessRequestService(restrictedPatientsRepository, prisonApiApplicationGateway)
+  private val prisonApiQueryService: PrisonApiQueryService = mock()
+  private val service = SubjectAccessRequestService(restrictedPatientsRepository, prisonApiQueryService)
 
   @Nested
   inner class GetRestrictedPatient {
@@ -51,7 +51,7 @@ class SubjectAccessRequestServiceTest {
       whenever(restrictedPatientsRepository.findById(anyString())).thenReturn(
         Optional.of(makeRestrictedPatient()),
       )
-      whenever(prisonApiApplicationGateway.getAgency(HOSPITAL.agencyId)).thenReturn(HOSPITAL)
+      whenever(prisonApiQueryService.getAgency(HOSPITAL.agencyId)).thenReturn(HOSPITAL)
 
       val restrictedPatient = service.getPrisonContentFor("A12345", null, null)?.content
 

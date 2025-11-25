@@ -14,7 +14,7 @@ import org.mockito.kotlin.whenever
 import org.springframework.web.reactive.function.client.WebClientResponseException
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.dataBuilders.makeLatestMovementReturn
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.dataBuilders.makeRestrictedPatient
-import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.PrisonApiApplicationGateway
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.PrisonApiQueryService
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.Agency
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.repositories.RestrictedPatientsRepository
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services.DomainEventPublisher
@@ -22,11 +22,11 @@ import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services.Restrict
 
 class RestrictedPatientEventServiceTest {
 
-  private val prisonApiApplicationGateway: PrisonApiApplicationGateway = mock()
+  private val prisonApiQueryService: PrisonApiQueryService = mock()
   private val domainEventPublisher: DomainEventPublisher = mock()
   private val restrictedPatientsRepository: RestrictedPatientsRepository = mock()
   private val service = RestrictedPatientEventService(
-    prisonApiApplicationGateway,
+    prisonApiQueryService,
     domainEventPublisher,
     restrictedPatientsRepository,
   )
@@ -36,7 +36,7 @@ class RestrictedPatientEventServiceTest {
     @BeforeEach
     fun beforeEach() {
       whenever(restrictedPatientsRepository.existsById(ArgumentMatchers.anyString())).thenReturn(false)
-      whenever(prisonApiApplicationGateway.getLatestMovements(any())).thenReturn(
+      whenever(prisonApiQueryService.getLatestMovements(any())).thenReturn(
         listOf(
           makeLatestMovementReturn(
             movementType = "REL",
@@ -45,7 +45,7 @@ class RestrictedPatientEventServiceTest {
           ),
         ),
       )
-      whenever(prisonApiApplicationGateway.getAgency(any())).thenReturn(
+      whenever(prisonApiQueryService.getAgency(any())).thenReturn(
         Agency(agencyId = "HAZLWD", description = "Hazelwood Hospital", agencyType = "HSHOSP"),
       )
       whenever(restrictedPatientsRepository.save(any())).thenReturn(makeRestrictedPatient())
@@ -75,31 +75,31 @@ class RestrictedPatientEventServiceTest {
 
       @Test
       fun `should throw when get movements fails with error`() {
-        whenever(prisonApiApplicationGateway.getLatestMovements(any())).thenThrow(WebClientResponseException.BadGateway::class.java)
+        whenever(prisonApiQueryService.getLatestMovements(any())).thenThrow(WebClientResponseException.BadGateway::class.java)
 
         Assertions.assertThrows(WebClientResponseException.BadGateway::class.java) {
           service.prisonerReleased("A1234AA", "RELEASED_TO_HOSPITAL")
         }
 
-        verify(prisonApiApplicationGateway).getLatestMovements("A1234AA")
+        verify(prisonApiQueryService).getLatestMovements("A1234AA")
         verify(restrictedPatientsRepository, never()).save(any())
         verify(domainEventPublisher, never()).publishRestrictedPatientAdded(any())
       }
 
       @Test
       fun `should do nothing if movements not found`() {
-        whenever(prisonApiApplicationGateway.getLatestMovements(any())).thenReturn(emptyList())
+        whenever(prisonApiQueryService.getLatestMovements(any())).thenReturn(emptyList())
 
         service.prisonerReleased("A1234AA", "RELEASED_TO_HOSPITAL")
 
-        verify(prisonApiApplicationGateway).getLatestMovements("A1234AA")
+        verify(prisonApiQueryService).getLatestMovements("A1234AA")
         verify(restrictedPatientsRepository, never()).save(any())
         verify(domainEventPublisher, never()).publishRestrictedPatientAdded(any())
       }
 
       @Test
       fun `should do nothing if latest movement not release to hospital`() {
-        whenever(prisonApiApplicationGateway.getLatestMovements(any())).thenReturn(
+        whenever(prisonApiQueryService.getLatestMovements(any())).thenReturn(
           listOf(
             makeLatestMovementReturn(
               movementType = "REL",
@@ -117,31 +117,31 @@ class RestrictedPatientEventServiceTest {
 
       @Test
       fun `should throw if get agency location fails with error`() {
-        whenever(prisonApiApplicationGateway.getAgency(any())).thenThrow(WebClientResponseException.BadRequest::class.java)
+        whenever(prisonApiQueryService.getAgency(any())).thenThrow(WebClientResponseException.BadRequest::class.java)
 
         Assertions.assertThrows(WebClientResponseException.BadRequest::class.java) {
           service.prisonerReleased("A1234AA", "RELEASED_TO_HOSPITAL")
         }
 
-        verify(prisonApiApplicationGateway).getAgency("HAZLWD")
+        verify(prisonApiQueryService).getAgency("HAZLWD")
         verify(restrictedPatientsRepository, never()).save(any())
         verify(domainEventPublisher, never()).publishRestrictedPatientAdded(any())
       }
 
       @Test
       fun `should do nothing if to agency is not found`() {
-        whenever(prisonApiApplicationGateway.getAgency(any())).thenReturn(null)
+        whenever(prisonApiQueryService.getAgency(any())).thenReturn(null)
 
         service.prisonerReleased("A1234AA", "RELEASED_TO_HOSPITAL")
 
-        verify(prisonApiApplicationGateway).getAgency("HAZLWD")
+        verify(prisonApiQueryService).getAgency("HAZLWD")
         verify(restrictedPatientsRepository, never()).save(any())
         verify(domainEventPublisher, never()).publishRestrictedPatientAdded(any())
       }
 
       @Test
       fun `should do nothing if agency is not a hospital`() {
-        whenever(prisonApiApplicationGateway.getLatestMovements(any())).thenReturn(
+        whenever(prisonApiQueryService.getLatestMovements(any())).thenReturn(
           listOf(
             makeLatestMovementReturn(
               movementType = "REL",
@@ -150,7 +150,7 @@ class RestrictedPatientEventServiceTest {
             ),
           ),
         )
-        whenever(prisonApiApplicationGateway.getAgency(any())).thenReturn(
+        whenever(prisonApiQueryService.getAgency(any())).thenReturn(
           Agency(agencyId = "MDI", description = "MDI", agencyType = "INST"),
         )
 
@@ -166,8 +166,8 @@ class RestrictedPatientEventServiceTest {
 
       @AfterEach
       fun afterEach() {
-        verify(prisonApiApplicationGateway).getLatestMovements("A1234AA")
-        verify(prisonApiApplicationGateway).getAgency("HAZLWD")
+        verify(prisonApiQueryService).getLatestMovements("A1234AA")
+        verify(prisonApiQueryService).getAgency("HAZLWD")
         verify(restrictedPatientsRepository).existsById("A1234AA")
       }
 
@@ -192,7 +192,7 @@ class RestrictedPatientEventServiceTest {
 
       @Test
       fun `should also allow release to agency type HOSPITAL`() {
-        whenever(prisonApiApplicationGateway.getAgency(any())).thenReturn(
+        whenever(prisonApiQueryService.getAgency(any())).thenReturn(
           Agency(agencyId = "HAZLWD", description = "Hazelwood Hospital", agencyType = "HOSPITAL"),
         )
 

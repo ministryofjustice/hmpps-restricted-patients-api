@@ -19,7 +19,7 @@ import org.mockito.kotlin.verifyNoMoreInteractions
 import org.mockito.kotlin.whenever
 import org.springframework.web.reactive.function.client.WebClientResponseException
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.dataBuilders.makePrisonerResult
-import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.PrisonerSearchApiGateway
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.PrisonerSearchApiService
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.entities.RestrictedPatient
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.repositories.RestrictedPatientsRepository
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services.BatchReleaseDateRemoval
@@ -31,7 +31,7 @@ import java.time.LocalDateTime
 import java.time.ZoneId
 
 class BatchReleaseDateRemovalTest {
-  private val prisonerSearchApiGateway: PrisonerSearchApiGateway = mock()
+  private val prisonerSearchApiService: PrisonerSearchApiService = mock()
   private val restrictedPatientsRepository: RestrictedPatientsRepository = mock()
   private val restrictedPatientsService: RestrictedPatientsService = mock()
   private val telemetryClient: TelemetryClient = mock()
@@ -52,7 +52,7 @@ class BatchReleaseDateRemovalTest {
 
   private val service = BatchReleaseDateRemoval(
     restrictedPatientsRepository,
-    prisonerSearchApiGateway,
+    prisonerSearchApiService,
     restrictedPatientsService,
     telemetryClient,
     domainEventPublisher,
@@ -70,7 +70,7 @@ class BatchReleaseDateRemovalTest {
     @Test
     fun `does nothing if no prisoners matched`() {
       whenever(restrictedPatientsRepository.findAll()).thenReturn(listOf(restrictedPatient))
-      whenever(prisonerSearchApiGateway.findByPrisonNumbers(any())).thenReturn(listOf(makePrisonerResult()))
+      whenever(prisonerSearchApiService.findByPrisonNumbers(any())).thenReturn(listOf(makePrisonerResult()))
 
       service.removeNonLifePrisonersPastRelevantDate()
 
@@ -81,12 +81,12 @@ class BatchReleaseDateRemovalTest {
     @Test
     fun `calls prisoner offender search multiple times if more than 1000 restricted patients`() {
       whenever(restrictedPatientsRepository.findAll()).thenReturn(MutableList(3500) { restrictedPatient })
-      whenever(prisonerSearchApiGateway.findByPrisonNumbers(any())).thenReturn(listOf(makePrisonerResult()))
+      whenever(prisonerSearchApiService.findByPrisonNumbers(any())).thenReturn(listOf(makePrisonerResult()))
 
       service.removeNonLifePrisonersPastRelevantDate()
 
       argumentCaptor<List<String>>().apply {
-        verify(prisonerSearchApiGateway, times(4)).findByPrisonNumbers(capture())
+        verify(prisonerSearchApiService, times(4)).findByPrisonNumbers(capture())
         assertThat(allValues.map { it.size }).isEqualTo(listOf(1000, 1000, 1000, 500))
       }
     }
@@ -94,7 +94,7 @@ class BatchReleaseDateRemovalTest {
     @Test
     fun `tracks potentials removals`() {
       whenever(restrictedPatientsRepository.findAll()).thenReturn(listOf(restrictedPatient))
-      whenever(prisonerSearchApiGateway.findByPrisonNumbers(any())).thenReturn(
+      whenever(prisonerSearchApiService.findByPrisonNumbers(any())).thenReturn(
         listOf(
           makePrisonerResult(
             prisonerNumber = "YESTERDAY_RECALL_DETERMINATE",
@@ -145,7 +145,7 @@ class BatchReleaseDateRemovalTest {
     @Test
     fun `continues after unexpected error`() {
       whenever(restrictedPatientsRepository.findAll()).thenReturn(listOf(restrictedPatient))
-      whenever(prisonerSearchApiGateway.findByPrisonNumbers(any())).thenReturn(
+      whenever(prisonerSearchApiService.findByPrisonNumbers(any())).thenReturn(
         listOf(
           makePrisonerResult(
             prisonerNumber = "YESTERDAY_RECALL_DETERMINATE",
@@ -176,7 +176,7 @@ class BatchReleaseDateRemovalTest {
     @Test
     fun `publishes domain event for removal`() {
       whenever(restrictedPatientsRepository.findAll()).thenReturn(listOf(restrictedPatient))
-      whenever(prisonerSearchApiGateway.findByPrisonNumbers(any())).thenReturn(
+      whenever(prisonerSearchApiService.findByPrisonNumbers(any())).thenReturn(
         listOf(
           makePrisonerResult(
             prisonerNumber = "YESTERDAY_RECALL_DETERMINATE",

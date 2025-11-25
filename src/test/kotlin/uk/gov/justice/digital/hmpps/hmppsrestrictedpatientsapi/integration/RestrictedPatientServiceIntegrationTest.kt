@@ -33,7 +33,7 @@ class RestrictedPatientServiceIntegrationTest : IntegrationTestBase() {
 
     @BeforeEach
     fun beforeEach() {
-      whenever(prisonApiApplicationGateway.getOffenderBooking("F12345")).thenReturn(OffenderBookingResponse(1235467, "F12345", true))
+      whenever(prisonApiQueryService.getOffenderBooking("F12345")).thenReturn(OffenderBookingResponse(1235467, "F12345", true))
     }
 
     @Test
@@ -41,7 +41,7 @@ class RestrictedPatientServiceIntegrationTest : IntegrationTestBase() {
       doAnswer {
         getRestrictedPatient(prisonerNumber = "F12345").exchange().expectStatus().is2xxSuccessful
         throw BreakFlow()
-      }.whenever(prisonApiApplicationGateway).dischargeToHospital(any())
+      }.whenever(prisonApiUpdateService).dischargeToHospital(any())
 
       Assertions.assertThrows(BreakFlow::class.java) {
         restrictedPatientsService.dischargeToHospital(makeDischargeRequest().copy(offenderNo = "F12345"))
@@ -50,7 +50,7 @@ class RestrictedPatientServiceIntegrationTest : IntegrationTestBase() {
 
     @Test
     fun `the recently added restricted patient gets removed`() {
-      doAnswer { throw BreakFlow() }.whenever(prisonApiApplicationGateway).dischargeToHospital(any())
+      doAnswer { throw BreakFlow() }.whenever(prisonApiUpdateService).dischargeToHospital(any())
 
       Assertions.assertThrows(BreakFlow::class.java) {
         restrictedPatientsService.dischargeToHospital(makeDischargeRequest().copy(offenderNo = "F12345"))
@@ -74,7 +74,7 @@ class RestrictedPatientServiceIntegrationTest : IntegrationTestBase() {
       doAnswer {
         getRestrictedPatient(prisonerNumber = "Z123456").exchange().expectStatus().isNotFound
         throw BreakFlow()
-      }.whenever(prisonApiApplicationGateway).createExternalMovement(any())
+      }.whenever(prisonApiUpdateService).createExternalMovement(any())
 
       Assertions.assertThrows(BreakFlow::class.java) {
         restrictedPatientsService.removeRestrictedPatient(prisonerNumber = "Z123456")
@@ -83,7 +83,7 @@ class RestrictedPatientServiceIntegrationTest : IntegrationTestBase() {
 
     @Test
     fun `the recently deleted restricted patient gets re added`() {
-      doAnswer { throw BreakFlow() }.whenever(prisonApiApplicationGateway).createExternalMovement(any())
+      doAnswer { throw BreakFlow() }.whenever(prisonApiUpdateService).createExternalMovement(any())
 
       Assertions.assertThrows(BreakFlow::class.java) {
         restrictedPatientsService.removeRestrictedPatient(prisonerNumber = "Z123456")

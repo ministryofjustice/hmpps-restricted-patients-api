@@ -6,8 +6,9 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.config.BadRequestException
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.controllers.SupportingPrisonRequest
-import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.PrisonApiGateway
-import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.PrisonerSearchApiGateway
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.PrisonApiQueryService
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.PrisonApiUpdateService
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.PrisonerSearchApiService
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.entities.RestrictedPatient
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.request.CreateExternalMovement
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.request.DischargeToHospitalRequest
@@ -28,8 +29,9 @@ data class ExistingDischargeData(
 @Service
 @Transactional(readOnly = true)
 class RestrictedPatientsService(
-  private val prisonApiGateway: PrisonApiGateway,
-  private val prisonerSearchApiGateway: PrisonerSearchApiGateway,
+  private val prisonApiQueryService: PrisonApiQueryService,
+  private val prisonApiUpdateService: PrisonApiUpdateService,
+  private val prisonerSearchApiService: PrisonerSearchApiService,
   private val restrictedPatientsRepository: RestrictedPatientsRepository,
   private val clock: Clock,
 ) {
@@ -38,7 +40,7 @@ class RestrictedPatientsService(
   fun dischargeToHospital(dischargeToHospital: DischargeToHospitalRequest): RestrictedPatientDto {
     checkNotExistingPatient(dischargeToHospital.offenderNo)
 
-    prisonApiGateway.getOffenderBooking(dischargeToHospital.offenderNo)
+    prisonApiQueryService.getOffenderBooking(dischargeToHospital.offenderNo)
       ?.takeIf { it.activeFlag }
       ?: throw EntityNotFoundException("No prisoner with activeFlag 'Y' found for ${dischargeToHospital.offenderNo}")
 
@@ -83,7 +85,7 @@ class RestrictedPatientsService(
   }
 
   private fun getLatestMovement(offenderNo: String): MovementResponse {
-    val movements = prisonApiGateway.getLatestMovements(offenderNo)
+    val movements = prisonApiQueryService.getLatestMovements(offenderNo)
 
     if (movements.isEmpty()) {
       throw BadRequestException(
@@ -124,7 +126,7 @@ class RestrictedPatientsService(
   }
 
   private fun addRestrictedPatient(restrictedPatient: RestrictedPatient): RestrictedPatientDto = restrictedPatientsRepository.save(restrictedPatient).run {
-    prisonApiGateway.dischargeToHospital(this)
+    prisonApiUpdateService.dischargeToHospital(this)
     transform(
       this,
       Agency(agencyId = fromLocationId),
@@ -138,9 +140,9 @@ class RestrictedPatientsService(
     ?: throw EntityNotFoundException("No restricted patient record found for prison number $prisonerNumber")
 
   private fun transformIntoDto(restrictedPatient: RestrictedPatient): RestrictedPatientDto {
-    val agencies = prisonApiGateway.getAgencyLocationsByType("INST")
+    val agencies = prisonApiQueryService.getAgencyLocationsByType("INST")
     val hospitals =
-      prisonApiGateway.getAgencyLocationsByType("HOSPITAL") + prisonApiGateway.getAgencyLocationsByType("HSHOSP")
+      prisonApiQueryService.getAgencyLocationsByType("HOSPITAL") + prisonApiQueryService.getAgencyLocationsByType("HSHOSP")
 
     val prisonSentFrom = agencies.find { it.agencyId == restrictedPatient.fromLocationId }
     val supportingPrison = agencies.find { it.agencyId == restrictedPatient.supportingPrisonId }
@@ -154,13 +156,13 @@ class RestrictedPatientsService(
     val restrictedPatient = restrictedPatientsRepository.findById(prisonerNumber)
       .orElseThrow { throw EntityNotFoundException("No restricted patient record found for prison number $prisonerNumber") }
 
-    val prisonerResult = prisonerSearchApiGateway.searchByPrisonNumber(prisonerNumber).firstOrNull()
+    val prisonerResult = prisonerSearchApiService.searchByPrisonNumber(prisonerNumber).firstOrNull()
       ?: throw EntityNotFoundException("No prisoner search results returned for $prisonerNumber")
 
     restrictedPatientsRepository.delete(restrictedPatient)
 
     return restrictedPatient.also {
-      prisonApiGateway.createExternalMovement(
+      prisonApiUpdateService.createExternalMovement(
         CreateExternalMovement(
           bookingId = prisonerResult.bookingId,
           fromAgencyId = restrictedPatient.hospitalLocationCode,
@@ -185,7 +187,7 @@ class RestrictedPatientsService(
         message = "Prisoner (${request.offenderNo}) already supported by ${request.supportingPrisonId}",
       )
     }
-    if (prisonApiGateway.getAgency(request.supportingPrisonId) == null) {
+    if (prisonApiQueryService.getAgency(request.supportingPrisonId) == null) {
       throw BadRequestException(
         errorCode = "PRISON_NOT_FOUND",
         message = "Prison ${request.supportingPrisonId} not found",
