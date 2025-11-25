@@ -20,7 +20,8 @@ import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import org.springframework.test.web.reactive.server.WebTestClient
-import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.PrisonApiApplicationGateway
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.PrisonApiQueryService
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.PrisonApiUpdateService
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.integration.wiremock.OAuthMockServer
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.integration.wiremock.PrisonApiMockServer
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.integration.wiremock.PrisonerSearchApiMockServer
@@ -61,7 +62,10 @@ abstract class IntegrationTestBase {
   lateinit var telemetryClient: TelemetryClient
 
   @MockitoSpyBean
-  lateinit var prisonApiApplicationGateway: PrisonApiApplicationGateway
+  lateinit var prisonApiQueryService: PrisonApiQueryService
+
+  @MockitoSpyBean
+  lateinit var prisonApiUpdateService: PrisonApiUpdateService
 
   val offenderEventQueue by lazy {
     hmppsQueueService.findByQueueId("offenderevents") ?: throw RuntimeException("Queue offenderevents not found")

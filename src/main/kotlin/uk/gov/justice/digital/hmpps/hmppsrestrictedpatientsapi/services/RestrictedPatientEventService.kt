@@ -3,7 +3,7 @@ package uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.services
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.PrisonApiApplicationGateway
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.PrisonApiQueryService
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.entities.RestrictedPatient
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.Agency
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.MovementResponse
@@ -11,7 +11,7 @@ import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.repositories.Rest
 
 @Service
 class RestrictedPatientEventService(
-  private val prisonApiApplicationGateway: PrisonApiApplicationGateway,
+  private val prisonApiQueryService: PrisonApiQueryService,
   private val domainEventPublisher: DomainEventPublisher,
   private val restrictedPatientsRepository: RestrictedPatientsRepository,
 ) {
@@ -54,10 +54,10 @@ class RestrictedPatientEventService(
 
   private fun getHospital(lastMovement: MovementResponse): Agency? = lastMovement
     .takeIf { it.toAgency != null }
-    ?.let { prisonApiApplicationGateway.getAgency(it.toAgency!!) }
+    ?.let { prisonApiQueryService.getAgency(it.toAgency!!) }
     ?.takeIf { agency -> listOf("HOSPITAL", "HSHOSP").contains(agency.agencyType) }
 
-  private fun getReleaseToHospitalMovement(offenderNo: String): MovementResponse? = prisonApiApplicationGateway.getLatestMovements(offenderNo)
+  private fun getReleaseToHospitalMovement(offenderNo: String): MovementResponse? = prisonApiQueryService.getLatestMovements(offenderNo)
     .lastOrNull()
     ?.takeIf { it.movementType == "REL" && it.movementReasonCode == "HP" }
 

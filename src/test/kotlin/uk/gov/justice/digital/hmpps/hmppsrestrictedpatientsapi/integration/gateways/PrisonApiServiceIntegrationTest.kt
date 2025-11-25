@@ -16,18 +16,19 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.web.reactive.function.client.WebClientResponseException
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.config.WebClientConfig
-import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.PrisonApiGateway
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.PrisonApiQueryService
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways.PrisonApiUpdateService
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.integration.wiremock.OAuthMockServer
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.integration.wiremock.PrisonApiMockServer
 import uk.gov.justice.hmpps.test.kotlin.auth.WithMockAuthUser
 
 @ActiveProfiles("test")
-@SpringBootTest(classes = [PrisonApiGateway::class, WebClientConfig::class, WebClientAutoConfiguration::class, OAuth2ClientAutoConfiguration::class, OAuth2ClientWebSecurityAutoConfiguration::class, SecurityAutoConfiguration::class])
+@SpringBootTest(classes = [PrisonApiUpdateService::class, PrisonApiQueryService::class, WebClientConfig::class, WebClientAutoConfiguration::class, OAuth2ClientAutoConfiguration::class, OAuth2ClientWebSecurityAutoConfiguration::class, SecurityAutoConfiguration::class])
 @WithMockAuthUser
-class PrisonApiGatewayIntegrationTest {
+class PrisonApiServiceIntegrationTest {
 
   @Autowired
-  protected lateinit var prisonApiGateway: PrisonApiGateway
+  protected lateinit var prisonApiQueryService: PrisonApiQueryService
 
   @Nested
   inner class GetAgency {
@@ -35,7 +36,7 @@ class PrisonApiGatewayIntegrationTest {
     fun `should return agency`() {
       prisonApiMockServer.stubGetAgency("MDI", "INST")
 
-      val agency = prisonApiGateway.getAgency("MDI")!!
+      val agency = prisonApiQueryService.getAgency("MDI")!!
 
       assertThat(agency.agencyId).isEqualTo("MDI")
       assertThat(agency.agencyType).isEqualTo("INST")
@@ -45,7 +46,7 @@ class PrisonApiGatewayIntegrationTest {
     fun `should return null if not found`() {
       prisonApiMockServer.stubGetAgencyNotFound("MDI")
 
-      val agency = prisonApiGateway.getAgency("MDI")
+      val agency = prisonApiQueryService.getAgency("MDI")
 
       assertThat(agency).isNull()
     }
@@ -55,7 +56,7 @@ class PrisonApiGatewayIntegrationTest {
       prisonApiMockServer.stubServerError(WireMock::get)
 
       assertThrows<WebClientResponseException.ServiceUnavailable> {
-        prisonApiGateway.getAgency("MDI")
+        prisonApiQueryService.getAgency("MDI")
       }
     }
   }
