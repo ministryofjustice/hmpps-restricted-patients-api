@@ -2,6 +2,8 @@ package uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.gateways
 
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Service
+import org.springframework.web.context.request.RequestContextHolder
+import org.springframework.web.context.request.ServletRequestAttributes
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.bodyToMono
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.entities.RestrictedPatient
@@ -9,11 +11,13 @@ import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.request.Cre
 
 @Service
 class PrisonApiUpdateService(
-  @Qualifier("prisonApiUserClient") private val prisonApiUserClient: WebClient? = null,
+  @Qualifier("prisonApiUserClient") private val prisonApiUserClient: WebClient,
   @Qualifier("prisonApiSystemClient") private val prisonApiSystemClient: WebClient,
 ) {
   // We attempt to use credentials including a user if available (e.g. from a web request), but fall back to the system client credentials if not (e.g. for event processing or batch jobs)
-  private fun prisonApiClient() = prisonApiUserClient ?: prisonApiSystemClient
+  private fun prisonApiClient(): WebClient = if (isRequestScopeActive()) prisonApiUserClient else prisonApiSystemClient
+
+  private fun isRequestScopeActive(): Boolean = RequestContextHolder.getRequestAttributes() is ServletRequestAttributes
 
   fun dischargeToHospital(newRestrictedPatient: RestrictedPatient): InmateDetail = prisonApiClient()
     .put()

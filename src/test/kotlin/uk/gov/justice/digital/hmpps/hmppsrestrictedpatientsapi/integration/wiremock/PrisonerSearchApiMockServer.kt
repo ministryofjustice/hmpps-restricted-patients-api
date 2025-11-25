@@ -27,7 +27,14 @@ class PrisonerSearchApiMockServer : WireMockServer(8100) {
     )
   }
 
-  fun stubSearchByPrisonNumber(prisonerNumber: String) {
+  fun stubSearchByPrisonNumber(
+    prisonerNumber: String,
+    response: String = """
+      "prisonerNumber": "$prisonerNumber",
+      "bookingId": "1138058",
+      "legalStatus": "SENTENCED"
+    """.trimIndent(),
+  ) {
     stubFor(
       post(urlPathEqualTo("/prisoner-search/prisoner-numbers"))
         .withQueryParam("responseFields", containing("prisonerNumber"))
@@ -45,13 +52,7 @@ class PrisonerSearchApiMockServer : WireMockServer(8100) {
             .withStatus(200)
             .withBody(
               """
-             [
-                {
-                  "prisonerNumber": "$prisonerNumber",
-                  "bookingId": "1138058",
-                  "legalStatus": "SENTENCED"
-                }
-               ]
+             [ { $response } ]
               """.trimIndent(),
             ),
         ),
