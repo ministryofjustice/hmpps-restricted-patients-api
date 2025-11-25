@@ -27,7 +27,9 @@ dependencies {
   implementation("com.google.code.gson:gson:2.13.2")
   implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:5.6.2")
   implementation("org.apache.commons:commons-csv:1.14.1")
-  // Needs to match this version https://github.com/microsoft/ApplicationInsights-Java/blob/3.7.4/dependencyManagement/build.gradle.kts#L16
+  // Needs to match this version https://github.com/microsoft/ApplicationInsights-Java/blob/<version>/dependencyManagement/build.gradle.kts#L16
+  // where <version> is the version of application insights pulled in by hmpps-gradle-spring-boot
+  // at https://github.com/ministryofjustice/hmpps-gradle-spring-boot/blob/main/src/main/kotlin/uk/gov/justice/digital/hmpps/gradle/configmanagers/AppInsightsConfigManager.kt#L7
   implementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:2.19.0")
 
   runtimeOnly("org.flywaydb:flyway-database-postgresql")
