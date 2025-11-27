@@ -46,7 +46,7 @@ jobs:
     secrets: inherit
     with:
       localstack-tag: "4"
-      postgres-tag: "17"
+      postgres-tag: "18"
       postgres-db: restricted-patients
       postgres-username: restricted-patients
       postgres-password: test
