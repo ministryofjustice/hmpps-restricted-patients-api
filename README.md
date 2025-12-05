@@ -14,7 +14,7 @@ The frontend can be found here: <https://github.com/ministryofjustice/hmpps-rest
 # Instructions
 ## Tests
 Before running the tests:
- - `docker-compose -f docker-compose-test.yml up` needs to be running and to have finished loading 
+ - `docker compose -f docker-compose-test.yml up` needs to be running and to have finished loading 
 before you start running the tests. Once done you can run the tests by running `./gradlew build`.
 
 ## Running locally 

@@ -42,4 +42,8 @@ hmpps.sqs:
     domaineventsoutbound:
       arn: arn:aws:sns:eu-west-2:000000000000:domain_events_outbound
 
-
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true

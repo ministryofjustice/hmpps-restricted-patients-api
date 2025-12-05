@@ -72,7 +72,7 @@ class HealthCheckTest : IntegrationTestBase() {
       )
       .jsonPath("components.prisonApiHealthCheck.details.HttpStatus").value(
         Consumer<String> {
-          assertThat(it).isEqualTo("OK")
+          assertThat(it).isEqualTo("200 OK")
         },
       )
   }
@@ -90,7 +90,7 @@ class HealthCheckTest : IntegrationTestBase() {
       )
       .jsonPath("components.prisonerSearchApiHealthCheck.details.HttpStatus").value(
         Consumer<String> {
-          assertThat(it).isEqualTo("OK")
+          assertThat(it).isEqualTo("200 OK")
         },
       )
   }
