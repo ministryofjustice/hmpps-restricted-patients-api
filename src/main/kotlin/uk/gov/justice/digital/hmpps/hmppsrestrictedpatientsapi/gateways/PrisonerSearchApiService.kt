@@ -5,7 +5,6 @@ import org.springframework.core.ParameterizedTypeReference
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.PrisonerResult
-import kotlin.reflect.KProperty1
 import kotlin.reflect.full.memberProperties
 
 @Component
@@ -17,7 +16,7 @@ class PrisonerSearchApiService(@Qualifier("prisonerSearchSystemClient") private 
     .post()
     .uri {
       it.path("/prisoner-search/prisoner-numbers")
-        .queryParam("responseFields", prisonerResultProperties)
+        .queryParam("responseFields", *prisonerResultProperties)
         .build()
     }
     .bodyValue(
@@ -29,9 +28,9 @@ class PrisonerSearchApiService(@Qualifier("prisonerSearchSystemClient") private 
 
   companion object {
     // Get all property names from PrisonerResult class
-    val prisonerResultProperties: List<String> by lazy {
+    val prisonerResultProperties: Array<String> by lazy {
       PrisonerResult::class.memberProperties
-        .map { (it as KProperty1<*, *>).name }
+        .map { it.name }.toTypedArray()
     }
   }
 }

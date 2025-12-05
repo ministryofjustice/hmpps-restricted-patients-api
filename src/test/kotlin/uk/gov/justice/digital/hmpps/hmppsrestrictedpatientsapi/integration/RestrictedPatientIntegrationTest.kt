@@ -488,7 +488,7 @@ class RestrictedPatientIntegrationTest : IntegrationTestBase() {
       prisonerNumber: String = "A12345",
       supportingPrisonId: String = "MDI",
     ): WebTestClient.RequestHeadersSpec<*> {
-      stubChangeSupportingPrison(prisonerNumber)
+      stubChangeSupportingPrison()
 
       return webTestClient
         .post()
@@ -502,7 +502,7 @@ class RestrictedPatientIntegrationTest : IntegrationTestBase() {
         )
     }
 
-    private fun stubChangeSupportingPrison(prisonerNumber: String) {
+    private fun stubChangeSupportingPrison() {
       prisonApiMockServer.stubAgencyLocationForPrisons()
       prisonApiMockServer.stubAgencyLocationForHospitals()
     }

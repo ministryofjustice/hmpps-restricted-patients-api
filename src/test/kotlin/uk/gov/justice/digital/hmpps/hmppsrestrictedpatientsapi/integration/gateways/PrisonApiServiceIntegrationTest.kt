@@ -8,11 +8,12 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientAutoConfiguration
-import org.springframework.boot.autoconfigure.security.oauth2.client.servlet.OAuth2ClientWebSecurityAutoConfiguration
-import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
-import org.springframework.boot.autoconfigure.web.reactive.function.client.WebClientAutoConfiguration
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration
+import org.springframework.boot.security.autoconfigure.SecurityAutoConfiguration
+import org.springframework.boot.security.oauth2.client.autoconfigure.OAuth2ClientAutoConfiguration
+import org.springframework.boot.security.oauth2.client.autoconfigure.servlet.OAuth2ClientWebSecurityAutoConfiguration
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.webclient.autoconfigure.WebClientAutoConfiguration
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.web.reactive.function.client.WebClientResponseException
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.config.WebClientConfig
@@ -24,11 +25,19 @@ import uk.gov.justice.hmpps.test.kotlin.auth.WithMockAuthUser
 
 @ActiveProfiles("test")
 @SpringBootTest(classes = [PrisonApiUpdateService::class, PrisonApiQueryService::class, WebClientConfig::class, WebClientAutoConfiguration::class, OAuth2ClientAutoConfiguration::class, OAuth2ClientWebSecurityAutoConfiguration::class, SecurityAutoConfiguration::class])
+// avoid spring trying to wire security beans
+@EnableAutoConfiguration(
+  exclude = [
+    SecurityAutoConfiguration::class,
+    OAuth2ClientAutoConfiguration::class,
+    OAuth2ClientWebSecurityAutoConfiguration::class,
+  ],
+)
 @WithMockAuthUser
 class PrisonApiServiceIntegrationTest {
 
   @Autowired
-  protected lateinit var prisonApiQueryService: PrisonApiQueryService
+  private lateinit var prisonApiQueryService: PrisonApiQueryService
 
   @Nested
   inner class GetAgency {

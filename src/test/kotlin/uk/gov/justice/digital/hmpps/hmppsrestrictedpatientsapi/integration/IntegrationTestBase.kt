@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT
 import org.springframework.boot.test.system.OutputCaptureExtension
+import org.springframework.boot.webtestclient.autoconfigure.AutoConfigureWebTestClient
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.http.MediaType.APPLICATION_JSON
@@ -39,6 +40,7 @@ import java.time.ZoneId
 @ExtendWith(OutputCaptureExtension::class)
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 @ActiveProfiles("test")
+@AutoConfigureWebTestClient
 abstract class IntegrationTestBase {
 
   @Autowired
