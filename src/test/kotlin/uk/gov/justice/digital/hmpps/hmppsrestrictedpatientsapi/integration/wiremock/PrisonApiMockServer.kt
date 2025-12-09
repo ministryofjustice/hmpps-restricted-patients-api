@@ -5,7 +5,6 @@ import com.github.tomakehurst.wiremock.client.MappingBuilder
 import com.github.tomakehurst.wiremock.client.WireMock.aResponse
 import com.github.tomakehurst.wiremock.client.WireMock.equalTo
 import com.github.tomakehurst.wiremock.client.WireMock.get
-import com.github.tomakehurst.wiremock.client.WireMock.matchingJsonPath
 import com.github.tomakehurst.wiremock.client.WireMock.post
 import com.github.tomakehurst.wiremock.client.WireMock.put
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
@@ -76,25 +75,6 @@ class PrisonApiMockServer : WireMockServer(8989) {
                       "dischargeDate": "2021-06-07",
                       "dischargeDetails": "Psychiatric Hospital Discharge to Hazelwood House"
                   }
-              }
-              """.trimIndent(),
-            ),
-        ),
-    )
-  }
-
-  fun stubDischargeToPrisonError(offenderNo: String) {
-    stubFor(
-      put(urlEqualTo("/api/offenders/$offenderNo/discharge-to-hospital"))
-        .willReturn(
-          aResponse()
-            .withHeader("Content-Type", "application/json")
-            .withStatus(400)
-            .withBody(
-              """
-              {
-                  "status": 400,
-                  "userMessage": "some error",
               }
               """.trimIndent(),
             ),
@@ -285,44 +265,6 @@ class PrisonApiMockServer : WireMockServer(8989) {
                   "ignoredField": "ignored",
                   "activeFlag": "$activeFlag"
                 }
-              """.trimIndent(),
-            ),
-        ),
-    )
-  }
-
-  fun stubCreatePrisoner(offenderNo: String) {
-    stubFor(
-      post(urlPathEqualTo("/api/offenders"))
-        .withRequestBody(matchingJsonPath("$.firstName"))
-        .withRequestBody(matchingJsonPath("$.lastName"))
-        .withRequestBody(matchingJsonPath("$.dateOfBirth"))
-        .withRequestBody(matchingJsonPath("$.gender"))
-        .withRequestBody(matchingJsonPath("$.croNumber"))
-        .withRequestBody(matchingJsonPath("$.pncNumber"))
-        .willReturn(
-          aResponse()
-            .withHeader("Content-Type", "application/json")
-            .withStatus(200)
-            .withBody(""" { "offenderNo": "$offenderNo" } """),
-        ),
-    )
-  }
-
-  fun stubCreatePrisonerError() {
-    stubFor(
-      post(urlPathEqualTo("/api/offenders"))
-        .willReturn(
-          aResponse()
-            .withHeader("Content-Type", "application/json")
-            .withStatus(400)
-            .withBody(
-              """
-              {
-                  "status": 400,
-                  "userMessage": "Some user message,
-                  "developerMessage": "Some developer message"
-              }
               """.trimIndent(),
             ),
         ),

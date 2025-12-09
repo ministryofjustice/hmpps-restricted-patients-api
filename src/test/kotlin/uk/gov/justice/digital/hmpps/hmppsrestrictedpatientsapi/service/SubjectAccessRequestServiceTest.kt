@@ -47,7 +47,7 @@ class SubjectAccessRequestServiceTest {
     }
 
     @Test
-    fun `by prison number with agency inoformation`() {
+    fun `by prison number with agency information`() {
       whenever(restrictedPatientsRepository.findById(anyString())).thenReturn(
         Optional.of(makeRestrictedPatient()),
       )

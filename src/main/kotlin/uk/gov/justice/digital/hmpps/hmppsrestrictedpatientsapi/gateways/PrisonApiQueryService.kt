@@ -57,7 +57,7 @@ class PrisonApiQueryService(private val prisonApiSystemClient: WebClient) {
     .onErrorResume(WebClientResponseException::class.java) { emptyWhenNotFound(it) }
     .block()
 
-  private fun <T> emptyWhenNotFound(exception: WebClientResponseException): Mono<T> = if (exception.statusCode == NOT_FOUND) Mono.empty() else Mono.error(exception)
+  private fun <T : Any> emptyWhenNotFound(exception: WebClientResponseException): Mono<T> = if (exception.statusCode == NOT_FOUND) Mono.empty() else Mono.error(exception)
 }
 
 class InmateDetail(val offenderNo: String)
