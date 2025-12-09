@@ -3,7 +3,6 @@ package uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.config
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.security.oauth2.client.AuthorizedClientServiceOAuth2AuthorizedClientManager
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository
@@ -21,15 +20,6 @@ class WebClientConfig(
   @Value("\${api.health-timeout:2s}") val healthTimeout: Duration,
   @Value("\${api.timeout:20s}") val timeout: Duration,
 ) {
-
-  @Bean
-  fun authorizedClientManager(
-    clientRegistrationRepository: ClientRegistrationRepository,
-    authorizedClientService: OAuth2AuthorizedClientService,
-  ): OAuth2AuthorizedClientManager = AuthorizedClientServiceOAuth2AuthorizedClientManager(
-    clientRegistrationRepository,
-    authorizedClientService,
-  )
 
   @Bean
   fun prisonApiHealthWebClient(builder: WebClient.Builder): WebClient = builder.healthWebClient(prisonApiUrl, healthTimeout)
