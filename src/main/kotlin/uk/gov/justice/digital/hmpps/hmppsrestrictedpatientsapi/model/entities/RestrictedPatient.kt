@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.entities
 
+import io.swagger.v3.oas.annotations.media.Schema
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.EntityListeners
@@ -16,10 +17,15 @@ import java.time.LocalDateTime
 @EntityListeners(AuditingEntityListener::class)
 class RestrictedPatient(
   @Id
+  @Schema(description = "The NOMS Id of the restricted patient", example = "G1072GT", required = true)
   val prisonerNumber: String,
+  @Schema(description = "From location id", example = "MDI", required = true)
   val fromLocationId: String,
+  @Schema(description = "Hospital location code", example = "HAZLWD", required = true)
   val hospitalLocationCode: String,
+  @Schema(description = "Supporting prison id", example = "LEI", required = true)
   var supportingPrisonId: String,
+  @Schema(description = "Date and time the prisoner was discharged to hospital", required = true)
   val dischargeTime: LocalDateTime,
   val commentText: String? = null,
 ) {
