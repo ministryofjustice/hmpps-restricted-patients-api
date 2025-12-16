@@ -1,6 +1,7 @@
 package uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.controllers
 
 import com.microsoft.applicationinsights.TelemetryClient
+import io.swagger.v3.oas.annotations.media.Schema
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.DeleteMapping
@@ -99,6 +100,8 @@ class RestrictedPatientsController(
 }
 
 data class SupportingPrisonRequest(
+  @Schema(description = "The prison number", example = "A1234AA", required = true)
   val offenderNo: String,
+  @Schema(description = "The supporting prison id", example = "MDI", required = true)
   val supportingPrisonId: String,
 )

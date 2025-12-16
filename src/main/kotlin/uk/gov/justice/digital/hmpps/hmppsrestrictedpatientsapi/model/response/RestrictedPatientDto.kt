@@ -7,7 +7,7 @@ import java.time.LocalDateTime
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Schema(description = "Restricted patient")
 data class RestrictedPatientDto(
-  @Schema(description = "Then NOMS Id of the restricted patient", example = "G1072GT")
+  @Schema(description = "Then NOMS Id of the restricted patient", example = "G1072GT", required = true)
   val prisonerNumber: String,
   @Schema(description = "Previous location id", example = "MDI")
   val fromLocation: Agency?,
@@ -15,7 +15,7 @@ data class RestrictedPatientDto(
   val hospitalLocation: Agency?,
   @Schema(description = "Prison where the offender is supported by POM", example = "LEI")
   val supportingPrison: Agency? = null,
-  @Schema(description = "Date and time the prisoner was discharged to hospital")
+  @Schema(description = "Date and time the prisoner was discharged to hospital", required = true)
   val dischargeTime: LocalDateTime,
   @Schema(description = "Useful comments")
   val commentText: String? = null,
@@ -27,6 +27,7 @@ data class RestrictedPatientDto(
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 data class Agency(
+  @Schema(description = "Agency id", example = "MDI", required = true)
   val agencyId: String,
   val description: String? = null,
   val longDescription: String? = null,
