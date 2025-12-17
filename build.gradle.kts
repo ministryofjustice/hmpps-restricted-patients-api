@@ -1,7 +1,7 @@
 import org.gradle.kotlin.dsl.register
 
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "10.0.0-beta"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "10.0.0-beta-2"
   kotlin("plugin.spring") version "2.2.21"
   kotlin("plugin.jpa") version "2.2.21"
 }

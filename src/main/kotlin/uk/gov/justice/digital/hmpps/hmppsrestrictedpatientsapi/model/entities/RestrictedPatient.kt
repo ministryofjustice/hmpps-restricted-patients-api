@@ -17,15 +17,15 @@ import java.time.LocalDateTime
 @EntityListeners(AuditingEntityListener::class)
 class RestrictedPatient(
   @Id
-  @Schema(description = "The NOMS Id of the restricted patient", example = "G1072GT", required = true)
+  @Schema(description = "The NOMS Id of the restricted patient", example = "G1072GT")
   val prisonerNumber: String,
-  @Schema(description = "From location id", example = "MDI", required = true)
+  @Schema(description = "From location id", example = "MDI")
   val fromLocationId: String,
-  @Schema(description = "Hospital location code", example = "HAZLWD", required = true)
+  @Schema(description = "Hospital location code", example = "HAZLWD")
   val hospitalLocationCode: String,
-  @Schema(description = "Supporting prison id", example = "LEI", required = true)
+  @Schema(description = "Supporting prison id", example = "LEI")
   var supportingPrisonId: String,
-  @Schema(description = "Date and time the prisoner was discharged to hospital", required = true)
+  @Schema(description = "Date and time the prisoner was discharged to hospital")
   val dischargeTime: LocalDateTime,
   val commentText: String? = null,
 ) {
