@@ -100,8 +100,8 @@ class RestrictedPatientsController(
 }
 
 data class SupportingPrisonRequest(
-  @Schema(description = "The prison number", example = "A1234AA", required = true)
+  @Schema(description = "The prison number", example = "A1234AA")
   val offenderNo: String,
-  @Schema(description = "The supporting prison id", example = "MDI", required = true)
+  @Schema(description = "The supporting prison id", example = "MDI")
   val supportingPrisonId: String,
 )
