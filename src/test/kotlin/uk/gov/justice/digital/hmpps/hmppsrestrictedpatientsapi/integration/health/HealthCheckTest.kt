@@ -1,11 +1,9 @@
 package uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.integration.health
 
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.integration.IntegrationTestBase
-import java.util.function.Consumer
 
 class HealthCheckTest : IntegrationTestBase() {
 
@@ -65,16 +63,8 @@ class HealthCheckTest : IntegrationTestBase() {
       .exchange()
       .expectStatus().isOk
       .expectBody()
-      .jsonPath("components.prisonApiHealthCheck.status").value(
-        Consumer<String> {
-          assertThat(it).isEqualTo("UP")
-        },
-      )
-      .jsonPath("components.prisonApiHealthCheck.details.HttpStatus").value(
-        Consumer<String> {
-          assertThat(it).isEqualTo("OK")
-        },
-      )
+      .jsonPath("components.prisonApiHealthCheck.status").isEqualTo("UP")
+      .jsonPath("components.prisonApiHealthCheck.details.HttpStatus").isEqualTo("200 OK")
   }
 
   @Test
@@ -83,16 +73,8 @@ class HealthCheckTest : IntegrationTestBase() {
       .exchange()
       .expectStatus().isOk
       .expectBody()
-      .jsonPath("components.prisonerSearchApiHealthCheck.status").value(
-        Consumer<String> {
-          assertThat(it).isEqualTo("UP")
-        },
-      )
-      .jsonPath("components.prisonerSearchApiHealthCheck.details.HttpStatus").value(
-        Consumer<String> {
-          assertThat(it).isEqualTo("OK")
-        },
-      )
+      .jsonPath("components.prisonerSearchApiHealthCheck.status").isEqualTo("UP")
+      .jsonPath("components.prisonerSearchApiHealthCheck.details.HttpStatus").isEqualTo("200 OK")
   }
 
   @Test

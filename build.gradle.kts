@@ -37,7 +37,6 @@ dependencies {
   testImplementation("org.springframework.boot:spring-boot-starter-data-jpa-test")
   testImplementation("org.springframework.boot:spring-boot-starter-webflux-test")
   testImplementation("org.springframework.security:spring-security-test:7.0.2")
-  testImplementation("com.fasterxml.jackson.module:jackson-module-kotlin")
   testImplementation("org.wiremock:wiremock-standalone:3.13.2")
   testImplementation("net.javacrumbs.json-unit:json-unit-assertj:5.1.0")
   testImplementation("org.awaitility:awaitility-kotlin:4.3.0")
