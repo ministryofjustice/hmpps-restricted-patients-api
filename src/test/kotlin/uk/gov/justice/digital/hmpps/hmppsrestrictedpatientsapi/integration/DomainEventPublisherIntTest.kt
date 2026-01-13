@@ -2,10 +2,6 @@
 
 package uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.integration
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.PropertyNamingStrategies
-import com.fasterxml.jackson.databind.annotation.JsonNaming
-import com.fasterxml.jackson.module.kotlin.readValue
 import net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson
 import org.awaitility.kotlin.await
 import org.awaitility.kotlin.matches
@@ -16,11 +12,13 @@ import software.amazon.awssdk.services.sqs.SqsAsyncClient
 import software.amazon.awssdk.services.sqs.model.DeleteMessageRequest
 import software.amazon.awssdk.services.sqs.model.Message
 import software.amazon.awssdk.services.sqs.model.ReceiveMessageRequest
+import tools.jackson.databind.ObjectMapper
+import tools.jackson.databind.PropertyNamingStrategies
+import tools.jackson.databind.annotation.JsonNaming
+import tools.jackson.module.kotlin.readValue
 import uk.gov.justice.hmpps.sqs.countAllMessagesOnQueue
 
-class DomainEventPublisherIntTest : IntegrationTestBase() {
-  @Autowired
-  private lateinit var objectMapper: ObjectMapper
+class DomainEventPublisherIntTest(@Autowired private val objectMapper: ObjectMapper) : IntegrationTestBase() {
 
   @Test
   fun `sends restricted patient added to the domain topic`() {
