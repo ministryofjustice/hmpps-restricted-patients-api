@@ -15,11 +15,11 @@ data class RestrictedPatientDto(
   val hospitalLocation: Agency?,
   @Schema(description = "Prison where the offender is supported by POM", example = "LEI")
   val supportingPrison: Agency? = null,
-  @Schema(description = "Date and time the prisoner was discharged to hospital")
+  @Schema(description = "Date and time the prisoner was discharged to hospital", example = "2021-07-16T12:34:56")
   val dischargeTime: LocalDateTime,
   @Schema(description = "Useful comments")
   val commentText: String? = null,
-  @Schema(description = "Date time the record was created")
+  @Schema(description = "Date time the record was created", example = "2020-04-20T17:00:00")
   var createDateTime: LocalDateTime? = null,
   @Schema(description = "The user id of the person who created the record")
   var createUserId: String? = null,
