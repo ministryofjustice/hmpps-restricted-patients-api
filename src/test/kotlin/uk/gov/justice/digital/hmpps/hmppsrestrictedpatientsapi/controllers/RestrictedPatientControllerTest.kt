@@ -49,7 +49,7 @@ class RestrictedPatientControllerTest : ControllerTestBase() {
 
       mockMvc.post("/discharge-to-hospital") {
         header("Content-Type", "application/json")
-        content = objectMapper.writeValueAsString(makeDischargeBody())
+        content = jsonMapper.writeValueAsString(makeDischargeBody())
       }.andExpect { status { isCreated() } }
 
       verify(restrictedPatientsService).dischargeToHospital(makeDischargeRequest().copy(supportingPrisonId = "MDI"))
@@ -62,7 +62,7 @@ class RestrictedPatientControllerTest : ControllerTestBase() {
 
       mockMvc.post("/discharge-to-hospital") {
         header("Content-Type", "application/json")
-        content = objectMapper.writeValueAsString(makeDischargeBody())
+        content = jsonMapper.writeValueAsString(makeDischargeBody())
       }.andExpect { status { isCreated() } }
 
       verify(domainEventPublisher).publishRestrictedPatientAdded("A12345")
@@ -75,7 +75,7 @@ class RestrictedPatientControllerTest : ControllerTestBase() {
 
       mockMvc.post("/discharge-to-hospital") {
         header("Content-Type", "application/json")
-        content = objectMapper.writeValueAsString(makeDischargeBody())
+        content = jsonMapper.writeValueAsString(makeDischargeBody())
       }.andExpect { status { isCreated() } }
 
       verify(telemetryClient).trackEvent(
@@ -101,7 +101,7 @@ class RestrictedPatientControllerTest : ControllerTestBase() {
           MockMvcRequestBuilders.post("/discharge-to-hospital")
             .header("Content-Type", "application/json")
             .content(
-              objectMapper.writeValueAsString(
+              jsonMapper.writeValueAsString(
                 makeDischargeBody(),
               ),
             ),
@@ -117,7 +117,7 @@ class RestrictedPatientControllerTest : ControllerTestBase() {
           MockMvcRequestBuilders.post("/discharge-to-hospital")
             .header("Content-Type", "application/json")
             .content(
-              objectMapper.writeValueAsString(
+              jsonMapper.writeValueAsString(
                 mapOf(
                   "offenderNo" to "A12345",
                 ),
@@ -137,7 +137,7 @@ class RestrictedPatientControllerTest : ControllerTestBase() {
           MockMvcRequestBuilders.post("/discharge-to-hospital")
             .header("Content-Type", "application/json")
             .content(
-              objectMapper.writeValueAsString(makeDischargeBody()),
+              jsonMapper.writeValueAsString(makeDischargeBody()),
             ),
         )
         .andExpect(MockMvcResultMatchers.status().isNotFound)
@@ -156,7 +156,7 @@ class RestrictedPatientControllerTest : ControllerTestBase() {
           MockMvcRequestBuilders.get("/restricted-patient/prison-number/A12345")
             .header("Content-Type", "application/json")
             .content(
-              objectMapper.writeValueAsString(makeRestrictedPatientDto()),
+              jsonMapper.writeValueAsString(makeRestrictedPatientDto()),
             ),
         )
         .andExpect(MockMvcResultMatchers.status().isNotFound)
@@ -171,7 +171,7 @@ class RestrictedPatientControllerTest : ControllerTestBase() {
           MockMvcRequestBuilders.get("/restricted-patient/prison-number/A12345")
             .header("Content-Type", "application/json")
             .content(
-              objectMapper.writeValueAsString(makeRestrictedPatientDto()),
+              jsonMapper.writeValueAsString(makeRestrictedPatientDto()),
             ),
         )
         .andExpect(MockMvcResultMatchers.status().is2xxSuccessful)
@@ -238,7 +238,7 @@ class RestrictedPatientControllerTest : ControllerTestBase() {
 
       mockMvc.post("/change-supporting-prison") {
         header("Content-Type", "application/json")
-        content = objectMapper.writeValueAsString(makeSupportingPrisonRequest())
+        content = jsonMapper.writeValueAsString(makeSupportingPrisonRequest())
       }.andExpect { status { isOk() } }
 
       verify(restrictedPatientsService).changeSupportingPrison(
@@ -255,7 +255,7 @@ class RestrictedPatientControllerTest : ControllerTestBase() {
 
       mockMvc.post("/change-supporting-prison") {
         header("Content-Type", "application/json")
-        content = objectMapper.writeValueAsString(makeSupportingPrisonRequest())
+        content = jsonMapper.writeValueAsString(makeSupportingPrisonRequest())
       }.andExpect { status { isOk() } }
 
       verify(domainEventPublisher).publishSupportingPrisonChanged("A12345")
@@ -267,7 +267,7 @@ class RestrictedPatientControllerTest : ControllerTestBase() {
 
       mockMvc.post("/change-supporting-prison") {
         header("Content-Type", "application/json")
-        content = objectMapper.writeValueAsString(makeSupportingPrisonRequest())
+        content = jsonMapper.writeValueAsString(makeSupportingPrisonRequest())
       }.andExpect { status { isOk() } }
 
       verify(telemetryClient).trackEvent(

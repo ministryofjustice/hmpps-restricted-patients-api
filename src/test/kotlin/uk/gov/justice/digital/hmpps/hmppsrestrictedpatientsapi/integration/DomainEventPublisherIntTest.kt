@@ -12,13 +12,13 @@ import software.amazon.awssdk.services.sqs.SqsAsyncClient
 import software.amazon.awssdk.services.sqs.model.DeleteMessageRequest
 import software.amazon.awssdk.services.sqs.model.Message
 import software.amazon.awssdk.services.sqs.model.ReceiveMessageRequest
-import tools.jackson.databind.ObjectMapper
 import tools.jackson.databind.PropertyNamingStrategies
 import tools.jackson.databind.annotation.JsonNaming
+import tools.jackson.databind.json.JsonMapper
 import tools.jackson.module.kotlin.readValue
 import uk.gov.justice.hmpps.sqs.countAllMessagesOnQueue
 
-class DomainEventPublisherIntTest(@Autowired private val objectMapper: ObjectMapper) : IntegrationTestBase() {
+class DomainEventPublisherIntTest(@Autowired private val jsonMapper: JsonMapper) : IntegrationTestBase() {
 
   @Test
   fun `sends restricted patient added to the domain topic`() {
@@ -85,7 +85,7 @@ class DomainEventPublisherIntTest(@Autowired private val objectMapper: ObjectMap
   private fun readNextDomainEventMessage(): String {
     val updateResult = testDomainEventQueue.sqsClient.receiveFirstMessage()
     testDomainEventQueue.sqsClient.deleteLastMessage(updateResult)
-    return objectMapper.readValue<MsgBody>(updateResult.body()).Message
+    return jsonMapper.readValue<MsgBody>(updateResult.body()).Message
   }
 
   private fun SqsAsyncClient.receiveFirstMessage(): Message = receiveMessage(
