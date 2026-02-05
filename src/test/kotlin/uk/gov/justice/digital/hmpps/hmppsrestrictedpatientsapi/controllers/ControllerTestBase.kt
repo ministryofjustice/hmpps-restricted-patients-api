@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Import
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.servlet.MockMvc
-import tools.jackson.databind.ObjectMapper
+import tools.jackson.databind.json.JsonMapper
 import uk.gov.justice.hmpps.test.kotlin.auth.JwtAuthorisationHelper
 
 @ActiveProfiles("test")
@@ -14,5 +14,5 @@ open class ControllerTestBase {
   internal lateinit var mockMvc: MockMvc
 
   @Autowired
-  internal lateinit var objectMapper: ObjectMapper
+  internal lateinit var jsonMapper: JsonMapper
 }
