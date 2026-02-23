@@ -221,13 +221,13 @@ class RestrictedPatientServiceTest {
         whenever(prisonApiQueryService.getOffenderBooking(any())).thenReturn(
           OffenderBookingResponse(1234567, "A1234AA", true),
         )
-        whenever(restrictedPatientsRepository.save(any())).thenReturn(makeRestrictedPatient())
+        whenever(restrictedPatientsRepository.save(any<RestrictedPatient>())).thenReturn(makeRestrictedPatient())
       }
 
       @Test
       fun `make a call to prison api to discharge a prisoner to hospital`() {
         val patient = makeRestrictedPatient(supportingPrisonId = "LEI")
-        whenever(restrictedPatientsRepository.save(any())).thenReturn(patient)
+        whenever(restrictedPatientsRepository.save(any<RestrictedPatient>())).thenReturn(patient)
         val response = service.dischargeToHospital(makeDischargeRequest().copy(supportingPrisonId = "LEI"))
 
         verify(prisonApiUpdateService).dischargeToHospital(patient)
@@ -424,7 +424,7 @@ class RestrictedPatientServiceTest {
 
       @BeforeEach
       fun beforeEach() {
-        whenever(restrictedPatientsRepository.save(any())).thenReturn(
+        whenever(restrictedPatientsRepository.save(any<RestrictedPatient>())).thenReturn(
           makeRestrictedPatient(
             dischargeTime = dischargeDateTime,
             commentText = testComment,
@@ -489,7 +489,7 @@ class RestrictedPatientServiceTest {
 
       @BeforeEach
       fun beforeEach() {
-        whenever(restrictedPatientsRepository.save(any())).thenReturn(
+        whenever(restrictedPatientsRepository.save(any<RestrictedPatient>())).thenReturn(
           makeRestrictedPatient(
             dischargeTime = dischargeDateTime,
             commentText = "comment saved to restricted patients",
@@ -578,7 +578,7 @@ class RestrictedPatientServiceTest {
           Optional.of(makeRestrictedPatient(supportingPrisonId = "LEI")),
         )
         whenever(prisonApiQueryService.getAgency(anyString())).thenReturn(PRISON)
-        whenever(restrictedPatientsRepository.save(any())).thenReturn(makeRestrictedPatient(supportingPrisonId = "MDI"))
+        whenever(restrictedPatientsRepository.save(any<RestrictedPatient>())).thenReturn(makeRestrictedPatient(supportingPrisonId = "MDI"))
         whenever(prisonApiQueryService.getAgencyLocationsByType("HSHOSP")).thenReturn(listOf(HOSPITAL))
         whenever(prisonApiQueryService.getAgencyLocationsByType("INST")).thenReturn(listOf(PRISON))
 
@@ -592,7 +592,7 @@ class RestrictedPatientServiceTest {
         whenever(restrictedPatientsRepository.findById(anyString())).thenReturn(
           Optional.of(makeRestrictedPatient()),
         )
-        whenever(restrictedPatientsRepository.save(any())).thenReturn(makeRestrictedPatient(supportingPrisonId = "LEI"))
+        whenever(restrictedPatientsRepository.save(any<RestrictedPatient>())).thenReturn(makeRestrictedPatient(supportingPrisonId = "LEI"))
         whenever(prisonApiQueryService.getAgency(anyString())).thenReturn(PRISON)
 
         service.changeSupportingPrison(makeSupportingPrisonRequest(supportingPrisonId = "LEI"))
