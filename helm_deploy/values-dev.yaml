@@ -36,6 +36,3 @@ generic-prometheus-alerts:
     - "dos-core-dev-rp_queue_for_domain_events_dl"
 
 environment: dev
-
-cron:
-  retry_dlqs_schedule: "*/10 7-20 * * 1-5"
