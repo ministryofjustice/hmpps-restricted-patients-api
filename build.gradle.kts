@@ -1,7 +1,7 @@
 import org.gradle.kotlin.dsl.register
 
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "10.1.0"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "10.1.1"
   kotlin("plugin.spring") version "2.3.20"
   kotlin("plugin.jpa") version "2.3.20"
 }
@@ -17,7 +17,7 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-data-jpa")
   implementation("org.springframework.boot:spring-boot-starter-flyway")
   implementation("org.springframework.boot:spring-boot-starter-webclient")
-  implementation("org.springframework.boot:spring-boot-gson:4.0.4")
+  implementation("org.springframework.boot:spring-boot-gson:4.0.5")
 
   implementation("org.apache.commons:commons-text:1.15.0")
   implementation("io.swagger:swagger-annotations:1.6.16")
