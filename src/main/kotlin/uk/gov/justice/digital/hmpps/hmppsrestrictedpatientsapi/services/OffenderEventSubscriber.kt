@@ -4,6 +4,7 @@ import com.google.gson.Gson
 import io.awspring.cloud.sqs.annotation.SqsListener
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Service
 
 data class OffenderMovementReception(
@@ -14,6 +15,7 @@ data class OffenderMovementReception(
 data class Event(val Message: String)
 
 @Service
+@ConditionalOnProperty(name = ["application.subscribers.enabled"], havingValue = "true", matchIfMissing = true)
 class OffenderEventSubscriber(
   private val gson: Gson,
   private val restrictedPatientCleanup: RestrictedPatientCleanup,
