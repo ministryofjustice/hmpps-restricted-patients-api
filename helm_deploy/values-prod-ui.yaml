@@ -4,16 +4,17 @@
 generic-service:
 
   ingress:
-    host: restricted-patients-api.hmpps.service.justice.gov.uk
+    host: restricted-patients-api.prison.service.justice.gov.uk
 
   env:
     APPLICATIONINSIGHTS_CONFIGURATION_FILE: applicationinsights.json
     PRISON_API_ENDPOINT_URL: https://prison-api.prison.service.justice.gov.uk
     PRISONER_SEARCH_API_ENDPOINT_URL: https://prisoner-search.prison.service.justice.gov.uk
     OAUTH_ENDPOINT_URL: https://sign-in.hmpps.service.justice.gov.uk/auth
+    APPLICATION_SUBSCRIBERS_ENABLED: "false"
 
   namespace_secrets:
-    rds-instance-output:
+    rp-rds-instance-output:
       DATABASE_ENDPOINT: "rds_instance_endpoint"
       DATABASE_NAME: "database_name"
       DATABASE_USERNAME: "database_username"
@@ -38,9 +39,9 @@ generic-prometheus-alerts:
   rdsAlertsDatabases:
     cloud-platform-d43cc21ae1d14deb: "Restricted Patients API"
   sqsNumberAlertQueueNames:
-    - "dps-core-prod-restricted_patients_queue"
-    - "dps-core-prod-restricted_patients_queue_dl"
-    - "dps-core-prod-rp_queue_for_domain_events"
-    - "dps-core-prod-rp_queue_for_domain_events_dl"
+    - "dps-core-prod-restricted_patients_domain_queue"
+    - "dps-core-prod-restricted_patients_domain_dlq"
+    - "dps-core-prod-restricted_patients_offender_queue"
+    - "dps-core-prod-restricted_patients_offender_dlq"
 
 environment: prod
