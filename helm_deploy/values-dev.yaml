@@ -16,6 +16,13 @@ generic-service:
     SPRINGDOC_API-DOCS_ENABLED: "true"
     SPRINGDOC_SWAGGER-UI_ENABLED: "true"
 
+  namespace_secrets:
+    rds-instance-output:
+      DATABASE_ENDPOINT: "rds_instance_endpoint"
+      DATABASE_NAME: "database_name"
+      DATABASE_USERNAME: "database_username"
+      DATABASE_PASSWORD: "database_password"
+
   scheduledDowntime:
     enabled: true
     startup: '24 6 * * 1-5' # Start at 6.24am UTC Monday-Friday

@@ -5,16 +5,17 @@ generic-service:
   replicaCount: 2
 
   ingress:
-    host: restricted-patients-api-preprod.hmpps.service.justice.gov.uk
+    host: restricted-patients-api-preprod.prison.service.justice.gov.uk
 
   env:
     APPLICATIONINSIGHTS_CONFIGURATION_FILE: applicationinsights.json
     PRISON_API_ENDPOINT_URL: https://prison-api-preprod.prison.service.justice.gov.uk
     PRISONER_SEARCH_API_ENDPOINT_URL: https://prisoner-search-preprod.prison.service.justice.gov.uk
     OAUTH_ENDPOINT_URL: https://sign-in-preprod.hmpps.service.justice.gov.uk/auth
+    APPLICATION_SUBSCRIBERS_ENABLED: "false"
 
   namespace_secrets:
-    rds-instance-output:
+    rp-rds-instance-output:
       DATABASE_ENDPOINT: "rds_instance_endpoint"
       DATABASE_NAME: "database_name"
       DATABASE_USERNAME: "database_username"
@@ -25,9 +26,9 @@ generic-prometheus-alerts:
   businessHoursOnly: true
   alertSeverity: syscon-nonprod
   sqsNumberAlertQueueNames:
-    - "dps-core-preprod-restricted_patients_queue"
-    - "dps-core-preprod-restricted_patients_queue_dl"
-    - "dps-core-preprod-rp_queue_for_domain_events"
-    - "dps-core-preprod-rp_queue_for_domain_events_dl"
+    - "dps-core-preprod-restricted_patients_domain_queue"
+    - "dps-core-preprod-restricted_patients_domain_dlq"
+    - "dps-core-preprod-restricted_patients_offender_queue"
+    - "dps-core-preprod-restricted_patients_offender_dlq"
 
 environment: preprod
