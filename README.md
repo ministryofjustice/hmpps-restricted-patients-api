@@ -1,7 +1,7 @@
 # HMPPS Restricted Patients API
 [![Ministry of Justice Repository Compliance Badge](https://github-community.service.justice.gov.uk/repository-standards/api/hmpps-restricted-patients-api/badge?style=flat)](https://github-community.service.justice.gov.uk/repository-standards/hmpps-restricted-patients-api)
 [![Docker Repository on ghcr](https://img.shields.io/badge/ghcr.io-repository-2496ED.svg?logo=docker)](https://ghcr.io/ministryofjustice/hmpps-restricted-patients-api)
-[![API docs](https://img.shields.io/badge/API_docs_-view-85EA2D.svg?logo=swagger)](https://restricted-patients-api-dev.hmpps.service.justice.gov.uk/swagger-ui/index.html)
+[![API docs](https://img.shields.io/badge/API_docs_-view-85EA2D.svg?logo=swagger)](https://restricted-patients-api-dev.prison.service.justice.gov.uk/swagger-ui/index.html)
 [![Event docs](https://img.shields.io/badge/Event_docs-view-85EA2D.svg)](https://studio.asyncapi.com/?url=https://raw.githubusercontent.com/ministryofjustice/hmpps-restricted-patients-api/main/async-api.yml&readOnly)
 
 # Features

@@ -77,17 +77,6 @@ jobs:
     uses: ministryofjustice/hmpps-github-actions/.github/workflows/deploy_env.yml@v2 # WORKFLOW_VERSION
     secrets: inherit
     with:
-      environment: 'dev'
-      app_version: '${{ needs.build.outputs.app_version }}'
-  deploy_dev_ui:
-    name: Deploy to the dev ui environment
-    if: github.ref == 'refs/heads/main'
-    needs:
-      - build
-      - helm_lint
-    uses: ministryofjustice/hmpps-github-actions/.github/workflows/deploy_env.yml@v2 # WORKFLOW_VERSION
-    secrets: inherit
-    with:
       environment: 'dev-ui'
       app_version: '${{ needs.build.outputs.app_version }}'
   deploy_preprod:
@@ -100,6 +89,16 @@ jobs:
     with:
       environment: 'preprod'
       app_version: '${{ needs.build.outputs.app_version }}'
+  deploy_preprod_ui:
+    name: Deploy to the preprod environment
+    needs:
+      - build
+      - deploy_dev
+    uses: ministryofjustice/hmpps-github-actions/.github/workflows/deploy_env.yml@v2 # WORKFLOW_VERSION
+    secrets: inherit
+    with:
+      environment: 'preprod-ui'
+      app_version: '${{ needs.build.outputs.app_version }}'
   deploy_prod:
     name: Deploy to the prod environment
     needs:
@@ -110,3 +109,14 @@ jobs:
     with:
       environment: 'prod'
       app_version: '${{ needs.build.outputs.app_version }}'
+  deploy_prod_ui:
+    name: Deploy to the prod environment
+    needs:
+      - build
+      - deploy_preprod_ui
+    uses: ministryofjustice/hmpps-github-actions/.github/workflows/deploy_env.yml@v2 # WORKFLOW_VERSION
+    secrets: inherit
+    with:
+      environment: 'prod-ui'
+      app_version: '${{ needs.build.outputs.app_version }}'
+
