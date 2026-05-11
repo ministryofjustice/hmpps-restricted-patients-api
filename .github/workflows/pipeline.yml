@@ -26,7 +26,7 @@ jobs:
   helm_lint:
     strategy:
       matrix:
-        environments: ['dev', 'dev-ui', 'preprod', 'prod']
+        environments: ['dev-ui', 'preprod', 'preprod-ui', 'prod', 'prod-ui']
     name: helm lint
     uses: ministryofjustice/hmpps-github-actions/.github/workflows/test_helm_lint.yml@v2 # WORKFLOW_VERSION
     secrets: inherit
