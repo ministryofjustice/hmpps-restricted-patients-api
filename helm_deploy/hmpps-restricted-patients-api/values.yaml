@@ -1,6 +1,7 @@
 generic-service:
   nameOverride: hmpps-restricted-patients-api
   productId: DPS066
+  cronPrefixName: api
 
   serviceAccountName: hmpps-restricted-patients-api
 
