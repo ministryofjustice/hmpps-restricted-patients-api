@@ -9,7 +9,6 @@ on:
         required: true
         options:
           - dev
-          - preprod
           - preprod-ui
           - prod
           - prod-ui

@@ -20,8 +20,8 @@ class OpenApiConfiguration(buildProperties: BuildProperties) {
     .servers(
       listOf(
         Server().url("https://restricted-patients-api-dev.prison.service.justice.gov.uk/").description("Development"),
-        Server().url("https://restricted-patients-api-preprod.hmpps.service.justice.gov.uk/").description("Pre-Production"),
-        Server().url("https://restricted-patients-api.hmpps.service.justice.gov.uk/").description("Production"),
+        Server().url("https://restricted-patients-api-preprod.prison.service.justice.gov.uk/").description("Pre-Production"),
+        Server().url("https://restricted-patients-api.prison.service.justice.gov.uk/").description("Production"),
         Server().url("http://localhost:8080").description("Local"),
       ),
     )
