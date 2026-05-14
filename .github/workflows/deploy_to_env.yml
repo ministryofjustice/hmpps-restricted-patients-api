@@ -9,7 +9,7 @@ on:
         required: true
         options:
           - dev
-          - preprod-ui
+          - preprod
           - prod
           - prod-ui
         default: 'dev'
