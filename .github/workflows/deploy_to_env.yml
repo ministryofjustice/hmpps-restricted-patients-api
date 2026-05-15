@@ -11,7 +11,6 @@ on:
           - dev
           - preprod
           - prod
-          - prod-ui
         default: 'dev'
       version:
         description: version to be deployed to the environment - must already exist.

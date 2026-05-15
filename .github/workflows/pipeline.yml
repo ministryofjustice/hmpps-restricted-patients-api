@@ -28,7 +28,7 @@ jobs:
   helm_lint:
     strategy:
       matrix:
-        environments: ['dev', 'preprod', 'prod', 'prod-ui']
+        environments: ['dev', 'preprod', 'prod']
     name: helm lint
     uses: ministryofjustice/hmpps-github-actions/.github/workflows/test_helm_lint.yml@v2 # WORKFLOW_VERSION
     secrets: inherit
@@ -102,14 +102,4 @@ jobs:
     secrets: inherit
     with:
       environment: 'prod'
-      app_version: '${{ needs.build.outputs.app_version }}'
-  deploy_prod_ui:
-    name: Deploy to the prod environment
-    needs:
-      - build
-      - deploy_preprod
-    uses: ministryofjustice/hmpps-github-actions/.github/workflows/deploy_env.yml@v2 # WORKFLOW_VERSION
-    secrets: inherit
-    with:
-      environment: 'prod-ui'
       app_version: '${{ needs.build.outputs.app_version }}'
