@@ -4,7 +4,6 @@ import com.google.gson.Gson
 import io.awspring.cloud.sqs.annotation.SqsListener
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Service
 
 data class HmppsDomainEvent(
@@ -19,7 +18,6 @@ data class AdditionalInformation(
 )
 
 @Service
-@ConditionalOnProperty(name = ["application.subscribers.enabled"], havingValue = "true", matchIfMissing = true)
 class DomainEventSubscriber(
   private val gson: Gson,
   private val restrictedPatientCleanup: RestrictedPatientCleanup,
