@@ -80,6 +80,8 @@ fun makeRestrictedPatient(
   dischargeTime: LocalDateTime = LocalDateTime.parse("2020-10-10T20:00:01"),
   createDateTime: LocalDateTime = LocalDateTime.parse("2020-10-10T20:00:01"),
   createUserId: String = "ITAG_USER",
+  modifyDateTime: LocalDateTime? = null,
+  modifyUserId: String? = null,
 ): RestrictedPatient {
   val patient = RestrictedPatient(
     prisonerNumber,
@@ -91,6 +93,8 @@ fun makeRestrictedPatient(
   )
   patient.createDateTime = createDateTime
   patient.createUserId = createUserId
+  patient.modifyDateTime = modifyDateTime
+  patient.modifyUserId = modifyUserId
   return patient
 }
 

@@ -43,6 +43,8 @@ class SubjectAccessRequestIntegrationTest : IntegrationTestBase() {
       @WithMockAuthUser
       fun `should return data if prisoner exists`() {
         saveRestrictedPatient(prisonerNumber = "A12345", commentText = "Prisoner was released to hospital")
+        prisonApiMockServer.stubGetAgency("MDI", "INST")
+        prisonApiMockServer.stubGetUser("user", lastName = "Tester")
 
         webTestClient.get().uri("/subject-access-request?prn=A12345")
           .headers(setHeaders(roles = listOf("ROLE_SAR_DATA_ACCESS")))
@@ -54,6 +56,28 @@ class SubjectAccessRequestIntegrationTest : IntegrationTestBase() {
           .jsonPath("$.content.hospitalLocationCode").isEqualTo("HAZLWD")
           .jsonPath("$.content.dischargeTime").isEqualTo("2020-10-09T00:00:00")
           .jsonPath("$.content.commentText").isEqualTo("Prisoner was released to hospital")
+          .jsonPath("$.content.fromLocationName").isEqualTo("MDI description")
+          .jsonPath("$.content.createdDate").exists()
+          .jsonPath("$.content.createdUserSurname").isEqualTo("Tester")
+          .jsonPath("$.content.modifiedDate").exists()
+          .jsonPath("$.content.modifiedUserSurname").isEqualTo("Tester")
+      }
+
+      @Test
+      @WithMockAuthUser
+      fun `should fall back to from location code when agency lookup returns nothing`() {
+        saveRestrictedPatient(prisonerNumber = "A12345")
+        prisonApiMockServer.stubGetAgencyNotFound("MDI")
+        prisonApiMockServer.stubGetUserNotFound("user")
+
+        webTestClient.get().uri("/subject-access-request?prn=A12345")
+          .headers(setHeaders(roles = listOf("ROLE_SAR_DATA_ACCESS")))
+          .exchange()
+          .expectStatus().isOk
+          .expectBody()
+          .jsonPath("$.content.fromLocationName").isEqualTo("MDI")
+          .jsonPath("$.content.createdUserSurname").doesNotHaveJsonPath()
+          .jsonPath("$.content.modifiedUserSurname").doesNotHaveJsonPath()
       }
 
       @Test

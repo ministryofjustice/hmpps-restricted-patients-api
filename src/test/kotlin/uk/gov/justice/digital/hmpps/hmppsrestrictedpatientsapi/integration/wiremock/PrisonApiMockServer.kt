@@ -293,6 +293,46 @@ class PrisonApiMockServer : WireMockServer(8989) {
     )
   }
 
+  fun stubGetUser(username: String, firstName: String = "John", lastName: String = "Smith") {
+    stubFor(
+      get(urlPathEqualTo("/api/users/$username"))
+        .willReturn(
+          aResponse()
+            .withHeader("Content-Type", "application/json")
+            .withStatus(200)
+            .withBody(
+              """
+              {
+                  "username": "$username",
+                  "firstName": "$firstName",
+                  "lastName": "$lastName"
+              }
+              """.trimIndent(),
+            ),
+        ),
+    )
+  }
+
+  fun stubGetUserNotFound(username: String) {
+    stubFor(
+      get(urlPathEqualTo("/api/users/$username"))
+        .willReturn(
+          aResponse()
+            .withHeader("Content-Type", "application/json")
+            .withStatus(404)
+            .withBody(
+              """
+              {
+                  "status": 404,
+                  "userMessage": "User not found",
+                  "developerMessage": "User not found"
+              }
+              """.trimIndent(),
+            ),
+        ),
+    )
+  }
+
   fun stubGetAgencyNotFound(agencyId: String) {
     stubFor(
       get(urlPathEqualTo("/api/agencies/$agencyId"))
