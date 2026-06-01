@@ -1,0 +1,14 @@
+{
+  "RestrictedPatient": {
+    "commentText": "String",
+    "createDateTime": "LocalDateTime",
+    "createUserId": "String",
+    "dischargeTime": "LocalDateTime",
+    "fromLocationId": "String",
+    "hospitalLocationCode": "String",
+    "modifyDateTime": "LocalDateTime",
+    "modifyUserId": "String",
+    "prisonerNumber": "String",
+    "supportingPrisonId": "String"
+  }
+}

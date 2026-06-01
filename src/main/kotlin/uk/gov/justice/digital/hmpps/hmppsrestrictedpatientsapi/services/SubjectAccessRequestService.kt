@@ -16,7 +16,6 @@ class SubjectAccessRequestService(
 ) : HmppsPrisonSubjectAccessRequestService {
   override fun getPrisonContentFor(prn: String, fromDate: LocalDate?, toDate: LocalDate?) = repository.findByIdOrNull(prn)?.let {
     val hospital = prisonApiQueryService.getAgency(it.hospitalLocationCode)
-    val fromLocation = prisonApiQueryService.getAgency(it.fromLocationId)
 
     HmppsSubjectAccessRequestContent(
       content = RestrictedPatientContent(
@@ -26,14 +25,11 @@ class SubjectAccessRequestService(
         hospitalLocationDescription = hospital?.description ?: it.hospitalLocationCode,
         dischargeTime = it.dischargeTime,
         commentText = it.commentText,
-        fromLocationName = fromLocation?.description ?: it.fromLocationId,
-        createdDate = it.createDateTime,
-        createdUserSurname = it.createUserId?.let { username -> surnameFor(username) },
+        createdDate = it.createDateTime!!,
+        createdUsername = it.createUserId,
         modifiedDate = it.modifyDateTime,
-        modifiedUserSurname = it.modifyUserId?.let { username -> surnameFor(username) },
+        modifiedUsername = it.modifyUserId,
       ),
     )
   }
-
-  private fun surnameFor(username: String): String? = prisonApiQueryService.getUser(username)?.lastName
 }

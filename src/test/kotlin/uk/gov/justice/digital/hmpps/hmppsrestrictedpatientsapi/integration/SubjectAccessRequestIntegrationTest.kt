@@ -1,98 +1,61 @@
 package uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.integration
 
-import org.junit.jupiter.api.DisplayName
-import org.junit.jupiter.api.Nested
+import jakarta.persistence.EntityManager
 import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.annotation.Import
+import org.springframework.test.context.jdbc.Sql
+import org.springframework.test.web.reactive.server.WebTestClient
+import uk.gov.justice.digital.hmpps.subjectaccessrequest.SarApiDataTest
+import uk.gov.justice.digital.hmpps.subjectaccessrequest.SarFlywaySchemaTest
+import uk.gov.justice.digital.hmpps.subjectaccessrequest.SarIntegrationTestHelper
+import uk.gov.justice.digital.hmpps.subjectaccessrequest.SarIntegrationTestHelperConfig
+import uk.gov.justice.digital.hmpps.subjectaccessrequest.SarJpaEntitiesTest
+import uk.gov.justice.digital.hmpps.subjectaccessrequest.SarReportTest
 import uk.gov.justice.hmpps.test.kotlin.auth.WithMockAuthUser
+import javax.sql.DataSource
 
 @WithMockAuthUser
-class SubjectAccessRequestIntegrationTest : IntegrationTestBase() {
-  @Nested
-  @DisplayName("/subject-access-request")
-  inner class SubjectAccessRequestEndpoint {
+@Import(SarIntegrationTestHelperConfig::class)
+class SubjectAccessRequestIntegrationTest :
+  IntegrationTestBase(),
+  SarFlywaySchemaTest,
+  SarJpaEntitiesTest,
+  SarApiDataTest,
+  SarReportTest {
 
-    @Nested
-    inner class Security {
-      @Test
-      fun `access forbidden when no authority`() {
-        webTestClient.get().uri("/subject-access-request?prn=A12345")
-          .exchange()
-          .expectStatus().isUnauthorized
-      }
+  @Autowired
+  lateinit var dataSource: DataSource
 
-      @Test
-      fun `access forbidden when no role`() {
-        webTestClient.get().uri("/subject-access-request?prn=A12345")
-          .headers(setHeaders(roles = listOf()))
-          .exchange()
-          .expectStatus().isForbidden
-      }
+  @Autowired
+  lateinit var entityManager: EntityManager
 
-      @Test
-      fun `access forbidden with wrong role`() {
-        webTestClient.get().uri("/subject-access-request?prn=A12345")
-          .headers(setHeaders(roles = listOf("ROLE_BANANAS")))
-          .exchange()
-          .expectStatus().isForbidden
-      }
-    }
+  @Autowired
+  lateinit var sarIntegrationTestHelper: SarIntegrationTestHelper
 
-    @Nested
-    inner class HappyPath {
-      @Test
-      @WithMockAuthUser
-      fun `should return data if prisoner exists`() {
-        saveRestrictedPatient(prisonerNumber = "A12345", commentText = "Prisoner was released to hospital")
-        prisonApiMockServer.stubGetAgency("MDI", "INST")
-        prisonApiMockServer.stubGetUser("user", lastName = "Tester")
+  override fun getDataSourceInstance(): DataSource = dataSource
 
-        webTestClient.get().uri("/subject-access-request?prn=A12345")
-          .headers(setHeaders(roles = listOf("ROLE_SAR_DATA_ACCESS")))
-          .exchange()
-          .expectStatus().isOk
-          .expectBody()
-          .jsonPath("$.content.prisonerNumber").isEqualTo("A12345")
-          .jsonPath("$.content.supportingPrisonId").isEqualTo("MDI")
-          .jsonPath("$.content.hospitalLocationCode").isEqualTo("HAZLWD")
-          .jsonPath("$.content.dischargeTime").isEqualTo("2020-10-09T00:00:00")
-          .jsonPath("$.content.commentText").isEqualTo("Prisoner was released to hospital")
-          .jsonPath("$.content.fromLocationName").isEqualTo("MDI description")
-          .jsonPath("$.content.createdDate").exists()
-          .jsonPath("$.content.createdUserSurname").isEqualTo("Tester")
-          .jsonPath("$.content.modifiedDate").exists()
-          .jsonPath("$.content.modifiedUserSurname").isEqualTo("Tester")
-      }
+  override fun getSarHelper(): SarIntegrationTestHelper = sarIntegrationTestHelper
 
-      @Test
-      @WithMockAuthUser
-      fun `should fall back to from location code when agency lookup returns nothing`() {
-        saveRestrictedPatient(prisonerNumber = "A12345")
-        prisonApiMockServer.stubGetAgencyNotFound("MDI")
-        prisonApiMockServer.stubGetUserNotFound("user")
+  override fun getEntityManagerInstance(): EntityManager = entityManager
 
-        webTestClient.get().uri("/subject-access-request?prn=A12345")
-          .headers(setHeaders(roles = listOf("ROLE_SAR_DATA_ACCESS")))
-          .exchange()
-          .expectStatus().isOk
-          .expectBody()
-          .jsonPath("$.content.fromLocationName").isEqualTo("MDI")
-          .jsonPath("$.content.createdUserSurname").doesNotHaveJsonPath()
-          .jsonPath("$.content.modifiedUserSurname").doesNotHaveJsonPath()
-      }
+  override fun setupTestData() {}
 
-      @Test
-      @WithMockAuthUser
-      fun `should omit data if none exists`() {
-        saveRestrictedPatient(prisonerNumber = "A12345")
+  override fun getWebTestClientInstance(): WebTestClient = webTestClient
 
-        webTestClient.get().uri("/subject-access-request?prn=A12345")
-          .headers(setHeaders(roles = listOf("ROLE_SAR_DATA_ACCESS")))
-          .exchange()
-          .expectStatus().isOk
-          .expectBody()
-          .jsonPath("$.content.prisonerNumber").isEqualTo("A12345")
-          .jsonPath("$.content.commentText").doesNotHaveJsonPath()
-      }
-    }
+  override fun getPrn(): String = "G1072GT"
+
+  @Test
+  @Sql("classpath:db/sar/reset.sql")
+  @Sql("classpath:db/sar/test_data.sql")
+  override fun `SAR API should return expected data`() {
+    super.`SAR API should return expected data`()
+  }
+
+  @Test
+  @Sql("classpath:db/sar/reset.sql")
+  @Sql("classpath:db/sar/test_data.sql")
+  override fun `SAR report should render as expected`() {
+    super.`SAR report should render as expected`()
   }
 }

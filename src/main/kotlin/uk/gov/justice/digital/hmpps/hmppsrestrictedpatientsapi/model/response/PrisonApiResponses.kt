@@ -11,5 +11,3 @@ data class MovementResponse(
 )
 
 data class OffenderBookingResponse(val bookingId: Long, val offenderNo: String, val activeFlag: Boolean)
-
-data class UserDetail(val username: String, val firstName: String?, val lastName: String?)

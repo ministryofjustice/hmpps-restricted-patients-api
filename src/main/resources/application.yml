@@ -102,3 +102,9 @@ springdoc:
     enabled: false
   swagger-ui:
     enabled: false
+
+hmpps:
+  sar:
+    template:
+      path: /sar/templates/sar_template.mustache
+      enabled: true

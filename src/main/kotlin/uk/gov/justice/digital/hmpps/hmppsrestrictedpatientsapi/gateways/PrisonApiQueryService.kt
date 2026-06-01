@@ -10,7 +10,6 @@ import reactor.core.publisher.Mono
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.Agency
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.MovementResponse
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.OffenderBookingResponse
-import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.response.UserDetail
 
 @Service
 class PrisonApiQueryService(private val prisonApiSystemClient: WebClient) {
@@ -39,16 +38,6 @@ class PrisonApiQueryService(private val prisonApiSystemClient: WebClient) {
     .uri("/agencies/{agencyId}", agencyId)
     .retrieve()
     .bodyToMono<Agency>()
-    .onErrorResume(WebClientResponseException.NotFound::class.java) {
-      Mono.empty()
-    }
-    .block()
-
-  fun getUser(username: String): UserDetail? = prisonApiSystemClient
-    .get()
-    .uri("/users/{username}", username)
-    .retrieve()
-    .bodyToMono<UserDetail>()
     .onErrorResume(WebClientResponseException.NotFound::class.java) {
       Mono.empty()
     }

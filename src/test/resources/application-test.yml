@@ -47,3 +47,15 @@ springdoc:
     enabled: true
   swagger-ui:
     enabled: true
+
+hmpps:
+  sar:
+    tests:
+      attachments-expected: true
+      expected-flyway-schema-version: 4
+      expected-jpa-entity-schema:
+        path: /sar/entity-schema.json
+      expected-api-response:
+        path: /sar/sar-api-response.json
+      expected-render-result:
+        path: /sar/sar-generated-report.html
