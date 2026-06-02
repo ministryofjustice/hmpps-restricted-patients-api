@@ -26,7 +26,7 @@ class SubjectAccessRequestService(
         dischargeTime = it.dischargeTime,
         commentText = it.commentText,
         createdDate = it.createDateTime!!,
-        createdUsername = it.createUserId,
+        createdUsername = it.createUserId!!,
         modifiedDate = it.modifyDateTime,
         modifiedUsername = it.modifyUserId,
       ),

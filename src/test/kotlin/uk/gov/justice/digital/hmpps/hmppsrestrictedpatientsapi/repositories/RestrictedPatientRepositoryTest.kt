@@ -10,13 +10,14 @@ import org.springframework.boot.jpa.test.autoconfigure.TestEntityManager
 import org.springframework.context.annotation.Import
 import org.springframework.test.context.ActiveProfiles
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.config.AuditConfiguration
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.config.ClockConfiguration
 import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.entities.RestrictedPatient
 import uk.gov.justice.hmpps.kotlin.auth.HmppsAuthenticationHolder
 import uk.gov.justice.hmpps.test.kotlin.auth.WithMockAuthUser
 import java.time.LocalDateTime
 
 @ActiveProfiles("test")
-@Import(AuditConfiguration::class, HmppsAuthenticationHolder::class)
+@Import(AuditConfiguration::class, ClockConfiguration::class, HmppsAuthenticationHolder::class)
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = NONE)
 @WithMockAuthUser("user")

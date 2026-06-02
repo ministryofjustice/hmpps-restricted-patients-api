@@ -3,10 +3,10 @@
   "supportingPrisonId": "LEI",
   "hospitalLocationCode": "HAZLWD",
   "hospitalLocationDescription": "HAZLWD",
-  "dischargeTime": "2024-09-05T08:50:44",
+  "dischargeTime": "2020-10-09T00:00:00",
   "commentText": "Released to hospital (Restricted Patients migration)",
-  "createdDate": "2024-09-04T10:00:00",
-  "createdUsername": "ITAG_USER",
-  "modifiedDate": "2024-09-10T11:22:33",
-  "modifiedUsername": "EDITOR_USER"
+  "createdDate": "2020-10-10T00:00:00",
+  "createdUsername": "user",
+  "modifiedDate": "2020-10-10T00:00:00",
+  "modifiedUsername": "user"
 }

@@ -9,8 +9,8 @@
         <tr><td>Comment</td><td>{{ optionalValue commentText }}</td></tr>
         <tr><td>Created date</td><td>{{ formatDate createdDate }}</td></tr>
         <tr><td>Created by</td><td>{{ getUserLastName createdUsername }}</td></tr>
-        <tr><td>Modified date</td><td>{{ formatDate modifiedDate }}</td></tr>
-        <tr><td>Modified by</td><td>{{ getUserLastName modifiedUsername }}</td></tr>
+        <tr><td>Modified date</td><td>{{ optionalValue (formatDate modifiedDate) }}</td></tr>
+        <tr><td>Modified by</td><td>{{ optionalValue (getUserLastName modifiedUsername) }}</td></tr>
     </table>
 {{/.}}
 {{^.}}
