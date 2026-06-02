@@ -44,6 +44,10 @@ class SubjectAccessRequestServiceTest {
       assertThat(restrictedPatient).extracting("hospitalLocationDescription").isEqualTo(HOSPITAL.agencyId)
       assertThat(restrictedPatient).extracting("commentText").isEqualTo("test")
       assertThat(restrictedPatient).extracting("dischargeTime").isEqualTo(LocalDateTime.parse("2020-10-10T20:00:01"))
+      assertThat(restrictedPatient).extracting("createdDate").isEqualTo(LocalDateTime.parse("2020-10-10T20:00:01"))
+      assertThat(restrictedPatient).extracting("createdUsername").isEqualTo("ITAG_USER")
+      assertThat(restrictedPatient).extracting("modifiedDate").isNull()
+      assertThat(restrictedPatient).extracting("modifiedUsername").isNull()
     }
 
     @Test
@@ -55,12 +59,24 @@ class SubjectAccessRequestServiceTest {
 
       val restrictedPatient = service.getPrisonContentFor("A12345", null, null)?.content
 
-      assertThat(restrictedPatient).extracting("prisonerNumber").isEqualTo("A12345")
-      assertThat(restrictedPatient).extracting("supportingPrisonId").isEqualTo(PRISON.agencyId)
-      assertThat(restrictedPatient).extracting("hospitalLocationCode").isEqualTo(HOSPITAL.agencyId)
       assertThat(restrictedPatient).extracting("hospitalLocationDescription").isEqualTo(HOSPITAL.description)
-      assertThat(restrictedPatient).extracting("commentText").isEqualTo("test")
-      assertThat(restrictedPatient).extracting("dischargeTime").isEqualTo(LocalDateTime.parse("2020-10-10T20:00:01"))
+    }
+
+    @Test
+    fun `populates modified date and username when set`() {
+      whenever(restrictedPatientsRepository.findById(anyString())).thenReturn(
+        Optional.of(
+          makeRestrictedPatient(
+            modifyDateTime = LocalDateTime.parse("2021-05-05T10:11:12"),
+            modifyUserId = "EDITOR",
+          ),
+        ),
+      )
+
+      val restrictedPatient = service.getPrisonContentFor("A12345", null, null)?.content
+
+      assertThat(restrictedPatient).extracting("modifiedDate").isEqualTo(LocalDateTime.parse("2021-05-05T10:11:12"))
+      assertThat(restrictedPatient).extracting("modifiedUsername").isEqualTo("EDITOR")
     }
   }
 }

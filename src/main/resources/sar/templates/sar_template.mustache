@@ -1,0 +1,18 @@
+<h1 class="title">Restricted Patients</h1>
+{{#.}}
+    <br>
+    <table class="summary-list">
+        <tr><td>Prisoner number</td><td>{{ prisonerNumber }}</td></tr>
+        <tr><td>Discharge time</td><td>{{ formatDate dischargeTime }}</td></tr>
+        <tr><td>Hospital location</td><td>{{ hospitalLocationDescription }}</td></tr>
+        <tr><td>Supporting prison</td><td>{{ getPrisonName supportingPrisonId }}</td></tr>
+        <tr><td>Comment</td><td>{{ optionalValue commentText }}</td></tr>
+        <tr><td>Created date</td><td>{{ formatDate createdDate }}</td></tr>
+        <tr><td>Created by</td><td>{{ getUserLastName createdUsername }}</td></tr>
+        <tr><td>Modified date</td><td>{{ optionalValue (formatDate modifiedDate) }}</td></tr>
+        <tr><td>Modified by</td><td>{{ optionalValue (getUserLastName modifiedUsername) }}</td></tr>
+    </table>
+{{/.}}
+{{^.}}
+    <p>No data held</p>
+{{/.}}

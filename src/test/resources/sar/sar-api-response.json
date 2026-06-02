@@ -1,0 +1,12 @@
+{
+  "prisonerNumber": "G1072GT",
+  "supportingPrisonId": "LEI",
+  "hospitalLocationCode": "HAZLWD",
+  "hospitalLocationDescription": "HAZLWD",
+  "dischargeTime": "2020-10-09T00:00:00",
+  "commentText": "Released to hospital (Restricted Patients migration)",
+  "createdDate": "2020-10-10T00:00:00",
+  "createdUsername": "user",
+  "modifiedDate": "2020-10-10T00:00:00",
+  "modifiedUsername": "user"
+}

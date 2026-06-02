@@ -1,74 +1,56 @@
 package uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.integration
 
-import org.junit.jupiter.api.DisplayName
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
+import jakarta.persistence.EntityManager
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.annotation.Import
+import org.springframework.test.web.reactive.server.WebTestClient
+import uk.gov.justice.digital.hmpps.hmppsrestrictedpatientsapi.model.entities.RestrictedPatient
+import uk.gov.justice.digital.hmpps.subjectaccessrequest.SarApiDataTest
+import uk.gov.justice.digital.hmpps.subjectaccessrequest.SarFlywaySchemaTest
+import uk.gov.justice.digital.hmpps.subjectaccessrequest.SarIntegrationTestHelper
+import uk.gov.justice.digital.hmpps.subjectaccessrequest.SarIntegrationTestHelperConfig
+import uk.gov.justice.digital.hmpps.subjectaccessrequest.SarJpaEntitiesTest
+import uk.gov.justice.digital.hmpps.subjectaccessrequest.SarReportTest
 import uk.gov.justice.hmpps.test.kotlin.auth.WithMockAuthUser
+import java.time.LocalDateTime
+import javax.sql.DataSource
 
 @WithMockAuthUser
-class SubjectAccessRequestIntegrationTest : IntegrationTestBase() {
-  @Nested
-  @DisplayName("/subject-access-request")
-  inner class SubjectAccessRequestEndpoint {
+@Import(SarIntegrationTestHelperConfig::class)
+class SubjectAccessRequestIntegrationTest @Autowired constructor(
+  private val dataSource: DataSource,
+  private val entityManager: EntityManager,
+  private val sarIntegrationTestHelper: SarIntegrationTestHelper,
+) : IntegrationTestBase(),
+  SarFlywaySchemaTest,
+  SarJpaEntitiesTest,
+  SarApiDataTest,
+  SarReportTest {
 
-    @Nested
-    inner class Security {
-      @Test
-      fun `access forbidden when no authority`() {
-        webTestClient.get().uri("/subject-access-request?prn=A12345")
-          .exchange()
-          .expectStatus().isUnauthorized
-      }
+  override fun getDataSourceInstance(): DataSource = dataSource
 
-      @Test
-      fun `access forbidden when no role`() {
-        webTestClient.get().uri("/subject-access-request?prn=A12345")
-          .headers(setHeaders(roles = listOf()))
-          .exchange()
-          .expectStatus().isForbidden
-      }
+  override fun getSarHelper(): SarIntegrationTestHelper = sarIntegrationTestHelper
 
-      @Test
-      fun `access forbidden with wrong role`() {
-        webTestClient.get().uri("/subject-access-request?prn=A12345")
-          .headers(setHeaders(roles = listOf("ROLE_BANANAS")))
-          .exchange()
-          .expectStatus().isForbidden
-      }
-    }
+  override fun getEntityManagerInstance(): EntityManager = entityManager
 
-    @Nested
-    inner class HappyPath {
-      @Test
-      @WithMockAuthUser
-      fun `should return data if prisoner exists`() {
-        saveRestrictedPatient(prisonerNumber = "A12345", commentText = "Prisoner was released to hospital")
+  override fun getWebTestClientInstance(): WebTestClient = webTestClient
 
-        webTestClient.get().uri("/subject-access-request?prn=A12345")
-          .headers(setHeaders(roles = listOf("ROLE_SAR_DATA_ACCESS")))
-          .exchange()
-          .expectStatus().isOk
-          .expectBody()
-          .jsonPath("$.content.prisonerNumber").isEqualTo("A12345")
-          .jsonPath("$.content.supportingPrisonId").isEqualTo("MDI")
-          .jsonPath("$.content.hospitalLocationCode").isEqualTo("HAZLWD")
-          .jsonPath("$.content.dischargeTime").isEqualTo("2020-10-09T00:00:00")
-          .jsonPath("$.content.commentText").isEqualTo("Prisoner was released to hospital")
-      }
+  override fun getPrn(): String = PRN
 
-      @Test
-      @WithMockAuthUser
-      fun `should omit data if none exists`() {
-        saveRestrictedPatient(prisonerNumber = "A12345")
+  override fun setupTestData() {
+    restrictedPatientRepository.save(
+      RestrictedPatient(
+        prisonerNumber = PRN,
+        fromLocationId = "MDI",
+        hospitalLocationCode = "HAZLWD",
+        supportingPrisonId = "LEI",
+        dischargeTime = LocalDateTime.parse("2020-10-09T00:00:00"),
+        commentText = "Released to hospital (Restricted Patients migration)",
+      ),
+    )
+  }
 
-        webTestClient.get().uri("/subject-access-request?prn=A12345")
-          .headers(setHeaders(roles = listOf("ROLE_SAR_DATA_ACCESS")))
-          .exchange()
-          .expectStatus().isOk
-          .expectBody()
-          .jsonPath("$.content.prisonerNumber").isEqualTo("A12345")
-          .jsonPath("$.content.commentText").doesNotHaveJsonPath()
-      }
-    }
+  private companion object {
+    const val PRN = "G1072GT"
   }
 }

@@ -25,6 +25,10 @@ class SubjectAccessRequestService(
         hospitalLocationDescription = hospital?.description ?: it.hospitalLocationCode,
         dischargeTime = it.dischargeTime,
         commentText = it.commentText,
+        createdDate = it.createDateTime!!,
+        createdUsername = it.createUserId!!,
+        modifiedDate = it.modifyDateTime,
+        modifiedUsername = it.modifyUserId,
       ),
     )
   }

@@ -28,4 +28,12 @@ data class RestrictedPatientContent(
   val dischargeTime: LocalDateTime,
   @Schema(description = "Useful comments")
   val commentText: String?,
+  @Schema(description = "Date and time the restricted patient record was created")
+  val createdDate: LocalDateTime,
+  @Schema(description = "Username of the user who created the restricted patient record", example = "ITAG_USER")
+  val createdUsername: String,
+  @Schema(description = "Date and time the restricted patient record was last modified")
+  val modifiedDate: LocalDateTime?,
+  @Schema(description = "Username of the user who last modified the restricted patient record", example = "ITAG_USER")
+  val modifiedUsername: String?,
 )
