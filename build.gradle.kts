@@ -15,16 +15,15 @@ dependencyCheck {
 }
 
 dependencies {
-  implementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter:2.2.0")
-  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:7.3.2")
+  implementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter:2.5.0")
+  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:7.4.0")
   implementation("org.springframework.boot:spring-boot-starter-webflux")
   implementation("org.springframework.boot:spring-boot-starter-data-jpa")
   implementation("org.springframework.boot:spring-boot-starter-flyway")
   implementation("org.springframework.boot:spring-boot-starter-webclient")
-  implementation("org.springframework.boot:spring-boot-gson:4.1.0")
+  implementation("org.springframework.boot:spring-boot-gson")
 
   implementation("org.apache.commons:commons-text:1.15.0")
-  implementation("io.swagger:swagger-annotations:1.6.16")
   implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.3")
   implementation("org.springframework:spring-jms")
   implementation("org.apache.commons:commons-csv:1.14.1")
@@ -40,16 +39,15 @@ dependencies {
   runtimeOnly("org.flywaydb:flyway-database-postgresql")
   runtimeOnly("org.postgresql:postgresql:42.7.11")
 
-  testImplementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter-test:2.2.0")
-  testImplementation("uk.gov.justice.service.hmpps:hmpps-subject-access-request-test-support:2.0.0")
+  testImplementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter-test:2.5.0")
+  testImplementation("uk.gov.justice.service.hmpps:hmpps-subject-access-request-test-support:2.5.0")
   testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
   testImplementation("org.springframework.boot:spring-boot-starter-data-jpa-test")
   testImplementation("org.springframework.boot:spring-boot-starter-webflux-test")
-  testImplementation("org.springframework.security:spring-security-test:7.0.2")
   testImplementation("org.wiremock:wiremock-standalone:3.13.2")
-  testImplementation("net.javacrumbs.json-unit:json-unit-assertj:5.1.0")
+  testImplementation("net.javacrumbs.json-unit:json-unit-assertj:5.1.2")
   testImplementation("org.awaitility:awaitility-kotlin:4.3.0")
-  testImplementation("io.swagger.parser.v3:swagger-parser:2.1.37") {
+  testImplementation("io.swagger.parser.v3:swagger-parser:2.1.42") {
     exclude(group = "io.swagger.core.v3")
   }
   testImplementation("io.opentelemetry:opentelemetry-sdk-testing:1.60.1")
@@ -65,9 +63,6 @@ allOpen {
 
 kotlin {
   jvmToolchain(25)
-  compilerOptions {
-    freeCompilerArgs.addAll("-Xannotation-default-target=param-property")
-  }
 }
 
 tasks {

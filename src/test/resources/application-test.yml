@@ -51,7 +51,7 @@ springdoc:
 hmpps:
   sar:
     tests:
-      attachments-expected: true
+      attachments-expected: false
       expected-flyway-schema-version: 4
       expected-jpa-entity-schema:
         path: /sar/entity-schema.json
