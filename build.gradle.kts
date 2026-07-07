@@ -1,17 +1,13 @@
 import org.gradle.kotlin.dsl.register
 
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "10.5.2"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "10.5.6"
   kotlin("plugin.spring") version "2.4.0"
   kotlin("plugin.jpa") version "2.4.0"
 }
 
 repositories {
   mavenCentral()
-}
-
-dependencyCheck {
-  suppressionFiles.add("azure-dependency-check-suppress.xml")
 }
 
 dependencies {
@@ -30,14 +26,10 @@ dependencies {
   // Needs to match this version https://github.com/microsoft/ApplicationInsights-Java/blob/<version>/dependencyManagement/build.gradle.kts#L16
   // where <version> is the version of application insights pulled in by hmpps-gradle-spring-boot
   // at https://github.com/ministryofjustice/hmpps-gradle-spring-boot/blob/main/src/main/kotlin/uk/gov/justice/digital/hmpps/gradle/configmanagers/AppInsightsConfigManager.kt#L7
-  implementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:2.26.1")
-
-  val appinsightsCore = "core:2.6.4"
-  implementation("io.micrometer:micrometer-registry-azure-monitor:1.17.0")
-  implementation("com.microsoft.azure:applicationinsights-$appinsightsCore")
+  implementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:2.28.1")
 
   runtimeOnly("org.flywaydb:flyway-database-postgresql")
-  runtimeOnly("org.postgresql:postgresql:42.7.11")
+  runtimeOnly("org.postgresql:postgresql:42.7.12")
 
   testImplementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter-test:2.5.0")
   testImplementation("uk.gov.justice.service.hmpps:hmpps-subject-access-request-test-support:2.5.0")
@@ -47,10 +39,10 @@ dependencies {
   testImplementation("org.wiremock:wiremock-standalone:3.13.2")
   testImplementation("net.javacrumbs.json-unit:json-unit-assertj:5.1.2")
   testImplementation("org.awaitility:awaitility-kotlin:4.3.0")
-  testImplementation("io.swagger.parser.v3:swagger-parser:2.1.42") {
+  testImplementation("io.swagger.parser.v3:swagger-parser:2.1.45") {
     exclude(group = "io.swagger.core.v3")
   }
-  testImplementation("io.opentelemetry:opentelemetry-sdk-testing:1.60.1")
+  testImplementation("io.opentelemetry:opentelemetry-sdk-testing:1.62.0")
 }
 
 allOpen {
