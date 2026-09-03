@@ -78,5 +78,20 @@ class SubjectAccessRequestServiceTest {
       assertThat(restrictedPatient).extracting("modifiedDate").isEqualTo(LocalDateTime.parse("2021-05-05T10:11:12"))
       assertThat(restrictedPatient).extracting("modifiedUsername").isEqualTo("EDITOR")
     }
+
+    @Test
+    fun `returns content when created username is null`() {
+      whenever(restrictedPatientsRepository.findById(anyString())).thenReturn(
+        Optional.of(
+          makeRestrictedPatient(
+            createUserId = null,
+          ),
+        ),
+      )
+
+      val restrictedPatient = service.getPrisonContentFor("A12345", null, null)?.content
+
+      assertThat(restrictedPatient).extracting("createdUsername").isNull()
+    }
   }
 }
