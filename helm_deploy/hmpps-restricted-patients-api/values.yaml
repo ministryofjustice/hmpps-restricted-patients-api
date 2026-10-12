@@ -75,6 +75,5 @@ generic-service:
       schedule: "0 3 * * *"
 
 generic-prometheus-alerts:
-  alertSeverity: syscon
   targetApplication: hmpps-restricted-patients-api
   sqsAlertsTotalMessagesThreshold: "0"
