@@ -29,7 +29,7 @@ generic-service:
 # CloudPlatform AlertManager receiver to route prometheus alerts to slack
 generic-prometheus-alerts:
   rdsAlertsDatabases:
-    cloud-platform-d43cc21ae1d14deb: "Restricted Patients API"
+    hmpps-restricted-patients-api-prod: "Restricted Patients API"
   sqsNumberAlertQueueNames:
     - "dps-core-prod-restricted_patients_domain_queue"
     - "dps-core-prod-restricted_patients_domain_dlq"
