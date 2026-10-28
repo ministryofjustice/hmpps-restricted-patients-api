@@ -79,15 +79,23 @@ search, the UI or DPS until the prisoner is re-indexed. See [runbook.md](runbook
 
 ## API endpoints
 
-| Method and path | Used by | What it does |
-|---|---|---|
-| `POST /discharge-to-hospital` | UI, move to hospital | Creates the record and asks Prison API to discharge the prisoner to hospital in NOMIS. |
-| `POST /migrate-in-restricted-patient` | UI, add a released prisoner | Creates the record for someone already released to hospital in NOMIS. |
-| `GET /restricted-patient/prison-number/{no}` | UI, search indexer, legacy DPS | Returns the record with prison and hospital descriptions; 404 if not a restricted patient. |
-| `DELETE /restricted-patient/prison-number/{no}` | UI, remove | Deletes the record and books a release movement in NOMIS. |
-| `POST /change-supporting-prison` | UI, change supporting prison | Changes the supporting prison. Database only, nothing is written to NOMIS. |
-| `GET /subject-access-request` | HMPPS SAR service | Subject access request data (needs `ROLE_SAR_DATA_ACCESS`). |
-| `/queue-admin/*` | Support | Dead letter queue tools from `hmpps-sqs` (needs `ROLE_SYSCON__QUEUE_ADMIN`). |
+| Method and path | Used by | Role needed | What it does |
+|---|---|---|---|
+| `POST /discharge-to-hospital` | UI, move to hospital | `ROLE_TRANSFER_RESTRICTED_PATIENT` | Creates the record and asks Prison API to discharge the prisoner to hospital in NOMIS. |
+| `POST /migrate-in-restricted-patient` | UI, add a released prisoner | `ROLE_RESTRICTED_PATIENT_MIGRATION` | Creates the record for someone already released to hospital in NOMIS. |
+| `GET /restricted-patient/prison-number/{no}` | UI, search indexer, legacy DPS | Any valid token (see below) | Returns the record with prison and hospital descriptions; 404 if not a restricted patient. |
+| `DELETE /restricted-patient/prison-number/{no}` | UI, remove | `ROLE_REMOVE_RESTRICTED_PATIENT` | Deletes the record and books a release movement in NOMIS. |
+| `POST /change-supporting-prison` | UI, change supporting prison | `ROLE_RESTRICTED_PATIENT_MIGRATION` | Changes the supporting prison. Database only, nothing is written to NOMIS. |
+| `GET /subject-access-request` | HMPPS SAR service | `ROLE_SAR_DATA_ACCESS` | Subject access request data. |
+| `/queue-admin/*` | Support | `ROLE_SYSCON__QUEUE_ADMIN` | Dead letter queue tools from `hmpps-sqs`. |
+
+The write endpoints need the same role as the UI journey that calls them, so they must be called
+with the user's own token. Every endpoint must carry a `@PreAuthorize`; `ResourceSecurityTest`
+fails the build if one does not.
+
+The `GET` endpoint needs no role because legacy DPS calls it with the token of whichever member of
+staff is viewing the prisoner, and those users hold no restricted patients role. It can be given a
+role once legacy DPS calls it with a system token instead.
 
 Swagger is published in dev only:
 <https://restricted-patients-api-dev.prison.service.justice.gov.uk/swagger-ui/index.html>.
@@ -107,8 +115,8 @@ The API uses two Prison API clients (`config/WebClientConfig.kt`):
 - **System client.** Used for all reads, and for writes when there is no HTTP request (event
   listeners and the nightly job). `PrisonApiUpdateService` chooses between them.
 
-The UI calls the API with the user's own token, except `DELETE`, which has used a system token
-since 2021 (NN-3524). Prisoner photos and prisoner details are also fetched with a system token.
+The UI calls the API with the user's own token. Prisoner photos and prisoner details are fetched
+with a system token.
 
 ### UI roles
 

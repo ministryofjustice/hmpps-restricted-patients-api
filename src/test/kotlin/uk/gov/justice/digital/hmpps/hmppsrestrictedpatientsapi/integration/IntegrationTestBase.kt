@@ -166,7 +166,7 @@ abstract class IntegrationTestBase {
     return webTestClient
       .post()
       .uri("/discharge-to-hospital")
-      .headers(setHeaders())
+      .headers(setHeaders(roles = listOf("ROLE_TRANSFER_RESTRICTED_PATIENT")))
       .bodyValue(
         mapOf(
           "offenderNo" to prisonerNumber,
@@ -197,7 +197,7 @@ abstract class IntegrationTestBase {
     return webTestClient
       .post()
       .uri("/discharge-to-hospital")
-      .headers(setHeaders())
+      .headers(setHeaders(roles = listOf("ROLE_TRANSFER_RESTRICTED_PATIENT")))
       .bodyValue(
         mapOf(
           "offenderNo" to prisonerNumber,
@@ -219,7 +219,7 @@ abstract class IntegrationTestBase {
     return webTestClient
       .post()
       .uri("/migrate-in-restricted-patient")
-      .headers(setHeaders())
+      .headers(setHeaders(roles = listOf("ROLE_RESTRICTED_PATIENT_MIGRATION")))
       .bodyValue(
         mapOf(
           "offenderNo" to prisonerNumber,
@@ -237,7 +237,7 @@ abstract class IntegrationTestBase {
     return webTestClient
       .post()
       .uri("/migrate-in-restricted-patient")
-      .headers(setHeaders())
+      .headers(setHeaders(roles = listOf("ROLE_RESTRICTED_PATIENT_MIGRATION")))
       .bodyValue(
         mapOf(
           "offenderNo" to prisonerNumber,
@@ -255,7 +255,7 @@ abstract class IntegrationTestBase {
     return webTestClient
       .post()
       .uri("/migrate-in-restricted-patient")
-      .headers(setHeaders())
+      .headers(setHeaders(roles = listOf("ROLE_RESTRICTED_PATIENT_MIGRATION")))
       .bodyValue(
         mapOf(
           "offenderNo" to prisonerNumber,
