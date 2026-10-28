@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
+import org.junit.jupiter.params.provider.ValueSource
 import org.springframework.http.HttpMethod
 import java.util.stream.Stream
 
@@ -52,9 +53,26 @@ class RestrictedPatientsSecurityTest : IntegrationTestBase() {
   }
 
   @Test
-  fun `get allowed with any token`() {
+  fun `get forbidden when no role`() {
     webTestClient.get().uri(PATIENT_URI)
       .headers(setHeaders(roles = listOf()))
+      .exchange()
+      .expectStatus().isForbidden
+  }
+
+  @Test
+  fun `get forbidden with the other write roles`() {
+    webTestClient.get().uri(PATIENT_URI)
+      .headers(setHeaders(roles = listOf("ROLE_TRANSFER_RESTRICTED_PATIENT", "ROLE_RESTRICTED_PATIENT_MIGRATION")))
+      .exchange()
+      .expectStatus().isForbidden
+  }
+
+  @ParameterizedTest(name = "get allowed with {0}")
+  @ValueSource(strings = ["ROLE_RESTRICTED_PATIENTS__RO", "ROLE_REMOVE_RESTRICTED_PATIENT"])
+  fun `get allowed with a read role`(role: String) {
+    webTestClient.get().uri(PATIENT_URI)
+      .headers(setHeaders(roles = listOf(role)))
       .exchange()
       .expectStatus().isNotFound
   }

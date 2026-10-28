@@ -59,9 +59,9 @@ class RestrictedPatientsController(
     domainEventPublisher.publishRestrictedPatientAdded(prisonerNumber)
   }
 
-  // Legacy DPS (digital-prison-services) calls this with the token of whichever user is viewing a
-  // prisoner, so no role can be required until it moves to a system token.
-  @PreAuthorize("isAuthenticated()")
+  // The prisoner search indexer calls this with a system token holding RESTRICTED_PATIENTS__RO.
+  // The UI's remove journey calls it with the user's own token, so that journey's role is accepted too.
+  @PreAuthorize("hasAnyRole('RESTRICTED_PATIENTS__RO', 'REMOVE_RESTRICTED_PATIENT')")
   @GetMapping(value = ["/restricted-patient/prison-number/{prison-number}"])
   fun getRestrictedPatientByPrisonNumber(@PathVariable(name = "prison-number") prisonNumber: String): RestrictedPatientDto = restrictedPatientsService.getRestrictedPatient(prisonNumber)
 
