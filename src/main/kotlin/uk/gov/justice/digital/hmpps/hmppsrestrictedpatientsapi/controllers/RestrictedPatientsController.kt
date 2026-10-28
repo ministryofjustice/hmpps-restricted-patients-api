@@ -4,6 +4,7 @@ import com.microsoft.applicationinsights.TelemetryClient
 import io.swagger.v3.oas.annotations.media.Schema
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -23,6 +24,7 @@ class RestrictedPatientsController(
   private val domainEventPublisher: DomainEventPublisher,
   private val telemetryClient: TelemetryClient,
 ) {
+  @PreAuthorize("hasRole('TRANSFER_RESTRICTED_PATIENT')")
   @PostMapping(
     value = ["/discharge-to-hospital"],
     consumes = [MediaType.APPLICATION_JSON_VALUE],
@@ -32,6 +34,7 @@ class RestrictedPatientsController(
     it.publishAndTrackAdd("discharge")
   }
 
+  @PreAuthorize("hasRole('RESTRICTED_PATIENT_MIGRATION')")
   @PostMapping(
     value = ["/migrate-in-restricted-patient"],
     consumes = [MediaType.APPLICATION_JSON_VALUE],
@@ -56,9 +59,13 @@ class RestrictedPatientsController(
     domainEventPublisher.publishRestrictedPatientAdded(prisonerNumber)
   }
 
+  // Legacy DPS (digital-prison-services) calls this with the token of whichever user is viewing a
+  // prisoner, so no role can be required until it moves to a system token.
+  @PreAuthorize("isAuthenticated()")
   @GetMapping(value = ["/restricted-patient/prison-number/{prison-number}"])
   fun getRestrictedPatientByPrisonNumber(@PathVariable(name = "prison-number") prisonNumber: String): RestrictedPatientDto = restrictedPatientsService.getRestrictedPatient(prisonNumber)
 
+  @PreAuthorize("hasRole('REMOVE_RESTRICTED_PATIENT')")
   @DeleteMapping(value = ["/restricted-patient/prison-number/{prison-number}"])
   fun removeRestrictedPatient(@PathVariable(name = "prison-number") prisonNumber: String) = restrictedPatientsService.removeRestrictedPatient(prisonNumber).also {
     telemetryClient.trackEvent(
@@ -75,6 +82,7 @@ class RestrictedPatientsController(
     domainEventPublisher.publishRestrictedPatientRemoved(it.prisonerNumber)
   }
 
+  @PreAuthorize("hasRole('RESTRICTED_PATIENT_MIGRATION')")
   @PostMapping(
     value = ["/change-supporting-prison"],
     consumes = [MediaType.APPLICATION_JSON_VALUE],

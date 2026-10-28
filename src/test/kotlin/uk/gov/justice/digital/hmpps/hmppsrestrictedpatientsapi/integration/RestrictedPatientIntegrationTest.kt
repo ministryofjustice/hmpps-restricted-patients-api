@@ -279,7 +279,7 @@ class RestrictedPatientIntegrationTest : IntegrationTestBase() {
         .expectStatus().is2xxSuccessful
 
       webTestClient.delete().uri("/restricted-patient/prison-number/A12345")
-        .headers(setHeaders())
+        .headers(setHeaders(roles = listOf("ROLE_REMOVE_RESTRICTED_PATIENT")))
         .exchange()
         .expectStatus().is2xxSuccessful
 
@@ -314,7 +314,7 @@ class RestrictedPatientIntegrationTest : IntegrationTestBase() {
       @Test
       fun `should error if not a restricted patient`() {
         webTestClient.delete().uri("/restricted-patient/prison-number/A12345")
-          .headers(setHeaders())
+          .headers(setHeaders(roles = listOf("ROLE_REMOVE_RESTRICTED_PATIENT")))
           .exchange()
           .expectStatus().isNotFound
       }
@@ -327,7 +327,7 @@ class RestrictedPatientIntegrationTest : IntegrationTestBase() {
         prisonApiMockServer.stubServerError(WireMock::post)
 
         webTestClient.delete().uri("/restricted-patient/prison-number/A12345")
-          .headers(setHeaders())
+          .headers(setHeaders(roles = listOf("ROLE_REMOVE_RESTRICTED_PATIENT")))
           .exchange()
           .expectStatus().is5xxServerError
           .expectBody()
@@ -343,7 +343,7 @@ class RestrictedPatientIntegrationTest : IntegrationTestBase() {
         saveRestrictedPatient(prisonerNumber = "A12345")
 
         webTestClient.delete().uri("/restricted-patient/prison-number/A12345")
-          .headers(setHeaders())
+          .headers(setHeaders(roles = listOf("ROLE_REMOVE_RESTRICTED_PATIENT")))
           .exchange()
           .expectStatus().is5xxServerError
           .expectBody()
@@ -365,7 +365,7 @@ class RestrictedPatientIntegrationTest : IntegrationTestBase() {
         doThrow(RuntimeException()).whenever(domainEventPublisher).publishRestrictedPatientRemoved(any())
 
         webTestClient.delete().uri("/restricted-patient/prison-number/A12345")
-          .headers(setHeaders())
+          .headers(setHeaders(roles = listOf("ROLE_REMOVE_RESTRICTED_PATIENT")))
           .exchange()
           .expectStatus().is5xxServerError
 
@@ -493,7 +493,7 @@ class RestrictedPatientIntegrationTest : IntegrationTestBase() {
       return webTestClient
         .post()
         .uri("/change-supporting-prison")
-        .headers(setHeaders())
+        .headers(setHeaders(roles = listOf("ROLE_RESTRICTED_PATIENT_MIGRATION")))
         .bodyValue(
           mapOf(
             "offenderNo" to prisonerNumber,

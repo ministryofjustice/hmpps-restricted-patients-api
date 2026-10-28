@@ -22,14 +22,14 @@ class SpringOauthIntegrationTest : IntegrationTestBase() {
     webTestClient
       .post()
       .uri("/discharge-to-hospital")
-      .headers(setHeaders(username = "USER1"))
+      .headers(setHeaders(username = "USER1", roles = listOf("ROLE_TRANSFER_RESTRICTED_PATIENT")))
       .bodyValue(getFormValues(OFFENDER_ONE))
       .exchange().expectStatus().is2xxSuccessful
 
     webTestClient
       .post()
       .uri("/discharge-to-hospital")
-      .headers(setHeaders(username = "USER2"))
+      .headers(setHeaders(username = "USER2", roles = listOf("ROLE_TRANSFER_RESTRICTED_PATIENT")))
       .bodyValue(getFormValues(OFFENDER_TWO))
       .exchange().expectStatus().is2xxSuccessful
 
