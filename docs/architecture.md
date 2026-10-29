@@ -25,7 +25,6 @@ flowchart LR
   sns --> indexer[Prisoner Search indexer]
   sns --> recon[DPS reconciliation]
   indexer -->|GET restricted patient| api
-  dps[digital-prison-services<br/>legacy DPS] -->|GET restricted patient| api
 
   offender{{prison offender events}} -->|OFFENDER_MOVEMENT-RECEPTION| api
   sns -->|prisoner.released, prisoner.merged| api
@@ -72,10 +71,9 @@ Everything else is fetched when needed:
 |---|---|---|
 | Prisoner Search indexer (`hmpps-prisoner-search`) | Listens for the three `restricted-patients.patient.*` events, then calls `GET /restricted-patient/prison-number/{no}` | Keeps the restricted patient details (hospital, supporting prison) on the prisoner's search record. The UI's "view" and "remove" searches read this index, not the API. |
 | DPS reconciliation (`hmpps-dps-reconciliation`) | Listens for the events | Reconciliation between DPS and NOMIS. |
-| `digital-prison-services` (legacy DPS) | `GET /restricted-patient/prison-number/{no}` | Treats a restricted patient as in the user's caseload when their supporting prison is, for case notes and prisoner profile access. |
 
 Because search is updated from the events, a change made directly in the database is not seen by
-search, the UI or DPS until the prisoner is re-indexed. See [runbook.md](runbook.md).
+search or the UI until the prisoner is re-indexed. See [runbook.md](runbook.md).
 
 ## API endpoints
 
@@ -83,7 +81,7 @@ search, the UI or DPS until the prisoner is re-indexed. See [runbook.md](runbook
 |---|---|---|---|
 | `POST /discharge-to-hospital` | UI, move to hospital | `ROLE_TRANSFER_RESTRICTED_PATIENT` | Creates the record and asks Prison API to discharge the prisoner to hospital in NOMIS. |
 | `POST /migrate-in-restricted-patient` | UI, add a released prisoner | `ROLE_RESTRICTED_PATIENT_MIGRATION` | Creates the record for someone already released to hospital in NOMIS. |
-| `GET /restricted-patient/prison-number/{no}` | UI, search indexer, legacy DPS | Any valid token (see below) | Returns the record with prison and hospital descriptions; 404 if not a restricted patient. |
+| `GET /restricted-patient/prison-number/{no}` | Search indexer, UI remove | `ROLE_RESTRICTED_PATIENTS__RO` or `ROLE_REMOVE_RESTRICTED_PATIENT` (see below) | Returns the record with prison and hospital descriptions; 404 if not a restricted patient. |
 | `DELETE /restricted-patient/prison-number/{no}` | UI, remove | `ROLE_REMOVE_RESTRICTED_PATIENT` | Deletes the record and books a release movement in NOMIS. |
 | `POST /change-supporting-prison` | UI, change supporting prison | `ROLE_RESTRICTED_PATIENT_MIGRATION` | Changes the supporting prison. Database only, nothing is written to NOMIS. |
 | `GET /subject-access-request` | HMPPS SAR service | `ROLE_SAR_DATA_ACCESS` | Subject access request data. |
@@ -93,9 +91,11 @@ The write endpoints need the same role as the UI journey that calls them, so the
 with the user's own token. Every endpoint must carry a `@PreAuthorize`; `ResourceSecurityTest`
 fails the build if one does not.
 
-The `GET` endpoint needs no role because legacy DPS calls it with the token of whichever member of
-staff is viewing the prisoner, and those users hold no restricted patients role. It can be given a
-role once legacy DPS calls it with a system token instead.
+The `GET` endpoint accepts either of two roles. The prisoner search indexer calls it with a system
+token whose client holds `ROLE_RESTRICTED_PATIENTS__RO`. The UI's remove journey calls it with the
+user's own token, so it also accepts that journey's role, `ROLE_REMOVE_RESTRICTED_PATIENT`. Legacy
+DPS (`digital-prison-services`) used to call it with any member of staff's token; that call was
+removed in October 2026 (MAPB-1052).
 
 Swagger is published in dev only:
 <https://restricted-patients-api-dev.prison.service.justice.gov.uk/swagger-ui/index.html>.

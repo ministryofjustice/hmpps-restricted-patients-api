@@ -151,7 +151,7 @@ abstract class IntegrationTestBase {
   }
 
   fun getRestrictedPatient(prisonerNumber: String = "A12345"): WebTestClient.RequestHeadersSpec<*> = webTestClient.get().uri("/restricted-patient/prison-number/$prisonerNumber")
-    .headers(setHeaders())
+    .headers(setHeaders(roles = listOf("ROLE_RESTRICTED_PATIENTS__RO")))
 
   fun dischargePrisonerWebClient(
     prisonerNumber: String,

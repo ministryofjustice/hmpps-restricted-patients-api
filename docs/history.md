@@ -82,7 +82,8 @@ and infrastructure up to date and handling support tickets.
   security upgrade (SDIT-4231).
 - **Oct 2026**: generic-prometheus-alerts 2.x, so alert channels now come from the Developer Portal
   (SDIT-4333). User UUID in UI telemetry (MAPB-1038), UI page views sent to HMPPS Audit
-  (MAPB-1039), and hand-over to Move a Prisoner (MAPB-1040).
+  (MAPB-1039), and hand-over to Move a Prisoner (MAPB-1040). Roles required on every endpoint
+  (MAPB-1049, MAPB-1052); legacy DPS stopped calling the API.
 
 ## Further reading
 
