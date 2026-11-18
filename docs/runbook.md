@@ -98,6 +98,37 @@ patient. Otherwise it logs `Ignoring release of prisoner ...` and does nothing.
    Hospitals are NOMIS agencies; this service has no list of its own.
 3. Manage POM can take about an hour to show the person afterwards.
 
+## A restricted patient's hospital needs changing
+
+There is no API endpoint or UI journey for this. Do not remove the patient and add them again:
+removing books a conditional release (`REL`, reason `CR`) in NOMIS, after which the add is refused
+because the last movement is no longer a release to hospital.
+
+The hospital shown in DPS, Manage POM and prisoner search comes from
+`restricted_patients.hospital_location_code`, not from NOMIS, so change that column.
+
+1. Ask the requester whether the patient has moved hospital or was recorded at the wrong one. Only
+   in the second case ask NOMIS Applications Support to correct the original NOMIS release movement.
+2. Find the new hospital's agency code (an agency of type `HOSPITAL` or `HSHOSP`; the UI's hospital
+   list shows them).
+3. Update the row in a transaction, checking the old code so that only the expected row changes:
+   ```sql
+   update restricted_patients
+      set hospital_location_code = '<new code>',
+          modify_datetime = now(),
+          modify_user_id = '<ticket number>'
+    where prisoner_number = '<prisoner number>'
+      and hospital_location_code = '<old code>';
+   -- expect 1 row
+   ```
+4. [Re-index the prisoner](#re-indexing-a-prisoner-after-a-database-change) and check prisoner
+   search shows the new hospital.
+
+When the patient is later removed, the NOMIS release is booked from the new hospital, so the two
+stay consistent. To undo, set the old code back and re-index again.
+
+Example: MAPB-1154 (November 2026).
+
 ## The nightly job did not run, or failed
 
 ```bash

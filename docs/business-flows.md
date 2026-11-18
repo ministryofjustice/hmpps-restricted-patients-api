@@ -24,8 +24,9 @@ A person can be added to this service in three ways and removed in three ways.
 | [Added after being released to hospital in NOMIS](#add-a-prisoner-already-released-to-hospital) | [Received back into prison](#received-back-into-prison) |
 | [Picked up automatically from a NOMIS discharge](#discharge-done-directly-in-nomis) | [Removed by the nightly job when custody ends](#nightly-removal-when-custody-ends) |
 
-The supporting prison can also be [changed](#change-supporting-prison). There is no way to change
-the hospital; the patient would have to be removed and added again.
+The supporting prison can also be [changed](#change-supporting-prison). The hospital cannot be
+changed through the service; it is a database change (see
+[runbook.md](runbook.md#a-restricted-patients-hospital-needs-changing)).
 
 ## Move a prisoner to hospital
 
